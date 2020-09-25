@@ -25,7 +25,7 @@
 
 link options, colmize, hexcvt, ebcdic
 
-global Graphic, Conv
+global Graphic, Conv, man
 
 procedure main(arg)
    local opt
