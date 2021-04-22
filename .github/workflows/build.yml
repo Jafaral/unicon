@@ -57,22 +57,23 @@ jobs:
     strategy:
       matrix:
         cfg:
-        -  { os: 'ubuntu:16.04',  name: 'Ubuntu 16.04',   opt: '' }
-        -  { os: 'ubuntu:18.04',  name: 'Ubuntu 18.04',   opt: '' }
-        -  { os: 'ubuntu:20.04',  name: 'Ubuntu 20.04',   opt: '' }
-        -  { os: 'centos:7',      name: 'CentOS 7',       opt: '' }
-        -  { os: 'fedora:latest', name: 'Fedora Latest',  opt: '' }
-        -  { os: 'debian:10',     name: 'Debian 10',      opt: '' }
-        -  { os: 'oraclelinux:8', name: 'Oracle Linux 8', opt: '' }
+        -  { os: 'ubuntu:16.04',   name: 'Ubuntu 16.04',   opt: '' }
+        -  { os: 'ubuntu:18.04',   name: 'Ubuntu 18.04',   opt: '' }
+        -  { os: 'ubuntu:20.04',   name: 'Ubuntu 20.04',   opt: '' }
+        -  { os: 'centos:7',       name: 'CentOS 7',       opt: '' }
+        -  { os: 'fedora:latest',  name: 'Fedora Latest',  opt: '' }
+        -  { os: 'debian:10',      name: 'Debian 10',      opt: '' }
+        -  { os: 'i386/ubuntu:18.04', name: 'Ubuntu 32-bit',  opt: '' }
+        -  { os: 'oraclelinux:8',  name: 'Oracle Linux 8', opt: '' }
         #-  { os: 'alpine:latest', name: 'Alpine Latest',  opt: '' }
     steps:
 
     - name: Install dependencies
       run: |
         case "${{ matrix.cfg.os }}" in
-           ubuntu*|debian*)
+           *ubuntu*|*debian*)
               apt-get update -q -y
-              DEBIAN_FRONTEND="noninteractive" apt-get install -q -y build-essential make autotools-dev libc6 libgcc1 libgl1-mesa-glx
+              DEBIAN_FRONTEND="noninteractive" apt-get install -q -y grep build-essential make autotools-dev libc6 libgcc1 libgl1-mesa-glx
               DEBIAN_FRONTEND="noninteractive" apt-get install -q -y libssl-dev libx11-dev libjpeg-dev libpng-dev libglu1-mesa-dev libxft-dev
               DEBIAN_FRONTEND="noninteractive" apt-get install -q -y libopenal-dev libalut-dev libogg-dev libvorbis-dev unixodbc-dev libfreetype6-dev
               ;;
