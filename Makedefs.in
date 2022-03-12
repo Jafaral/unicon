@@ -118,8 +118,10 @@ datarootdir=@datarootdir@
 docdir=@docdir@
 mandir=@mandir@
 htmldir=@htmldir@
- 
+
+# Used by plugins
 SQLITE=@SQLITE@
+GSLRNG=@GSLRNG@
 
 
 #  configuration parameters

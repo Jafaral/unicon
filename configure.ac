@@ -545,10 +545,15 @@ AC_FUNC_FORK()
 AC_CHECK_LIB(dbm,main)
 AC_CHECK_LIB(ndbm,main)
 
-# we don't need sqlite to be added to $LIBS, not yet at least
+# Check for libs for plugin use, don't add to these to $LIBS
 saved_libs="$LIBS"
+
 AC_CHECK_HEADERS([sqlite3.h])
 AC_CHECK_LIB(sqlite3, sqlite3_config)
+
+AC_CHECK_HEADERS([gsl/gsl_rng.h])
+AC_CHECK_LIB(gsl, gsl_rng_set)
+
 LIBS="$saved_libs"
 
 if test "x$ac_cv_header_sqlite3_h" = "xyes" -a  "x$ac_cv_lib_sqlite3_sqlite3_config" = "xyes"; then
@@ -556,7 +561,15 @@ if test "x$ac_cv_header_sqlite3_h" = "xyes" -a  "x$ac_cv_lib_sqlite3_sqlite3_con
 else
   SQLITE=""
 fi
+
+if test "x$ac_cv_header_gsl_gsl_rng_h" = "xyes" -a  "x$ac_cv_lib_gsl_gsl_rng_set" = "xyes"; then
+  GSLRNG="gsl"
+else
+  GSLRNG=""
+fi
+
 AC_SUBST(SQLITE)
+AC_SUBST(GSLRNG)
 
 AC_SEARCH_LIBS([getaddrinfo],[socket],
 	[AC_DEFINE([HAVE_GETADDRINFO], [1], [getaddinfo])])
