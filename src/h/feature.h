@@ -138,11 +138,7 @@
 
 #ifdef Graphics3D
    Feature(1, "_3D_GRAPHICS", "3D graphics")
-#endif                  /* Graphics */
-
-#ifdef GraphicsGL
-   Feature(1, "_GL_GRAPHICS", "OpenGL graphics")
-#endif                  /* GraphicsGL */
+#endif					/* Graphics */
 
 #ifdef XWindows
    Feature(1, "_X_WINDOW_SYSTEM", "X Windows")

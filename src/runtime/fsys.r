@@ -137,18 +137,13 @@ function{0,1} close(f)
       pollctr >>= 1;
       pollctr++;
       if (BlkD(f,File)->status & Fs_Window) {
-         if (BlkLoc(f)->File.status != Fs_Window) { /* not already closed? */
-            BlkLoc(f)->File.status = Fs_Window;
-            SETCLOSED((wbp) fp);
-#ifdef GraphicsGL
-            if (((wbp)fp)->window->is_gl)
-               gl_wclose((wbp) fp);
-            else
-#endif                                  /* GraphicsGL */
-            wclose((wbp) fp);
-            }
-         return f;
-         }
+	 if (BlkLoc(f)->File.status != Fs_Window) { /* not already closed? */
+	    BlkLoc(f)->File.status = Fs_Window;
+	    SETCLOSED((wbp) fp);
+	    wclose((wbp) fp);
+	    }
+	 return f;
+	 }
       else
 #endif                                  /* Graphics */
 #ifdef HAVE_VOICE
@@ -472,36 +467,16 @@ Deliberate Syntax Error
 #ifdef Graphics
                status |= Fs_Window | Fs_Read | Fs_Write;
 #ifdef XWindows
-               XInitThreads();
-#endif                                  /* XWindows */
-#ifdef GraphicsGL
-               /*
-                * For now, having FreeType is a requirement for the OpenGL
-                * 2D and 2D/3D implementation
-                */
-#if HAVE_LIBFREETYPE
-               /* for enabling OpenGL 2D implementation in a convenient way */
-               if (!getenv("UNICONGL2D"))
-#endif                                  /* HAVE_LIBFREETYPE */
-#endif                                  /* GraphicsGL */
-               continue;
-#else                                   /* Graphics */
-               set_errortext(148);
-               fail;
-#endif                                  /* Graphics */
-#ifdef GraphicsGL
-               /* OpenGL 2D implementation */
-               if (status & Fs_Window) {
-                  status |= Fs_WinGL2D;
-                  continue;
-                  }
-#else
-               /* Does it need a specific code? */
-               set_errortext(1045);
-               fail;
-#endif                                  /* GraphicsGL */
-            case 'l':
-            case 'L':
+	       XInitThreads();
+#endif					/* XWindows */
+	       continue;
+#else					/* Graphics */
+	       set_errortext(148);
+	       fail;
+#endif					/* Graphics */
+
+	    case 'l':
+	    case 'L':
 #ifdef PosixFns
                if (status & Fs_Socket) {
                   status |= Fs_Listen | Fs_Append;
@@ -671,36 +646,33 @@ Deliberate Syntax Error
           */
          Protect(hp = alclist(0, MinListSlots), runerr(0));
 
-         /*
-          * loop through attributes, checking validity
-          */
-         for (j = 0; j < n; j++) {
-            if (is:null(attr[j]))
-               attr[j] = emptystr;
-            if (!is:string(attr[j]))
-               runerr(109, attr[j]);
-            }
+	 /*
+	  * loop through attributes, checking validity
+	  */
+	 for (j = 0; j < n; j++) {
+	    if (is:null(attr[j]))
+	       attr[j] = emptystr;
+	    if (!is:string(attr[j]))
+	       runerr(109, attr[j]);
+	    }
+
 #ifdef Graphics3D
-         if (status & Fs_Window3D)
-            f = gl_wopen(fnamestr, hp, attr, n, &err_index, 1);
-         else
-#endif                                  /* Graphics3D */
-#ifdef GraphicsGL
-         if (status & Fs_WinGL2D)
-            f = gl_wopen(fnamestr, hp, attr, n, &err_index, 0);
-         else
-#endif                                  /* GraphicsGL */
-            f = wopen(fnamestr, hp, attr, n, &err_index, 0, 0);
-         if (f == NULL) {
-            if (err_index >= 0) runerr(145, attr[err_index]);
-            else if (err_index == -1) {
-               /* count on wopen() to set &errortext */
-               fail;
-               }
-            else runerr(305);
-            }
-         } else
-#endif                                  /* Graphics */
+	 if (status & Fs_Window3D)
+	    f = wopengl(fnamestr, hp, attr, n, &err_index);
+	 else
+#endif					/* Graphics3D */
+	    f = wopen(fnamestr, hp, attr, n, &err_index,0);
+
+	 if (f == NULL) {
+	    if (err_index >= 0) runerr(145, attr[err_index]);
+	    else if (err_index == -1) {
+	       /* count on wopen() to set &errortext */
+	       fail;
+	       }
+	    else runerr(305);
+	    }
+	 } else
+#endif					/* Graphics */
 
 #ifdef Messaging
             if (status & Fs_Messaging) {
@@ -2635,14 +2607,8 @@ end
 #ifdef Graphics
    pollctr >>= 1;
    pollctr++;
-   if (status & Fs_Window) {
-#ifdef GraphicsGL
-      if (f.wb->window->is_gl)
-         gl_wputc('\n', f.wb);
-      else
-#endif                                  /* GraphicsGL */
+   if (status & Fs_Window)
       wputc('\n', f.wb);
-      }
    else
 #endif                                  /* Graphics */
 
@@ -2865,21 +2831,14 @@ function {1} name(x[nargs])
                       * Append a newline to the file and flush it.
                       */
 #ifdef Graphics
-                     pollctr >>= 1;
-                     pollctr++;
-                     if (status & Fs_Window) {
-#ifdef GraphicsGL
-                        if ((f.wb)->window->is_gl) {
-                           gl_wputc('\n', f.wb);
-                           gl_wflush(f.wb);
-                           }
-                        else
-#endif                                  /* GraphicsGL */
-                        wputc('\n', f.wb);
-                        wflush(f.wb);
-                        }
-                     else {
-#endif                                  /* Graphics */
+		     pollctr >>= 1;
+		     pollctr++;
+		     if (status & Fs_Window) {
+			wputc('\n', f.wb);
+			wflush(f.wb);
+			}
+		     else {
+#endif					/* Graphics */
 
 #ifdef PseudoPty
                      if (status & Fs_Pty) {
@@ -3318,14 +3277,8 @@ function{1} flush(f)
       pollctr >>= 1;
       pollctr++;
 
-      if (status & Fs_Window) {
-#ifdef GraphicsGL
-         if (((wbp)fp)->window->is_gl)
-            gl_wflush((wbp)fp);
-         else
-#endif                                  /* GraphicsGL */
-         wflush((wbp)fp);
-         }
+      if (status & Fs_Window)
+	 wflush((wbp)fp);
       else
 #endif                                  /* Graphics */
          fflush(fp);

@@ -13,7 +13,7 @@ HDRS = ../h/define.h ../h/config.h ../h/typedefs.h ../h/monitor.h\
 	  ../h/rproto.h ../h/mproto.h ../h/version.h ../h/sys.h
 
 GRAPHICSHDRS = ../h/graphics.h ../h/xwin.h
-GRAPHICSRI = rxwin.ri rmswin.ri rwin3d.ri ropengl.ri rd3d.ri ropengl2d.ri
+GRAPHICSRI = rxwin.ri rmswin.ri rwin3d.ri ropengl.ri rd3d.ri
 
 .PHONY: update_rev
 
@@ -54,7 +54,7 @@ CONSOLEOBJS=  xrwindow.$(O) xrsys.$(O) xinit.$(O) xfwindow.$(O) xfsys.$(O) xrwin
 
 OBJS=	$(XOBJS) $(EXEICONTARGET)
 
-interp_all: update_rev 
+interp_all: update_rev
 	$(MAKE) $(UNICONX)
 
 # Some systems require global symbols to be left in iconx for loadfunc() to work
@@ -95,7 +95,7 @@ WNTCON: CONSOLE icon.$(O)
 
 # make sure to clean the files affected by NTConsole to force rebuild them
 CONSOLE:
-	$(RM) $(CONSOLEOBJS)	
+	$(RM) $(CONSOLEOBJS)
 
 
 x%.$(O): %.r $(HDRS)

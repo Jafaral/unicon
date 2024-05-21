@@ -282,33 +282,28 @@ function{0,1} EvGet(cs,vmask,flag)
 
 #ifdef Graphics
       if (Testb((word)ToAscii(E_MXevent), cs) &&
-          is:file(kywd_xwin[XKey_Window])) {
-         wbp _w_ = BlkD(kywd_xwin[XKey_Window],File)->fd.wb;
-#ifdef GraphicsGL
-         if (_w_->window->is_gl)
-            gl_wsync(_w_);
-         else
-#endif                                  /* GraphicsGL */
-         wsync(_w_);
-         pollctr = pollevent();
-         if (pollctr == -1)
-            fatalerr(141, NULL);
-         if (BlkD(_w_->window->listp,List)->size > 0) {
-            register int c;
-            c = wgetevent(_w_, &curpstate->eventval, -1);
-            if (c == 0) {
-               StrLen(curpstate->eventcode) = 1;
-               StrLoc(curpstate->eventcode) =
-                  (char *)&allchars[FromAscii(E_MXevent) & 0xFF];
-               return curpstate->eventcode;
-               }
-            else if (c == -1)
-               runerr(141);
-            else
-               runerr(143);
-            }
-         }
-#endif                                  /* Graphics */
+	  is:file(kywd_xwin[XKey_Window])) {
+	 wbp _w_ = BlkD(kywd_xwin[XKey_Window],File)->fd.wb;
+	 wsync(_w_);
+	 pollctr = pollevent();
+	 if (pollctr == -1)
+	    fatalerr(141, NULL);
+	 if (BlkD(_w_->window->listp,List)->size > 0) {
+	    register int c;
+	    c = wgetevent(_w_, &curpstate->eventval, -1);
+	    if (c == 0) {
+	       StrLen(curpstate->eventcode) = 1;
+	       StrLoc(curpstate->eventcode) =
+		  (char *)&allchars[FromAscii(E_MXevent) & 0xFF];
+	       return curpstate->eventcode;
+	       }
+	    else if (c == -1)
+	       runerr(141);
+	    else
+	       runerr(143);
+	    }
+	 }
+#endif					/* Graphics */
 
       /*
        * Loop until we read an event allowed.
