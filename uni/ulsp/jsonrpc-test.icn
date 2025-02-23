@@ -9,9 +9,9 @@ class JRPC_Calc(jrpc_server)
 
    method  start(addr)
       local sock, msg
+      runerr()
       if not (jrpc_server := JRPC_HTTPSocket(addr,"n")) then
          write("server open(",addr,") ERROR: ", \&errortext | "Unknown") & fail
-
       repeat {
          msg := jrpc_server.get_msg() | next
          case msg.get_kind() of {
@@ -74,12 +74,18 @@ procedure main()
          workers, i, response, job
 
    addr := ":" || 5000 + ?1000
-   if &features == ("MacOS" | "MS Windows NT") then
+   #b := "!" || 5000 + ?1000
+   #c := ":" || 5000 + ?1000
+   if &features == ("MacOS" | "MS Windows NT") then {
       addr := "127.0.0.1" || addr
-
+      #b := "127.0.0.1" || b
+      #c := "127.0.0.1" || c
+      
+   }
    client := JRPC_client()
    calc := JRPC_Calc()
    thread calc.start(addr)
+   delay(1000)
    client.listen(addr)
    workers:=[]
    work_items := mutex(table())
