@@ -23,7 +23,17 @@
 #
 ############################################################################
 
+#
+#  The SDL graphics backend reports outboard keys with their X11 values.
+#
 $ifdef _X_WINDOW_SYSTEM
+$define _X_KEYSYMS 1
+$endif
+$ifdef _SDL_GRAPHICS
+$define _X_KEYSYMS 1
+$endif
+
+$ifdef _X_KEYSYMS
 $define Shift_Tab               65056
 
 $define Key_Compose		65312
