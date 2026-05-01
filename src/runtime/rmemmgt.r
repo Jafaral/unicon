@@ -660,6 +660,8 @@ void initalloc(word codesize)
    struct threadstate *curtstate;     /* do NOT change this name, the maps[23] macros depend on it */
 #if defined(HAVE_KEYWORD__THREAD) && defined(MultiProgram)
    struct threadstate *root_ts = rootpstate.tstate;
+#elif defined(HAVE_KEYWORD__THREAD)
+   struct threadstate *root_ts = unicon_tlschain_root;
 #else
    struct threadstate *root_ts = &roottstate;
 #endif
@@ -834,6 +836,8 @@ static void markthreads()
    struct threadstate *t;
 #if defined(HAVE_KEYWORD__THREAD) && defined(MultiProgram)
    struct threadstate *root_ts = rootpstate.tstate;
+#elif defined(HAVE_KEYWORD__THREAD)
+   struct threadstate *root_ts = unicon_tlschain_root;
 #else
    struct threadstate *root_ts = &roottstate;
 #endif
