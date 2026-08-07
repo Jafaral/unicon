@@ -26,50 +26,204 @@ Paragraphs and lists
 --------------------
 
 Blank lines separate paragraphs. Bullet lists use ``-`` or ``*`` with
-a following space. Indented continuation lines belong to the current
-item.
+a following space. Numbered lists use ``1. `` / ``1) `` or auto-number
+``#. ``. Indented continuation lines belong to the current item.
+
+Source:
+
+.. literalinclude:: includes/ex-lists.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-lists.rst
+
+Definition lists
+----------------
+
+A term on its own line followed by an indented body. Blank lines inside
+the body start a new paragraph.
+
+Source:
+
+.. literalinclude:: includes/ex-deflist-multi.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-deflist-multi.rst
+
+Tables
+------
+
+**Simple** tables use ``=`` column separators. The first row is the
+header.
+
+Source:
+
+.. literalinclude:: includes/ex-table.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-table.rst
+
+**Grid** tables use ``+---+`` borders; a border with ``=`` marks the
+header.
+
+Source:
+
+.. literalinclude:: includes/ex-grid-table.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-grid-table.rst
+
+**List tables** use the ``list-table`` directive:
+
+Source:
+
+.. literalinclude:: includes/ex-list-table.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-list-table.rst
+
+Labels and cross-references
+---------------------------
+
+Place ``.. _name:`` immediately before a heading, figure, or table.
+Pass 1 collects explicit labels and title slugs; pass 2 turns ref
+roles into ``chapter.html#anchor`` links.
+
+Source:
+
+.. literalinclude:: includes/ex-labels.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/ex-labels.rst
+
+Live refs (explicit label and display-text form):
+
+- plain: :ref:`stable-labels`
+- with display text: :ref:`Jump here <stable-labels>`
+- chapter: :doc:`install`
+
+Title-only refs (matching a heading exactly) still work. Full chapter
+sources are linked from each HTML footer as **Page source**.
 
 Inline markup
 -------------
 
-- single asterisks for emphasis
-- double asterisks for strong
-- backticks for inline literals
-- a ref role pointing at a section title (same text as the heading)
-- a doc role is parsed; full resolution is still limited
-
-For cross-chapter links, write a ref role whose label matches the
-target heading exactly (see the links in :ref:`Introduction`).
+- single asterisks for *emphasis*
+- double asterisks for **strong**
+- backticks for ``inline literals``
 
 Directives
 ----------
 
-Recognized forms (authoring markup):
+Admonition bodies are re-parsed as nested blocks (lists, code, nested
+directives). Source then rendered:
+
+.. literalinclude:: includes/ex-nested-note.rst
+
+   :language: rst
+
+.. include:: includes/ex-nested-note.rst
+
+Also: ``warning``, ``tip``, ``important``, ``caution``, ``attention``,
+``danger``, ``error``, ``hint``.
+
+Figures take a caption (numbered in HTML/LaTeX) and optional
+``:name:`` / preceding ``.. _label:``:
 
 .. code-block:: rst
 
-   .. note::
+   .. _logo-figure:
 
-      Body lines, indented.
+   .. figure:: images/uniphinx-logo.png
 
-   .. warning::
+      :alt: uniphinx logo
 
-      Careful.
+      The uniphinx mark.
 
-   .. tip::
+.. _logo-figure:
 
-      Hint.
+.. figure:: images/uniphinx-logo.png
+
+   :alt: uniphinx logo
+
+   The uniphinx mark.
+
+See :ref:`logo-figure`.
+
+Other authoring forms (shown literally):
+
+.. code-block:: rst
 
    .. code-block:: unicon
 
-      # source lines, indented
       procedure main()
          write("ok")
       end
 
    .. image:: images/diagram.svg
 
-      Optional alt text on an indented line
+      Optional alt text
+
+   .. include:: path/to/fragment.rst
+
+   .. literalinclude:: path/to/file.icn
+
+      :language: unicon
+      :lines: 1-10
+      :start-after: marker
+      :end-before: marker
+      :dedent: 3
+
+Paths are resolved next to the including chapter, then under the
+process cwd. Nested ``include`` is allowed; circular includes warn and
+are skipped.
+
+Include / literalinclude
+------------------------
+
+``literalinclude`` shows a file as a listing; ``include`` parses it as
+markup. The tip below is the same fragment both ways.
+
+Source (``includes/shared-tip.rst``):
+
+.. literalinclude:: includes/shared-tip.rst
+
+   :language: rst
+
+Rendered:
+
+.. include:: includes/shared-tip.rst
+
+Pull a real ``.icn`` file as a listing. Language defaults from the
+extension (``.icn`` → ``unicon``); override with ``:language:``:
+
+.. literalinclude:: includes/hello.icn
+
+   :language: unicon
+
+The same file, only the body between markers:
+
+.. literalinclude:: includes/hello.icn
+
+   :start-after: procedure main()
+   :end-before: end
 
 Unicon listings
 ---------------
@@ -79,6 +233,7 @@ syntax highlighting in HTML (via ``highlight-unicon.js``). Other
 languages are emitted as plain
 ``<pre><code class="language-…">`` without Unicon highlighting —
 use ``sh`` for shell, ``rst`` or ``text`` for markup samples.
+``literalinclude`` of ``.icn`` files uses the same highlighting.
 
 Example Unicon program as it appears in the built book:
 
@@ -92,18 +247,11 @@ Example Unicon program as it appears in the built book:
    end
 
 A line ending in ``::`` (RST literal-block introducer) followed by an
-indented block is also treated as a code listing. ``Sphinx::`` becomes
-the label ``Sphinx:`` plus the indented tree; a lone ``::`` introduces
+indented block is also treated as a code listing. ``Unicon::`` becomes
+the label ``Unicon:`` plus the indented tree; a lone ``::`` introduces
 a block with no label.
 
 Unknown ``.. name::`` directives become HTML comments so content is
 not silently dropped.
 
-Cross-references
-----------------
-
-Pass 1 collects every section title (slugified) across all chapters.
-Pass 2 turns pending ref roles into links of the form
-``chapter.html#anchor``. Prefer unique section titles.
-
-See also :ref:`Quick Start` and :ref:`Command Line`.
+See also :doc:`quickstart` and :doc:`cli`.

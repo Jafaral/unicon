@@ -59,35 +59,35 @@ uniphinx --manifest=FILE [options]
 <h3 id="options">
 Options
 </h3>
+<dl>
+<dt>**--manifest=FILE**</dt>
+<dd>
 <p>
-<strong>
---manifest=FILE
-</strong>
-   Required. Plain-text chapter list: one source path per line.   Lines starting with 
+Required. Plain-text chapter list: one source path per line. Lines starting with 
 <code>#</code>
- and blank lines are ignored. Paths are   relative to the process current working directory.
+ and blank lines are ignored. Paths are relative to the process current working directory.
 </p>
+</dd>
+<dt>**--title=TITLE**</dt>
+<dd>
 <p>
-<strong>
---title=TITLE
-</strong>
-   Book title for 
+Book title for 
 <code>&lt;title&gt;</code>
-, the sidebar heading, the index page,   and the LaTeX 
+, the sidebar heading, the index page, and the LaTeX 
 <code>\\title</code>
 . Default: 
 <code>Untitled Book</code>
 .
 </p>
+</dd>
+<dt>**--copyright=TEXT**</dt>
+<dd>
 <p>
-<strong>
---copyright=TEXT
-</strong>
-   Optional footer copyright (text after ©), e.g.   
+Optional footer copyright (text after ©), e.g. 
 <code>2026, Jafar Al-Gharaibeh</code>
-. HTML only. Every HTML page always   ends with 
+. HTML only. Every HTML page always ends with 
 <code>Powered by uniphinx</code>
-; chapter pages also link   
+; chapter pages also link 
 <strong>
 Page source
 </strong>
@@ -95,19 +95,19 @@ Page source
 <code>_sources/</code>
 .
 </p>
+</dd>
+<dt>**--logo=FILE**</dt>
+<dd>
 <p>
-<strong>
---logo=FILE
-</strong>
-   Optional sidebar logo. The image is copied into 
+Optional sidebar logo. The image is copied into 
 <code>targetDir/_static/</code>
-   and shown above the book title in the nav. HTML only.
+ and shown above the book title in the nav. HTML only.
 </p>
+</dd>
+<dt>**--format=FMT**</dt>
+<dd>
 <p>
-<strong>
---format=FMT
-</strong>
-   Output format: 
+Output format: 
 <code>html</code>
  (default), 
 <code>latex</code>
@@ -115,18 +115,14 @@ Page source
 <code>pdf</code>
 .
 </p>
-<ul>
-<li>
+<p>
+- 
 <code>html</code>
- — one page per chapter plus index/search/themes
-</li>
-<li>
+ — one page per chapter plus index/search/themes - 
 <code>latex</code>
  — a single 
 <code>book.tex</code>
- for the whole manifest
-</li>
-<li>
+ for the whole manifest - 
 <code>pdf</code>
  — write 
 <code>book.tex</code>
@@ -134,53 +130,54 @@ Page source
 <code>pdflatex</code>
 , 
 <code>xelatex</code>
-, or 
+, or   
 <code>lualatex</code>
  (whichever is first in 
 <code>PATH</code>
 ) twice for TOC/xrefs
-</li>
-</ul>
+</p>
+</dd>
+<dt>**--targetDir=DIR**</dt>
+<dd>
 <p>
-<strong>
---targetDir=DIR
-</strong>
-   Output directory. Default: 
+Output directory. Default: 
 <code>./htmlBook</code>
  for HTML, 
 <code>./latexBook</code>
-   for latex/pdf. Created if missing.
+ for latex/pdf. Created if missing.
 </p>
+</dd>
+<dt>**--theme=NAME**</dt>
+<dd>
 <p>
-<strong>
---theme=NAME
-</strong>
-   Initial HTML theme: 
+Initial HTML theme: 
 <code>basic</code>
 , 
 <code>classic</code>
 , or 
 <code>dark</code>
- (or a custom   name under 
+ (or a custom name under 
 <code>--themePath</code>
 ). Default: 
 <code>basic</code>
-. Ignored for   latex/pdf.
+. Ignored for latex/pdf.
 </p>
+</dd>
+<dt>**--themePath=DIR**</dt>
+<dd>
 <p>
-<strong>
---themePath=DIR
-</strong>
-   Directory that contains theme subdirectories (
+Directory that contains theme subdirectories (
 <code>DIR/basic/static</code>
-,   …). If omitted, uniphinx searches 
+, …). If omitted, uniphinx searches 
 <code>./themes</code>
 , 
 <code>../themes</code>
-, and   
+, and 
 <code>themes</code>
 . HTML only.
 </p>
+</dd>
+</dl>
 <h3 id="outputs">
 Outputs
 </h3>
@@ -228,11 +225,11 @@ LaTeX / PDF
 <code>--format=pdf</code>
 , also writes 
 <code>targetDir/book.pdf</code>
- when a TeX engine is available. Copy figure files into 
-<code>targetDir</code>
- (or a subdirectory matching the 
+ when a TeX engine is available. Local 
 <code>.. image::</code>
- path) before building; SVG is not embedded (a boxed placeholder is emitted instead — convert to PDF/PNG for TeX).
+ files are copied into 
+<code>targetDir</code>
+ automatically (relative paths preserved). SVG is not embedded in LaTeX (a boxed placeholder is emitted instead — convert to PDF/PNG for TeX).
 </p>
 <h3 id="exit-status">
 Exit status

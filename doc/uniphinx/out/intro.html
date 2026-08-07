@@ -54,9 +54,7 @@ Introduction
 <em>
 uniphinx
 </em>
- is a prose/book documentation generator for Unicon. It reads a small RST-like markup, builds a doctree, resolves cross-chapter references, and writes HTML — in the same general niche as 
-<code>Sphinx &lt;https://www.sphinx-doc.org/&gt;</code>
-_, but implemented in Unicon and aimed at Unicon documentation and books.
+ is a prose/book documentation generator for Unicon. It reads a small RST-like markup, builds a doctree, resolves cross-chapter references, and writes themed HTML (and optionally LaTeX/PDF) for Unicon documentation and books.
 </p>
 <p>
 This manual is the user guide for uniphinx itself. Sources live under 
@@ -89,7 +87,7 @@ It is
 <strong>
 not
 </strong>
- a full Sphinx or docutils replacement. The markup subset is intentionally small; extend the parser as real documents need more.
+ a full RST/docutils toolchain. The markup subset is intentionally small; extend the parser as real documents need more.
 </p>
 <h3 id="a-taste-of-unicon-highlighting">
 A taste of Unicon highlighting
@@ -106,12 +104,12 @@ Mark listings with
 <pre><code class="language-unicon">
 
 procedure greet(who)
-  write(&quot;Hello, &quot;, \who | &quot;world&quot;, &quot;!&quot;)
+   write(&quot;Hello, &quot;, \who | &quot;world&quot;, &quot;!&quot;)
 end
 
 procedure main()
-  greet(&quot;uniphinx&quot;)
-  greet()
+   greet(&quot;uniphinx&quot;)
+   greet()
 end
 </code></pre>
 <p>

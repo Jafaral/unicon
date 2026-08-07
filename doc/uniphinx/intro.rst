@@ -7,9 +7,8 @@ Introduction
 
 *uniphinx* is a prose/book documentation generator for Unicon. It reads
 a small RST-like markup, builds a doctree, resolves cross-chapter
-references, and writes HTML — in the same general niche as
-`Sphinx <https://www.sphinx-doc.org/>`_, but implemented in Unicon and
-aimed at Unicon documentation and books.
+references, and writes themed HTML (and optionally LaTeX/PDF) for
+Unicon documentation and books.
 
 This manual is the user guide for uniphinx itself. Sources live under
 ``doc/uniphinx/`` in the unicon tree and are built *with* uniphinx.
@@ -22,8 +21,8 @@ What uniphinx is for
 - Unicon code samples with syntax highlighting
 - Images and simple admonitions
 
-It is **not** a full Sphinx or docutils replacement. The markup subset
-is intentionally small; extend the parser as real documents need more.
+It is **not** a full RST/docutils toolchain. The markup subset is
+intentionally small; extend the parser as real documents need more.
 
 A taste of Unicon highlighting
 ------------------------------
@@ -55,9 +54,9 @@ future ``.. api::`` bridge may connect them.
 How to read this guide
 ----------------------
 
-- :ref:`Installation` — build and install the ``uniphinx`` binary
-- :ref:`Quick Start` — generate HTML from a tiny book
-- :ref:`Markup Reference` — headings, lists, inline markup, directives
-- :ref:`Themes` — basic, classic, dark, and the in-page switcher
-- :ref:`Command Line` — CLI options
-- :ref:`uniphinx and Sphinx` — what maps to what if you know Sphinx
+- :doc:`install` — build and install the ``uniphinx`` binary
+- :doc:`quickstart` — generate HTML from a tiny book
+- :doc:`markup` — headings, lists, inline markup, directives
+- :doc:`themes` — basic, classic, dark, and the in-page switcher
+- :doc:`cli` — CLI options
+- :doc:`sphinx` — what maps to what if you know Sphinx

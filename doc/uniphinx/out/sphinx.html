@@ -126,7 +126,17 @@ uniphinx understands a
 <strong>
 subset
 </strong>
- of RST: underline headings, bullets, a few directives, and light inline markup. It does not run docutils. Sphinx-only roles, domains, and extensions will not work unchanged.
+ of RST: underline headings, bullets, simple/grid/list tables, definition lists, 
+<code>include</code>
+ / 
+<code>literalinclude</code>
+, 
+<code>figure</code>
+ captions, explicit 
+<code>.. _label:</code>
+ targets, nested admonition bodies, and light inline markup (including 
+<code>:ref:`Text &lt;label&gt;</code>
+`). It does not run docutils. Sphinx-only roles, domains, and extensions will not work unchanged.
 </p>
 <h3 id="project-layout">
 Project layout

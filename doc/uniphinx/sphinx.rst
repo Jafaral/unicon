@@ -25,8 +25,11 @@ Markup
 ------
 
 uniphinx understands a **subset** of RST: underline headings, bullets,
-a few directives, and light inline markup. It does not run docutils.
-Sphinx-only roles, domains, and extensions will not work unchanged.
+simple/grid/list tables, definition lists, ``include`` /
+``literalinclude``, ``figure`` captions, explicit ``.. _label:``
+targets, nested admonition bodies, and light inline markup (including
+``:ref:`Text <label>```). It does not run docutils. Sphinx-only roles,
+domains, and extensions will not work unchanged.
 
 Project layout
 --------------

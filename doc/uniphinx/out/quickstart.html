@@ -91,13 +91,13 @@ Second Section
 
 .. note::
 
-  Indented body of a note.
+   Indented body of a note.
 
 .. code-block:: unicon
 
-  procedure main()
-     write(&quot;hi&quot;)
-  end
+   procedure main()
+      write(&quot;hi&quot;)
+   end
 </code></pre>
 <p>
 <strong>
@@ -111,7 +111,7 @@ Here is that Unicon listing as it appears when built (syntax highlighted in HTML
 <pre><code class="language-unicon">
 
 procedure main()
-  write(&quot;hi&quot;)
+   write(&quot;hi&quot;)
 end
 </code></pre>
 <h3 id="3-build-html">
@@ -120,10 +120,10 @@ end
 <pre><code class="language-sh">
 
 uniphinx --manifest=book.manifest \
-        --title=&quot;My Book&quot; \
-        --targetDir=./out \
-        --theme=basic \
-        --themePath=/path/to/uni/uniphinx/themes
+         --title=&quot;My Book&quot; \
+         --targetDir=./out \
+         --theme=basic \
+         --themePath=/path/to/uni/uniphinx/themes
 </code></pre>
 <p>
 Or from a project 
@@ -152,7 +152,7 @@ TeX / PDF dependencies by platform
 <pre><code class="language-sh">
 
 uniphinx --format=pdf --manifest=book.manifest \
-        --title=&quot;My Book&quot; --targetDir=./out
+         --title=&quot;My Book&quot; --targetDir=./out
 </code></pre>
 <p>
 Or 

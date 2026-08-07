@@ -53,4 +53,4 @@ pass ``--theme=mytheme``. Keep the same HTML class names
 (``.sidebar``, ``.main``, ``.tok-keyword``, …) so shared scripts keep
 working.
 
-See ``themes/README.md`` in the source tree for the Sphinx comparison.
+See ``themes/README.md`` in the source tree for layout details.
