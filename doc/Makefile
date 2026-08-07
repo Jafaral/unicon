@@ -9,10 +9,10 @@ all:
 	$(MAKE) -C book
 	$(MAKE) -C ib
 	$(MAKE) -C utr
-	$(MAKE) -C unisphix
+	$(MAKE) -C uniphinx
 
 Clean clean Pure:
 	cd book; $(MAKE) clean
 	cd ib;   $(MAKE) clean
 	cd utr;  $(MAKE) clean
-	cd unisphix; $(MAKE) clean
+	cd uniphinx; $(MAKE) clean

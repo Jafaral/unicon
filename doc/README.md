@@ -12,7 +12,7 @@ This page indexes manuals, technical reports, and HTML shipped under `doc/` in t
   - [Unicode reference data (for UTF-8 / UTR work)](#unicode-reference-data-for-utf-8-utr-work)
 - [Other documentation](#other-documentation)
   - [General Unicon pages](#general-unicon-pages)
-  - [unisphix — uniphinx user guide](#unisphix--uniphinx-user-guide)
+  - [uniphinx user guide](#uniphinx-user-guide)
   - [Icon 9.3 legacy](#icon-93-legacy)
   - [UDB — Unicon debugger](#udb-unicon-debugger)
 - [Building PDFs from LaTeX](#building-pdfs-from-latex)
@@ -89,22 +89,24 @@ Pages that are not a single numbered UTR (guides, indexes, examples).
 
 *Location in tree: `doc/unicon/`.*
 
-### unisphix — uniphinx user guide
+### uniphinx user guide
 
-HTML user guide for *uniphinx* (Unicon’s Sphinx-like book generator).
-On GitHub Pages the built guide is at [unisphix/out/](unisphix/out/)
-([index.html](unisphix/out/index.html)). Sources are RST; build locally with:
+HTML user guide for *uniphinx* (Unicon’s book documentation generator).
+On GitHub Pages the built guide is at
+[doc/uniphinx/out/](uniphinx/out/index.html)
+(e.g. `https://…/unicon/doc/uniphinx/out/`). Sources are RST; build
+locally with:
 
 ```sh
-make -C doc/unisphix
-# open doc/unisphix/out/index.html
+make -C doc/uniphinx
+# open doc/uniphinx/out/index.html
 ```
 
-- [Built HTML (Pages)](unisphix/out/index.html) — generated user guide
-- [README](unisphix/README.md) — build notes
-- [`*.rst` sources](unisphix/) — manual chapters
+- [Built HTML (Pages)](uniphinx/out/index.html) — generated user guide
+- [README](uniphinx/README.md) — build notes
+- [`*.rst` sources](uniphinx/) — manual chapters
 
-*Location in tree: `doc/unisphix/`. Tool sources: `uni/uniphinx/`.*
+*Location in tree: `doc/uniphinx/`. Tool sources: `uni/uniphinx/`.*
 
 ### Icon 9.3 legacy
 

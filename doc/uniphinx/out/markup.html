@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uniphinx User Guide</title>
+<script>
+(function(){try{var t=localStorage.getItem('uniphinx-theme');
+if(t==='basic'||t==='classic'||t==='dark')
+document.documentElement.setAttribute('data-theme',t);
+else t='basic';
+document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.css">');
+}catch(e){document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-basic.css">');}})();
+</script>
+<noscript><link id="theme-css" rel="stylesheet" href="_static/theme-basic.css"></noscript>
+<link rel="stylesheet" href="_static/highlight.css">
+<script defer src="_static/search.js"></script>
+<script defer src="_static/highlight-unicon.js"></script>
+<script defer src="_static/theme-switcher.js"></script>
+</head><body>
+<div class="layout">
+<nav class="sidebar" aria-label="Book contents">
+<a class="sidebar-logo" href="index.html"><img src="_static/uniphinx-logo.png" alt="uniphinx User Guide"></a>
+<div class="book-title"><a href="index.html">uniphinx User Guide</a></div>
+<label class="search-hint" for="theme-select">Theme</label>
+<select class="search-box" id="theme-select" aria-label="Color theme">
+<option value="basic">basic</option>
+<option value="classic">classic</option>
+<option value="dark">dark</option>
+</select>
+<p class="search-hint">Filter chapters; Enter for full search</p>
+<input class="search-box" id="nav-search" type="search" 
+placeholder="Search…" aria-label="Filter chapter list">
+<ol id="nav-toc">
+<li><a href="intro.html">Introduction</a></li>
+<li><a href="install.html">Installation</a></li>
+<li><a href="quickstart.html">Quick Start</a></li>
+<li class="current">Markup Reference</li>
+<li><a href="themes.html">Themes</a></li>
+<li><a href="cli.html">Command Line</a></li>
+<li><a href="sphinx.html">uniphinx and Sphinx</a></li>
+</ol>
+<p class="search-hint"><a href="search.html">Search page</a></p>
+</nav>
+<div class="main">
+<div class="prevnext">
+<a href="quickstart.html">&larr; Quick Start</a>
+<a href="themes.html">Themes &rarr;</a>
+</div>
+<h2 id="markup-reference">
+Markup Reference
+</h2>
+<p>
+uniphinx accepts a 
+<strong>
+restricted RST-like
+</strong>
+ dialect. Unknown constructs are either ignored, treated as plain text, or left as raw directives.
+</p>
+<h3 id="headings">
+Headings
+</h3>
+<pre><code class="language-rst">
+
+Chapter Title
+=============
+
+Section
+-------
+
+Subsection
+~~~~~~~~~~
+</code></pre>
+<p>
+Characters 
+<code>= - ~ ^</code>
+ are recognized as underline styles. Heading level follows the underline character. The underline length must be greater than or equal to the title length.
+</p>
+<h3 id="paragraphs-and-lists">
+Paragraphs and lists
+</h3>
+<p>
+Blank lines separate paragraphs. Bullet lists use 
+<code>-</code>
+ or 
+<code>*</code>
+ with a following space. Indented continuation lines belong to the current item.
+</p>
+<h3 id="inline-markup">
+Inline markup
+</h3>
+<ul>
+<li>
+single asterisks for emphasis
+</li>
+<li>
+double asterisks for strong
+</li>
+<li>
+backticks for inline literals
+</li>
+<li>
+a ref role pointing at a section title (same text as the heading)
+</li>
+<li>
+a doc role is parsed; full resolution is still limited
+</li>
+</ul>
+<p>
+For cross-chapter links, write a ref role whose label matches the target heading exactly (see the links in 
+<a href="intro.html#introduction">Introduction</a>
+).
+</p>
+<h3 id="directives">
+Directives
+</h3>
+<p>
+Recognized forms (authoring markup):
+</p>
+<pre><code class="language-rst">
+
+.. note::
+
+  Body lines, indented.
+
+.. warning::
+
+  Careful.
+
+.. tip::
+
+  Hint.
+
+.. code-block:: unicon
+
+  # source lines, indented
+  procedure main()
+     write(&quot;ok&quot;)
+  end
+
+.. image:: images/diagram.svg
+
+  Optional alt text on an indented line
+</code></pre>
+<h3 id="unicon-listings">
+Unicon listings
+</h3>
+<p>
+<code>code-block</code>
+ languages 
+<code>unicon</code>
+, 
+<code>icon</code>
+, and 
+<code>icn</code>
+ get Unicon syntax highlighting in HTML (via 
+<code>highlight-unicon.js</code>
+). Other languages are emitted as plain 
+<code>&lt;pre&gt;&lt;code class=&quot;language-…&quot;&gt;</code>
+ without Unicon highlighting — use 
+<code>sh</code>
+ for shell, 
+<code>rst</code>
+ or 
+<code>text</code>
+ for markup samples.
+</p>
+<p>
+Example Unicon program as it appears in the built book:
+</p>
+<pre><code class="language-unicon">
+
+# Hello from a uniphinx listing
+procedure main()
+  every i := 1 to 3 do
+     write(&quot;tick &quot;, i)
+  write(&amp;version)
+end
+</code></pre>
+<p>
+A line ending in 
+<code>::</code>
+ (RST literal-block introducer) followed by an indented block is also treated as a code listing. 
+<code>Sphinx::</code>
+ becomes the label 
+<code>Sphinx:</code>
+ plus the indented tree; a lone 
+<code>::</code>
+ introduces a block with no label.
+</p>
+<p>
+Unknown 
+<code>.. name::</code>
+ directives become HTML comments so content is not silently dropped.
+</p>
+<h3 id="cross-references">
+Cross-references
+</h3>
+<p>
+Pass 1 collects every section title (slugified) across all chapters. Pass 2 turns pending ref roles into links of the form 
+<code>chapter.html#anchor</code>
+. Prefer unique section titles.
+</p>
+<p>
+See also 
+<a href="quickstart.html#quick-start">Quick Start</a>
+ and 
+<a href="cli.html#command-line">Command Line</a>
+.
+</p>
+<div class="prevnext">
+<a href="quickstart.html">&larr; Quick Start</a>
+<a href="themes.html">Themes &rarr;</a>
+</div>
+<footer class="footer" role="contentinfo">
+&copy; 2026, Jafar Al-Gharaibeh. | Powered by uniphinx &amp; Basic | <a href="_sources/markup.rst" rel="nofollow">Page source</a>
+</footer>
+</div></div>
+</body></html>
