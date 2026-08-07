@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>uniphinx User Guide</title>
+<script>
+(function(){try{var t=localStorage.getItem('uniphinx-theme');
+if(t==='basic'||t==='classic'||t==='dark')
+document.documentElement.setAttribute('data-theme',t);
+else t='basic';
+document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.css">');
+}catch(e){document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-basic.css">');}})();
+</script>
+<noscript><link id="theme-css" rel="stylesheet" href="_static/theme-basic.css"></noscript>
+<link rel="stylesheet" href="_static/highlight.css">
+<script defer src="_static/search.js"></script>
+<script defer src="_static/highlight-unicon.js"></script>
+<script defer src="_static/theme-switcher.js"></script>
+</head><body>
+<div class="layout">
+<nav class="sidebar" aria-label="Book contents">
+<div class="book-title"><a href="index.html">uniphinx User Guide</a></div>
+<label class="search-hint" for="theme-select">Theme</label>
+<select class="search-box" id="theme-select" aria-label="Color theme">
+<option value="basic">basic</option>
+<option value="classic">classic</option>
+<option value="dark">dark</option>
+</select>
+<p class="search-hint">Filter chapters; Enter for full search</p>
+<input class="search-box" id="nav-search" type="search" 
+placeholder="Search…" aria-label="Filter chapter list">
+<ol id="nav-toc">
+<li><a href="intro.html">Introduction</a></li>
+<li><a href="install.html">Installation</a></li>
+<li><a href="quickstart.html">Quick Start</a></li>
+<li><a href="markup.html">Markup Reference</a></li>
+<li><a href="themes.html">Themes</a></li>
+<li class="current">Command Line</li>
+<li><a href="sphinx.html">uniphinx and Sphinx</a></li>
+</ol>
+<p class="search-hint"><a href="search.html">Search page</a></p>
+</nav>
+<div class="main">
+<div class="prevnext">
+<a href="themes.html">&larr; Themes</a>
+<a href="sphinx.html">uniphinx and Sphinx &rarr;</a>
+</div>
+<h2 id="command-line">
+Command Line
+</h2>
+<h3 id="synopsis">
+Synopsis
+</h3>
+<pre><code class="language-unicon">
+
+# shell
+uniphinx --manifest=FILE [options]
+</code></pre>
+<h3 id="options">
+Options
+</h3>
+<p>
+<strong>
+--manifest=FILE
+</strong>
+   Required. Plain-text chapter list: one source path per line.   Lines starting with 
+<code>#</code>
+ and blank lines are ignored. Paths are   relative to the process current working directory.
+</p>
+<p>
+<strong>
+--title=TITLE
+</strong>
+   Book title for 
+<code>&lt;title&gt;</code>
+, the sidebar heading, the index page,   and the LaTeX 
+<code>\\title</code>
+. Default: 
+<code>Untitled Book</code>
+.
+</p>
+<p>
+<strong>
+--format=FMT
+</strong>
+   Output format: 
+<code>html</code>
+ (default), 
+<code>latex</code>
+, or 
+<code>pdf</code>
+.
+</p>
+<ul>
+<li>
+<code>html</code>
+ — one page per chapter plus index/search/themes
+</li>
+<li>
+<code>latex</code>
+ — a single 
+<code>book.tex</code>
+ for the whole manifest
+</li>
+<li>
+<code>pdf</code>
+ — write 
+<code>book.tex</code>
+ and run 
+<code>pdflatex</code>
+, 
+<code>xelatex</code>
+, or 
+<code>lualatex</code>
+ (whichever is first in 
+<code>PATH</code>
+) twice for TOC/xrefs
+</li>
+</ul>
+<p>
+<strong>
+--targetDir=DIR
+</strong>
+   Output directory. Default: 
+<code>./htmlBook</code>
+ for HTML, 
+<code>./latexBook</code>
+   for latex/pdf. Created if missing.
+</p>
+<p>
+<strong>
+--theme=NAME
+</strong>
+   Initial HTML theme: 
+<code>basic</code>
+, 
+<code>classic</code>
+, or 
+<code>dark</code>
+ (or a custom   name under 
+<code>--themePath</code>
+). Default: 
+<code>basic</code>
+. Ignored for   latex/pdf.
+</p>
+<p>
+<strong>
+--themePath=DIR
+</strong>
+   Directory that contains theme subdirectories (
+<code>DIR/basic/static</code>
+,   …). If omitted, uniphinx searches 
+<code>./themes</code>
+, 
+<code>../themes</code>
+, and   
+<code>themes</code>
+. HTML only.
+</p>
+<h3 id="outputs">
+Outputs
+</h3>
+<p>
+<strong>
+HTML
+</strong>
+ (
+<code>--format=html</code>
+): for each chapter 
+<code>path/name.rst</code>
+, writes 
+<code>targetDir/name.html</code>
+, plus:
+</p>
+<ul>
+<li>
+<code>index.html</code>
+ — contents landing page
+</li>
+<li>
+<code>search.html</code>
+ + 
+<code>searchindex.js</code>
+ — full-text search
+</li>
+<li>
+<code>_static/</code>
+ — theme CSS, search JS, highlighter, theme switcher
+</li>
+</ul>
+<p>
+<strong>
+LaTeX / PDF
+</strong>
+: writes 
+<code>targetDir/book.tex</code>
+. With 
+<code>--format=pdf</code>
+, also writes 
+<code>targetDir/book.pdf</code>
+ when a TeX engine is available. Copy figure files into 
+<code>targetDir</code>
+ (or a subdirectory matching the 
+<code>.. image::</code>
+ path) before building; SVG is not embedded (a boxed placeholder is emitted instead — convert to PDF/PNG for TeX).
+</p>
+<h3 id="exit-status">
+Exit status
+</h3>
+<p>
+Usage errors and missing files call 
+<code>stop()</code>
+ (non-zero). A successful build prints 
+<code>wrote …</code>
+ lines for each output file.
+</p>
+<div class="prevnext">
+<a href="themes.html">&larr; Themes</a>
+<a href="sphinx.html">uniphinx and Sphinx &rarr;</a>
+</div>
+</div></div>
+</body></html>
