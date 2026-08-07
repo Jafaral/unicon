@@ -23,7 +23,7 @@ Options
 **--copyright=TEXT**
   Optional footer copyright (text after ©), e.g.
   ``2026, Jafar Al-Gharaibeh``. HTML only. Every HTML page always
-  ends with ``Powered by uniphinx & Theme``; chapter pages also link
+  ends with ``Powered by uniphinx``; chapter pages also link
   **Page source** under ``_sources/``.
 
 **--logo=FILE**

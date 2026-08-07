@@ -47,15 +47,5 @@ uniphinx::
      images/
      Makefile   # optional; see doc/uniphinx/
 
-When to use which
------------------
-
-- Prefer **Sphinx** for large multi-language sites, rich LaTeX themes,
-  and the extension ecosystem.
-- Prefer **uniphinx** for Unicon-native books and manuals that should
-  build with the Unicon toolchain, with first-class Unicon listings and
-  no Python doc stack. PDF is available via ``--format=pdf`` when a
-  TeX engine is installed.
-
 This user guide is itself a uniphinx project: the tool documents and
 drives itself.
