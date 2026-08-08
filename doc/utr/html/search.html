@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Unicon Technical Reports — Search</title>
 <script>
-(function(){try{var t=localStorage.getItem('uniphinx-theme');
+(function(){try{var t=localStorage.getItem('uscribe-theme');
 if(t==='basic'||t==='classic'||t==='dark')
 document.documentElement.setAttribute('data-theme',t);
 else t='basic';
@@ -70,7 +70,7 @@ function qparam(){var m=location.search.match(/[?&]q=([^&]*)/);
 return m?decodeURIComponent(m[1].replace(/\+/g,' ')):''}
 function run(q){q=(q||'').toLowerCase().trim();
 var box=document.getElementById('search-results');
-var data=window.UNIPHINX_SEARCH||[];
+var data=window.USCRIBE_SEARCH||[];
 if(!q){box.innerHTML='<p>Type a query.</p>';return}
 var hits=[];
 for(var i=0;i<data.length;i++){var e=data[i];
@@ -90,6 +90,6 @@ input.addEventListener('input',function(){run(input.value)});
 })();
 </script>
 <footer class="footer" role="contentinfo">
-Powered by uniphinx
+Powered by uscribe
 </footer>
 </div></div></body></html>

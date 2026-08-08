@@ -12,7 +12,7 @@ built to HTML and is the documentation portal (UTRs, books, guides, legacy).
 | Docs homepage | [`index.rst`](index.rst) → Pages `/doc/` |
 | Technical reports | [`utr/html/`](utr/html/index.html) (`make -C doc/utr html`) |
 | FAQ / Posix / … | [`unicon/html/`](unicon/html/) (`make -C doc/unicon html`) |
-| uniphinx guide | [`uniphinx/out/`](uniphinx/out/index.html) |
+| uscribe guide | [`uscribe/out/`](uscribe/out/index.html) |
 | Icon 9.3 legacy | [`icon/`](icon/) |
 | UDB overview | [`udb/`](udb/) |
 | Book (LaTeX) | [`book/`](book/) |
@@ -23,7 +23,7 @@ built to HTML and is the documentation portal (UTRs, books, guides, legacy).
 ```sh
 make -C doc/utr html
 make -C doc/unicon html
-make -C doc/uniphinx html
+make -C doc/uscribe html
 ```
 
 Local Pages preview (from repo root, after a Unicon build):

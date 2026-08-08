@@ -6,7 +6,7 @@
 # Compile/generate PDF and/or HTML version of Unicon TR's.
 # HTML versions may be special-purpose, for Unicon IDE's online help.
 #
-# Preferred path for new/converted reports: RST via uniphinx
+# Preferred path for new/converted reports: RST via uscribe
 # (``make html`` / ``make latex``). Legacy ``%.pdf: %.tex`` remains
 # for older LaTeX-only sources.
 #
@@ -16,9 +16,9 @@
 #
 
 TOPDIR=../..
-UNIPHINX_DIR = $(TOPDIR)/uni/uniphinx
-UNIPHINX ?= $(UNIPHINX_DIR)/uniphinx
-THEMES = $(UNIPHINX_DIR)/themes
+USCRIBE_DIR = $(TOPDIR)/uni/uscribe
+USCRIBE ?= $(USCRIBE_DIR)/uscribe
+THEMES = $(USCRIBE_DIR)/themes
 HTMLDIR = html
 TEXDIR = latex
 MANIFEST = utr.manifest
@@ -33,30 +33,30 @@ all: html
 
 # Seed any checked-in *.pdf into $(HTMLDIR) so the index can link them,
 # then build HTML. Run ``make pdf`` first (or in CI) for generated PDFs.
-html: $(UNIPHINX)
+html: $(USCRIBE)
 	mkdir -p $(HTMLDIR)
 	-cp -f *.pdf $(HTMLDIR)/ 2>/dev/null || true
-	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
+	$(USCRIBE) --manifest=$(MANIFEST) --title="$(TITLE)" \
 		--themePath=$(THEMES) --targetDir=$(HTMLDIR) --format=html
 	# Reference data linked from utf8.rst (not image assets)
 	mkdir -p $(HTMLDIR)/assets/utf8
 	cp -f assets/utf8/*.txt $(HTMLDIR)/assets/utf8/
 
-latex: $(UNIPHINX)
+latex: $(USCRIBE)
 	mkdir -p $(TEXDIR)
-	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
+	$(USCRIBE) --manifest=$(MANIFEST) --title="$(TITLE)" \
 		--targetDir=$(TEXDIR) --format=latex
 
 # Per-report PDFs beside the HTML (same names as the Download links).
 # Continues past individual pdflatex failures (GIF figures, etc.).
-pdf pdf-rst: $(UNIPHINX)
+pdf pdf-rst: $(USCRIBE)
 	mkdir -p $(HTMLDIR)
 	-cp -f *.pdf $(HTMLDIR)/ 2>/dev/null || true
-	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
+	$(USCRIBE) --manifest=$(MANIFEST) --title="$(TITLE)" \
 		--targetDir=$(HTMLDIR) --format=pdf
 
-$(UNIPHINX):
-	$(MAKE) -C $(UNIPHINX_DIR)
+$(USCRIBE):
+	$(MAKE) -C $(USCRIBE_DIR)
 
 htmlean: htmlean.icn
 	unicon htmlean.icn

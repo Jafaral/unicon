@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.8)  8 AUG 2026 05:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.8)  8 AUG 2026 05:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -384,9 +384,9 @@ Here is how much of TeX's memory you used:
 x1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
 cbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 /ecbx2074.600pk>
-Output written on utr15.pdf (5 pages, 80500 bytes).
+Output written on utr15.pdf (5 pages, 79977 bytes).
 PDF statistics:
- 330 PDF objects out of 1000 (max. 8388607)
+ 328 PDF objects out of 1000 (max. 8388607)
  98 compressed objects within 1 object stream
  26 named destinations out of 1000 (max. 500000)
  57 words of extra memory for PDF output out of 10000 (max. 10000000)
