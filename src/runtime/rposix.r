@@ -3784,6 +3784,9 @@ SSL_CTX * create_ssl_context(dptr attr, int n, int type ) {
 
    return ctx;
 }
+
+#include "rcrypto.ri"
+
 #endif                                  /* LIBSSL */
 
 #if HAVE_LIBSSH
