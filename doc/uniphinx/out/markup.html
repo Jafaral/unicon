@@ -180,7 +180,9 @@ Simple
 </strong>
  tables use 
 <code>=</code>
- column separators. The first row is the header.
+ column separators. The first row is the header. PDF output uses 
+<code>longtable</code>
+ so tables can break across pages.
 </p>
 <p>
 Source:
@@ -243,7 +245,60 @@ Grid
 <code>+---+</code>
  borders; a border with 
 <code>=</code>
- marks the header.
+ marks the header. Omit an internal 
+<code>|</code>
+ to span columns:
+</p>
+<p>
+Source:
+</p>
+<pre><code class="language-rst">
++--------+--------+--------+
+| Left   | Mid    | Right  |
++========+========+========+
+| A      | B spanning two  |
++--------+-----------------+
+| C spanning two  | D      |
++-----------------+--------+
+</code></pre>
+<p>
+Rendered:
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Left
+</th>
+<th>
+Mid
+</th>
+<th>
+Right
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+A
+</td>
+<td colspan="2">
+B spanning two
+</td>
+</tr>
+<tr>
+<td colspan="2">
+C spanning two
+</td>
+<td>
+D
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+A plain grid without spans:
 </p>
 <p>
 Source:

@@ -118,15 +118,19 @@ Output format:
 <p>
 - 
 <code>html</code>
- — one page per chapter plus index/search/themes - 
+ — one page per chapter plus index/search/themes.   Report manifests get a UTR index table on 
+<code>index.html</code>
+. - 
 <code>latex</code>
- — a single 
+ — for books, a single 
 <code>book.tex</code>
- for the whole manifest - 
+; for report   manifests (every chapter is a report), one 
+<code>.tex</code>
+ per report - 
 <code>pdf</code>
- — write 
-<code>book.tex</code>
- and run 
+ — like 
+<code>latex</code>
+, then run 
 <code>pdflatex</code>
 , 
 <code>xelatex</code>
@@ -196,7 +200,7 @@ HTML
 <ul>
 <li>
 <code>index.html</code>
- — contents landing page
+ — contents landing page (chapter list, or a UTR table of number / title / author / date for report collections)
 </li>
 <li>
 <code>search.html</code>
@@ -219,13 +223,21 @@ HTML
 <strong>
 LaTeX / PDF
 </strong>
-: writes 
+: book manifests write 
 <code>targetDir/book.tex</code>
-. With 
+ (and 
+<code>book.pdf</code>
+ with 
 <code>--format=pdf</code>
-, also writes 
-<code>targetDir/book.pdf</code>
- when a TeX engine is available. Local 
+). Report manifests write one 
+<code>.tex</code>
+ / 
+<code>.pdf</code>
+ per report, named like the HTML stem (
+<code>ex-report.tex</code>
+ beside 
+<code>ex-report.html</code>
+). Local 
 <code>.. image::</code>
  files are copied into 
 <code>targetDir</code>
