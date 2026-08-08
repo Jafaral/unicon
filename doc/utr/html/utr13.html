@@ -69,6 +69,7 @@ placeholder="Search…" aria-label="Filter chapter list">
 <p class="report-authors">Steven E. Lumos and Clinton L. Jeffery</p>
 <p class="report-tr">Unicon Technical Report: 13a</p>
 <p class="report-date">2015-06-24</p>
+<p class="report-pdf"><a href="utr13.pdf" download>Download PDF</a></p>
 <div class="report-abstract">
 <p class="report-abstract-label">Abstract</p>
 <p>A messaging language provides highly-integrated connectivity (networking) along with context sensitivity. This work explores the implementation of messaging in a more traditional language by adding messaging language features to the Unicon programming language. The resulting system makes it easy to write Unicon programs that take advantage of Internet resources by leveraging programmer intuition.</p>
@@ -333,7 +334,7 @@ The following program shows how to send a webpage to someone via email. An examp
 
 procedure main(args)
 
-if ∗args ̃= 2 then stop(&quot;usage: &quot;, &amp;progname, &quot; url mailto &quot;)
+if *args ~= 2 then stop(&quot;usage: &quot;, &amp;progname, &quot; url mailto &quot;)
 
 web := open(args [1], &quot;m&quot;) \| stop(args[1] \|\| &quot;: can' t open&quot;)
 

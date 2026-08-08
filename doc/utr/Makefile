@@ -27,12 +27,15 @@ TITLE = Unicon Technical Reports
 # Legacy LaTeX-only leftovers (not yet converted to RST).
 LEGACY_PDF = utr9c.pdf
 
-.PHONY: all html latex pdf-rst notes Clean clean
+.PHONY: all html latex pdf pdf-rst notes Clean clean
 
 all: html
 
+# Seed any checked-in *.pdf into $(HTMLDIR) so the index can link them,
+# then build HTML. Run ``make pdf`` first (or in CI) for generated PDFs.
 html: $(UNIPHINX)
 	mkdir -p $(HTMLDIR)
+	-cp -f *.pdf $(HTMLDIR)/ 2>/dev/null || true
 	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
 		--themePath=$(THEMES) --targetDir=$(HTMLDIR) --format=html
 	# Reference data linked from utf8.rst (not image assets)
@@ -44,10 +47,13 @@ latex: $(UNIPHINX)
 	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
 		--targetDir=$(TEXDIR) --format=latex
 
-pdf-rst: $(UNIPHINX)
-	mkdir -p $(TEXDIR)
+# Per-report PDFs beside the HTML (same names as the Download links).
+# Continues past individual pdflatex failures (GIF figures, etc.).
+pdf pdf-rst: $(UNIPHINX)
+	mkdir -p $(HTMLDIR)
+	-cp -f *.pdf $(HTMLDIR)/ 2>/dev/null || true
 	$(UNIPHINX) --manifest=$(MANIFEST) --title="$(TITLE)" \
-		--targetDir=$(TEXDIR) --format=pdf
+		--targetDir=$(HTMLDIR) --format=pdf
 
 $(UNIPHINX):
 	$(MAKE) -C $(UNIPHINX_DIR)
