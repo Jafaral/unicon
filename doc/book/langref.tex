@@ -1923,6 +1923,10 @@ remote command's exit status (and fails until it has arrived),
 \texttt{Attrib(c, "stderr")} returns stderr bytes accumulated since the
 previous such call, and \texttt{Attrib(c, "eof")} produces 1 once remote
 EOF has been seen.
+For a cryptographic handle, \texttt{Attrib(h, "type")} reports the
+material role; assignments such as \texttt{op=}, \texttt{alg=},
+\texttt{cipher=}, \texttt{iv=}, and \texttt{sig=} are allowed only in
+the idle window between operations.
 For a co-expression or list, integer attribute codes from
 \texttt{threadh.icn} query or set thread inbox/outbox and channel limits
 (see Chapter~8; requires Concurrent).
@@ -2895,7 +2899,9 @@ UDP network socket\\
  \ \ \ \ \texttt{"nr"\ \ \ \ }open a raw
 IP socket (\texttt{SOCK\_RAW}; requires \texttt{proto=})\\
  \ \ \ \ \texttt{"e"\ \ \ \ } use SSL/TLS protocol to
-encrypt the network socket\\
+encrypt the network socket; alone or as
+\texttt{"er"}/\texttt{"eh"}, also open cryptographic
+handles (hash/HMAC/sign/encrypt; see Chapter~6)\\
  \ \ \ \ \texttt{"h"\ \ \ \ } open an SSH client
 session (requires \texttt{libssh}; see Chapter~6)\\
  \ \ \ \ \texttt{"m"\ \ \ \ }connect to a
@@ -2996,6 +3002,15 @@ transport-only session). Mode \texttt{"h-"} skips host-key verification.
 \texttt{open(s, ...)} on an existing SSH file opens another channel on
 the same session; \texttt{open(s, "sftp", "path=\textit{path}", ...)}
 opens a remote file or directory over SFTP. See Chapter~6.
+
+When opening a cryptographic handle (modes \texttt{"e"}, \texttt{"er"},
+or \texttt{"eh"}, without a network \texttt{"n"}), the first argument is
+a digest name (\texttt{"eh"}), a key/certificate path, a raw key string
+(\texttt{"er"}), or another crypto handle that supplies material.
+Trailing attributes include \texttt{op=} (\texttt{hash}, \texttt{hmac},
+\texttt{sign}, \texttt{verify}, \texttt{encrypt}, \texttt{decrypt}),
+\texttt{alg=}, \texttt{cipher=}, \texttt{iv=}, and \texttt{sig=}.
+Defaults are \texttt{sha256} and \texttt{aes-256-gcm}. See Chapter~6.
 
 \bigskip\hrule\vspace{0.1cm}
 \index{opmask}
@@ -5075,6 +5090,13 @@ length\\
 1307 \ \ \ \ \ \ \ private key and certificate mismatch\\
 1308 \ \ \ \ \ \ \ unknown protocol\\
 1310 \ \ \ \ \ \ \ bad socket attribute\\
+1311 \ \ \ \ \ \ \ unknown cryptographic algorithm or cipher\\
+1312 \ \ \ \ \ \ \ cryptographic handle lacks required material\\
+1313 \ \ \ \ \ \ \ duplicate cryptographic material role\\
+1314 \ \ \ \ \ \ \ AEAD authentication failed\\
+1315 \ \ \ \ \ \ \ signature verification failed\\
+1316 \ \ \ \ \ \ \ invalid cryptographic operation state\\
+1317 \ \ \ \ \ \ \ cryptographic material could not be loaded\\
 1320 \ \ \ \ \ \ \ SSH error\\
 1321 \ \ \ \ \ \ \ bad ssh attribute\\
 1322 \ \ \ \ \ \ \ SSH authentication error\\
