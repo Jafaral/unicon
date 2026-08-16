@@ -18,20 +18,22 @@
 \contentsline {chapter}{\numberline {3}Quick Start}{10}{chapter.3}%
 \contentsline {section}{\numberline {3.1}1. Create a manifest}{10}{section.3.1}%
 \contentsline {section}{\numberline {3.2}2. Write chapters}{10}{section.3.2}%
-\contentsline {section}{\numberline {3.3}3. Build HTML}{11}{section.3.3}%
-\contentsline {section}{\numberline {3.4}4. Build PDF (optional)}{11}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Where files go}{12}{section.3.5}%
+\contentsline {section}{\numberline {3.3}3. Book settings}{11}{section.3.3}%
+\contentsline {section}{\numberline {3.4}4. Build HTML}{11}{section.3.4}%
+\contentsline {section}{\numberline {3.5}5. Build PDF (optional)}{12}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Where files go}{12}{section.3.6}%
 \contentsline {chapter}{\numberline {4}Markup Reference}{13}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Headings}{13}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Paragraphs and lists}{13}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Definition lists}{14}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Tables}{14}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Labels and cross-references}{16}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Stable labels}{17}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Inline markup}{17}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Directives}{17}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Include / literalinclude}{20}{section.4.9}%
-\contentsline {section}{\numberline {4.10}Unicon listings}{20}{section.4.10}%
+\contentsline {section}{\numberline {4.2}Document fields}{13}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Paragraphs and lists}{14}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Definition lists}{14}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Tables}{15}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Labels and cross-references}{17}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Stable labels}{17}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Inline markup}{17}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Directives}{18}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Include / literalinclude}{20}{section.4.10}%
+\contentsline {section}{\numberline {4.11}Unicon listings}{21}{section.4.11}%
 \contentsline {chapter}{\numberline {5}Themes}{22}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Built-in themes}{22}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Build-time default}{22}{section.5.2}%

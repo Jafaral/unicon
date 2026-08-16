@@ -51,7 +51,7 @@ Command Line
 <h3 id="synopsis">
 Synopsis
 </h3>
-<pre><code class="language-sh">uscribe --manifest=FILE [options]
+<pre><code class="language-sh">uscribe [options]
 </code></pre>
 <h3 id="options">
 Options
@@ -60,9 +60,33 @@ Options
 <dt>**--manifest=FILE**</dt>
 <dd>
 <p>
-Required. Plain-text chapter list: one source path per line. Lines starting with 
+Plain-text chapter list: one source path per line. Lines starting with 
 <code>#</code>
- and blank lines are ignored. Paths are relative to the process current working directory.
+ and blank lines are ignored. Paths are relative to the process current working directory. Default: 
+<code>book.manifest</code>
+ in the current directory.
+</p>
+</dd>
+<dt>**--config=FILE**</dt>
+<dd>
+<p>
+Book-level settings file. If omitted, uscribe loads 
+<code>book.conf</code>
+ next to the manifest when that file exists. Keys: 
+<code>title</code>
+, 
+<code>copyright</code>
+, 
+<code>logo</code>
+, 
+<code>name</code>
+, 
+<code>theme</code>
+, 
+<code>themePath</code>
+, 
+<code>docclass</code>
+. Paths in the file are relative to the config file. Any command-line option overrides the file.
 </p>
 </dd>
 <dt>**--title=TITLE**</dt>
@@ -72,7 +96,9 @@ Book title for
 <code>&lt;title&gt;</code>
 , the sidebar heading, the index page, and the LaTeX 
 <code>\\title</code>
-. Default: 
+. Default: from 
+<code>book.conf</code>
+, else 
 <code>Untitled Book</code>
 .
 </p>

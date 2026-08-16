@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.16)  16 AUG 2026 03:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.16)  16 AUG 2026 03:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -325,7 +325,7 @@ Package hyperref Info: Link coloring ON on input line 16.
 \@outlinefile=\write4
 \openout4 = `uscribe-userguide.out'.
 
-<uscribe-logo.png, id=176, 1027.84pt x 1027.84pt>
+<uscribe-logo.png, id=184, 1027.84pt x 1027.84pt>
 File: uscribe-logo.png Graphic file (type png)
 <use uscribe-logo.png>
 Package pdftex.def Info: uscribe-logo.png  used on input line 20.
@@ -392,21 +392,21 @@ Chapter 4.
 
 
 ] [14] [15]
-Overfull \hbox (26.09671pt too wide) in paragraph at lines 576--577
+Overfull \hbox (26.09671pt too wide) in paragraph at lines 605--606
 \T1/cmr/m/n/10.95 lects ex-plicit la-bels and ti-tle slugs; pass 2 turns ref ro
 les into \T1/cmtt/m/n/10.95 chapter.html#anchor
  []
 
 [16] [17]
-<images/uscribe-logo.png, id=326, 1027.84pt x 1027.84pt>
+<images/uscribe-logo.png, id=336, 1027.84pt x 1027.84pt>
 File: images/uscribe-logo.png Graphic file (type png)
 <use images/uscribe-logo.png>
-Package pdftex.def Info: images/uscribe-logo.png  used on input line 682.
+Package pdftex.def Info: images/uscribe-logo.png  used on input line 711.
 (pdftex.def)             Requested size: 323.9978pt x 323.99088pt.
 
 
 LaTeX Warning: Hyper reference `markup-logo-figure' on page 18 undefined on inp
-ut line 688.
+ut line 717.
 
 [18] [19 <./images/uscribe-logo.png (PNG copy)>] [20] [21]
 Chapter 5.
@@ -416,41 +416,47 @@ Chapter 5.
 ] [23]
 Chapter 6.
 
-Overfull \hbox (6.49872pt too wide) in paragraph at lines 875--876
-[]\T1/cmr/m/n/10.95 Optional logo. HTML copies it into \T1/cmtt/m/n/10.95 targe
-tDir/_static/
+Overfull \hbox (24.7305pt too wide) in paragraph at lines 892--893
+[]\T1/cmr/m/n/10.95 Book-level set-tings file. If omit-ted, uscribe loads \T1/c
+mtt/m/n/10.95 book.conf
  []
 
 [24
 
 
 ]
-Overfull \hbox (0.63715pt too wide) in paragraph at lines 886--887
+Overfull \hbox (6.49872pt too wide) in paragraph at lines 908--909
+[]\T1/cmr/m/n/10.95 Optional logo. HTML copies it into \T1/cmtt/m/n/10.95 targe
+tDir/_static/
+ []
+
+
+Overfull \hbox (0.63715pt too wide) in paragraph at lines 919--920
 []\T1/cmr/m/n/10.95 Output di-rec-tory. De-fault: \T1/cmtt/m/n/10.95 ./htmlBook
  \T1/cmr/m/n/10.95 for HTML,
  []
 
 
-Overfull \hbox (78.49689pt too wide) in paragraph at lines 894--895
+Overfull \hbox (78.49689pt too wide) in paragraph at lines 927--928
 []\T1/cmr/m/n/10.95 Directory that con-tains theme sub-di-rec-to-ries (\T1/cmtt
 /m/n/10.95 DIR/basic/static\T1/cmr/m/n/10.95 ,
  []
 
 
-Overfull \hbox (61.13113pt too wide) in paragraph at lines 901--902
+Overfull \hbox (61.13113pt too wide) in paragraph at lines 934--935
 \T1/cmr/bx/n/10.95 HTML \T1/cmr/m/n/10.95 (\T1/cmtt/m/n/10.95 --format=html\T1/
 cmr/m/n/10.95 ): for each chap-ter \T1/cmtt/m/n/10.95 path/name.rst\T1/cmr/m/n/
 10.95 , writes \T1/cmtt/m/n/10.95 targetDir/name.html\T1/cmr/m/n/10.95 ,
  []
 
 
-Overfull \hbox (0.29745pt too wide) in paragraph at lines 911--912
+Overfull \hbox (0.29745pt too wide) in paragraph at lines 944--945
 []\T1/cmtt/m/n/10.95 _sources/ \T1/cmr/m/n/10.95 --- chap-ter sources as \T1/cm
 tt/m/n/10.95 name.rst.txt \T1/cmr/m/n/10.95 (browser-viewable text;
  []
 
 
-Overfull \hbox (9.73788pt too wide) in paragraph at lines 914--915
+Overfull \hbox (9.73788pt too wide) in paragraph at lines 947--948
 []\T1/cmr/bx/n/10.95 LaTeX / PDF\T1/cmr/m/n/10.95 : book man-i-fests write \T1/
 cmtt/m/n/10.95 targetDir/STEM.tex \T1/cmr/m/n/10.95 (and \T1/cmtt/m/n/10.95 STE
 M.pdf
@@ -469,13 +475,13 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
 Package rerunfilecheck Info: File `uscribe-userguide.out' has not changed.
-(rerunfilecheck)             Checksum: 5A1E10B111B486EBFC9708AEA221FB17;5851.
+(rerunfilecheck)             Checksum: E5F95DF0E7CA1ECEDD4BA3B921D96C87;6126.
  ) 
 Here is how much of TeX's memory you used:
- 9907 strings out of 476182
- 152549 string characters out of 5795595
- 1934975 words of memory out of 5000000
- 31716 multiletter control sequences out of 15000+600000
+ 9913 strings out of 476182
+ 152651 string characters out of 5795595
+ 1933975 words of memory out of 5000000
+ 31720 multiletter control sequences out of 15000+600000
  571785 words of font info for 61 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,6n,79p,610b,656s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -491,10 +497,10 @@ ec/ecsl1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecrm1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2488.600pk>
-Output written on uscribe-userguide.pdf (26 pages, 2082175 bytes).
+Output written on uscribe-userguide.pdf (26 pages, 2085872 bytes).
 PDF statistics:
- 894 PDF objects out of 1000 (max. 8388607)
- 391 compressed objects within 4 object streams
- 79 named destinations out of 1000 (max. 500000)
- 355 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 911 PDF objects out of 1000 (max. 8388607)
+ 401 compressed objects within 5 object streams
+ 81 named destinations out of 1000 (max. 500000)
+ 371 words of extra memory for PDF output out of 10000 (max. 10000000)
 

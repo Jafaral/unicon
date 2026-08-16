@@ -51,7 +51,9 @@ Quick Start
 <p>
 A uscribe project is a directory of chapter 
 <code>.rst</code>
- files plus a manifest that lists them in reading order.
+ files, a manifest that lists them in reading order, and usually a 
+<code>book.conf</code>
+ for book-wide title, logo, and PDF name.
 </p>
 <h3 id="1-create-a-manifest">
 1. Create a manifest
@@ -107,14 +109,24 @@ Here is that Unicon listing as it appears when built (syntax highlighted in HTML
    write(&quot;hi&quot;)
 end
 </code></pre>
-<h3 id="3-build-html">
-3. Build HTML
+<h3 id="3-book-settings">
+3. Book settings
 </h3>
-<pre><code class="language-sh">uscribe --manifest=book.manifest \
-         --title=&quot;My Book&quot; \
-         --targetDir=./out \
-         --theme=basic \
-         --themePath=/path/to/uni/uscribe/themes
+<p>
+<code>book.conf</code>
+ next to the manifest (optional; CLI overrides):
+</p>
+<pre><code class="language-text">title: My Book
+copyright: 2026, Your Name
+logo: images/logo.png
+name: my-book
+theme: basic
+themePath: /path/to/uni/uscribe/themes
+</code></pre>
+<h3 id="4-build-html">
+4. Build HTML
+</h3>
+<pre><code class="language-sh">uscribe --targetDir=./out
 </code></pre>
 <p>
 Or from a project 
@@ -128,8 +140,8 @@ Open
 <code>out/index.html</code>
 . Use the sidebar for chapters, search, and theme switching.
 </p>
-<h3 id="4-build-pdf-optional">
-4. Build PDF (optional)
+<h3 id="5-build-pdf-optional">
+5. Build PDF (optional)
 </h3>
 <p>
 Install a TeX engine first — see the 
@@ -140,20 +152,19 @@ TeX / PDF dependencies by platform
 <a href="install.html#installation">Installation</a>
 . Then:
 </p>
-<pre><code class="language-sh">uscribe --format=pdf --manifest=book.manifest \
-         --title=&quot;My Book&quot; --name=my-book --targetDir=./out
+<pre><code class="language-sh">uscribe --format=pdf --targetDir=./out
 </code></pre>
 <p>
 Or 
 <code>make pdf</code>
 . Output is 
 <code>out/STEM.pdf</code>
- (and 
-<code>out/STEM.tex</code>
-); the default stem is 
+ from the 
+<code>name</code>
+ key (default stem 
 <code>book</code>
-. This user guide uses 
-<code>--name=uscribe-userguide</code>
+). This user guide uses 
+<code>name: uscribe-userguide</code>
 . SVG figures are not embedded; convert them to PDF or PNG for TeX.
 </p>
 <h3 id="where-files-go">
@@ -166,7 +177,11 @@ Where files go
 </li>
 <li>
 <code>*.manifest</code>
- — manifest (chapter order)
+ — chapter order
+</li>
+<li>
+<code>book.conf</code>
+ — book title, logo, copyright, PDF name, theme
 </li>
 <li>
 <code>images/</code>

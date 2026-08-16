@@ -72,6 +72,35 @@ Characters
 <code>= - ~ ^</code>
  are recognized as underline styles. Heading level follows the underline character. The underline length must be greater than or equal to the title length.
 </p>
+<h3 id="document-fields">
+Document fields
+</h3>
+<p>
+A chapter may start with an RST field list (Docutils bibliographic fields). Repeat 
+<code>:author:</code>
+ for several names. Book chapters show these as a byline under the first heading; omit the fields and nothing is added. Reports also use 
+<code>:title:</code>
+, 
+<code>:trnumber:</code>
+, 
+<code>:abstract:</code>
+, and 
+<code>:docclass:</code>
+ for the UTR cover.
+</p>
+<pre><code class="language-rst">:author: Jane Doe
+:author: Pat Lee
+:date: 2026-08-15
+:copyright: 2026, Jane Doe
+
+Chapter Title
+=============
+</code></pre>
+<p>
+Book-wide title, logo, theme, and PDF name belong in 
+<code>book.conf</code>
+ next to the manifest (CLI options override). They are not chapter fields.
+</p>
 <h3 id="paragraphs-and-lists">
 Paragraphs and lists
 </h3>

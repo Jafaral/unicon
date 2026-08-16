@@ -6,19 +6,28 @@ Synopsis
 
 .. code-block:: sh
 
-   uscribe --manifest=FILE [options]
+   uscribe [options]
 
 Options
 -------
 
 **--manifest=FILE**
-  Required. Plain-text chapter list: one source path per line.
-  Lines starting with ``#`` and blank lines are ignored. Paths are
-  relative to the process current working directory.
+  Plain-text chapter list: one source path per line. Lines starting
+  with ``#`` and blank lines are ignored. Paths are relative to the
+  process current working directory. Default: ``book.manifest`` in
+  the current directory.
+
+**--config=FILE**
+  Book-level settings file. If omitted, uscribe loads
+  ``book.conf`` next to the manifest when that file exists.
+  Keys: ``title``, ``copyright``, ``logo``, ``name``, ``theme``,
+  ``themePath``, ``docclass``. Paths in the file are relative to
+  the config file. Any command-line option overrides the file.
 
 **--title=TITLE**
   Book title for ``<title>``, the sidebar heading, the index page,
-  and the LaTeX ``\\title``. Default: ``Untitled Book``.
+  and the LaTeX ``\\title``. Default: from ``book.conf``, else
+  ``Untitled Book``.
 
 **--copyright=TEXT**
   Optional footer copyright (text after ©), e.g.

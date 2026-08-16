@@ -242,7 +242,7 @@ make pdf
 \chapter{Quick Start}
 \label{quickstart-quick-start}
 
-A uscribe project is a directory of chapter \texttt{.rst} files plus a manifest that lists them in reading order.
+A uscribe project is a directory of chapter \texttt{.rst} files, a manifest that lists them in reading order, and usually a \texttt{book.conf} for book-wide title, logo, and PDF name.
 
 \section{1. Create a manifest}
 \label{quickstart-1-create-a-manifest}
@@ -296,14 +296,24 @@ procedure main()
 end
 \end{Verbatim}
 
-\section{3. Build HTML}
-\label{quickstart-3-build-html}
+\section{3. Book settings}
+\label{quickstart-3-book-settings}
+
+\texttt{book.conf} next to the manifest (optional; CLI overrides):
+
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
-uscribe --manifest=book.manifest \\
-         --title="My Book" \\
-         --targetDir=./out \\
-         --theme=basic \\
-         --themePath=/path/to/uni/uscribe/themes
+title: My Book
+copyright: 2026, Your Name
+logo: images/logo.png
+name: my-book
+theme: basic
+themePath: /path/to/uni/uscribe/themes
+\end{Verbatim}
+
+\section{4. Build HTML}
+\label{quickstart-4-build-html}
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+uscribe --targetDir=./out
 \end{Verbatim}
 
 
@@ -312,18 +322,17 @@ Or from a project \texttt{Makefile} patterned on \texttt{doc/uscribe/Makefile}.
 
 Open \texttt{out/index.html}. Use the sidebar for chapters, search, and theme switching.
 
-\section{4. Build PDF (optional)}
-\label{quickstart-4-build-pdf-optional}
+\section{5. Build PDF (optional)}
+\label{quickstart-5-build-pdf-optional}
 
 Install a TeX engine first --- see the \emph{TeX / PDF dependencies by platform} section under \hyperref[install-installation]{Installation}. Then:
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
-uscribe --format=pdf --manifest=book.manifest \\
-         --title="My Book" --name=my-book --targetDir=./out
+uscribe --format=pdf --targetDir=./out
 \end{Verbatim}
 
 
-Or \texttt{make~pdf}. Output is \texttt{out/STEM.pdf} (and \texttt{out/STEM.tex}); the default stem is \texttt{book}. This user guide uses \texttt{--name=uscribe-userguide}. SVG figures are not embedded; convert them to PDF or PNG for TeX.
+Or \texttt{make~pdf}. Output is \texttt{out/STEM.pdf} from the \texttt{name} key (default stem \texttt{book}). This user guide uses \texttt{name:~uscribe-userguide}. SVG figures are not embedded; convert them to PDF or PNG for TeX.
 
 \section{Where files go}
 \label{quickstart-where-files-go}
@@ -331,7 +340,9 @@ Or \texttt{make~pdf}. Output is \texttt{out/STEM.pdf} (and \texttt{out/STEM.tex}
 \item 
 \texttt{*.rst} --- chapter sources
 \item 
-\texttt{*.manifest} --- manifest (chapter order)
+\texttt{*.manifest} --- chapter order
+\item 
+\texttt{book.conf} --- book title, logo, copyright, PDF name, theme
 \item 
 \texttt{images/} --- figures (copied into \texttt{out/images/})
 \item 
@@ -360,6 +371,24 @@ Subsection
 
 
 Characters \texttt{=~-~\textasciitilde{}~\textasciicircum{}} are recognized as underline styles. Heading level follows the underline character. The underline length must be greater than or equal to the title length.
+
+\section{Document fields}
+\label{markup-document-fields}
+
+A chapter may start with an RST field list (Docutils bibliographic fields). Repeat \texttt{:author:} for several names. Book chapters show these as a byline under the first heading; omit the fields and nothing is added. Reports also use \texttt{:title:}, \texttt{:trnumber:}, \texttt{:abstract:}, and \texttt{:docclass:} for the UTR cover.
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+:author: Jane Doe
+:author: Pat Lee
+:date: 2026-08-15
+:copyright: 2026, Jane Doe
+
+Chapter Title
+=============
+\end{Verbatim}
+
+
+Book-wide title, logo, theme, and PDF name belong in \texttt{book.conf} next to the manifest (CLI options override). They are not chapter fields.
 
 \section{Paragraphs and lists}
 \label{markup-paragraphs-and-lists}
@@ -848,7 +877,7 @@ See \texttt{themes/README.md} in the source tree for layout details.
 \section{Synopsis}
 \label{cli-synopsis}
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
-uscribe --manifest=FILE [options]
+uscribe [options]
 \end{Verbatim}
 
 \section{Options}
@@ -856,11 +885,15 @@ uscribe --manifest=FILE [options]
 \begin{description}
 \item[**--manifest=FILE**]
 
-Required. Plain-text chapter list: one source path per line. Lines starting with \texttt{\#} and blank lines are ignored. Paths are relative to the process current working directory.
+Plain-text chapter list: one source path per line. Lines starting with \texttt{\#} and blank lines are ignored. Paths are relative to the process current working directory. Default: \texttt{book.manifest} in the current directory.
+
+\item[**--config=FILE**]
+
+Book-level settings file. If omitted, uscribe loads \texttt{book.conf} next to the manifest when that file exists. Keys: \texttt{title}, \texttt{copyright}, \texttt{logo}, \texttt{name}, \texttt{theme}, \texttt{themePath}, \texttt{docclass}. Paths in the file are relative to the config file. Any command-line option overrides the file.
 
 \item[**--title=TITLE**]
 
-Book title for \texttt{<title>}, the sidebar heading, the index page, and the LaTeX \texttt{\textbackslash{}\textbackslash{}title}. Default: \texttt{Untitled~Book}.
+Book title for \texttt{<title>}, the sidebar heading, the index page, and the LaTeX \texttt{\textbackslash{}\textbackslash{}title}. Default: from \texttt{book.conf}, else \texttt{Untitled~Book}.
 
 \item[**--copyright=TEXT**]
 
