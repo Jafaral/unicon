@@ -169,7 +169,7 @@ What uscribe LaTeX output needs
 </h4>
 <p>
 Generated 
-<code>book.tex</code>
+<code>STEM.tex</code>
  uses a small set of packages (
 <code>graphicx</code>
 , 
@@ -180,7 +180,15 @@ Generated
 <code>fancyvrb</code>
 , 
 <code>booktabs</code>
-). A latex base or recommended install is usually enough. If 
+, 
+<code>longtable</code>
+). 
+<code>multirow</code>
+ is loaded when the 
+<code>.sty</code>
+ is installed (needed for grid-table row spans). A latex recommended install is usually enough; GitHub Pages installs 
+<code>texlive-latex-extra</code>
+ so the user-guide PDF build has the full set. If 
 <code>pdflatex</code>
  stops with 
 <code>File …sty not found</code>
@@ -237,12 +245,12 @@ PDF (after installing a TeX engine as above):
 </p>
 <pre><code class="language-sh">cd doc/uscribe
 make pdf
-# open out/book.pdf
+# open out/uscribe-userguide.pdf
 </code></pre>
 <p>
 <code>make latex</code>
  writes 
-<code>out/book.tex</code>
+<code>out/uscribe-userguide.tex</code>
  without running a TeX engine. 
 <code>make pdf</code>
  writes the 
@@ -254,7 +262,7 @@ make pdf
 <a href="quickstart.html">Quick Start &rarr;</a>
 </div>
 <footer class="footer" role="contentinfo">
-&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="install.pdf">pdf</a> | <a href="_sources/install.rst.txt" rel="nofollow">source</a>
+&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="uscribe-userguide.pdf">pdf</a> | <a href="_sources/install.rst.txt" rel="nofollow">source</a>
 </footer>
 </div></div>
 </body></html>

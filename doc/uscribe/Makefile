@@ -9,10 +9,14 @@ include $(UNICON_TOP_BUILDDIR)/Makedefs
 USCRIBE_DIR = $(TOPDIR)/uni/uscribe
 USCRIBE ?= $(USCRIBE_DIR)/uscribe
 TITLE = uscribe User Guide
+NAME = uscribe-userguide
 MANIFEST = manual.manifest
 OUTDIR = out
 THEME ?= basic
 THEMES = $(USCRIBE_DIR)/themes
+USCRIBE_FLAGS = --manifest=$(MANIFEST) --title="$(TITLE)" \
+	--name=$(NAME) --targetDir=$(OUTDIR) \
+	--logo=images/uscribe-logo.png
 
 .PHONY: all html latex pdf basic classic dark clean
 
@@ -22,22 +26,19 @@ all: html
 html: $(USCRIBE)
 	mkdir -p $(OUTDIR)/images
 	-cp -f images/* $(OUTDIR)/images/ 2>/dev/null || true
-	$(USCRIBE) --manifest=$(MANIFEST) --title="$(TITLE)" \
+	$(USCRIBE) $(USCRIBE_FLAGS) \
 		--copyright="2026, Jafar Al-Gharaibeh" \
-		--logo=images/uscribe-logo.png \
-		--targetDir=$(OUTDIR) --theme=$(THEME) --themePath=$(THEMES)
+		--theme=$(THEME) --themePath=$(THEMES)
 
 latex: $(USCRIBE)
 	mkdir -p $(OUTDIR)/images
 	-cp -f images/* $(OUTDIR)/images/ 2>/dev/null || true
-	$(USCRIBE) --format=latex --manifest=$(MANIFEST) --title="$(TITLE)" \
-		--targetDir=$(OUTDIR)
+	$(USCRIBE) --format=latex $(USCRIBE_FLAGS)
 
 pdf: $(USCRIBE)
 	mkdir -p $(OUTDIR)/images
 	-cp -f images/* $(OUTDIR)/images/ 2>/dev/null || true
-	$(USCRIBE) --format=pdf --manifest=$(MANIFEST) --title="$(TITLE)" \
-		--targetDir=$(OUTDIR)
+	$(USCRIBE) --format=pdf $(USCRIBE_FLAGS)
 
 basic:
 	$(MAKE) html THEME=basic

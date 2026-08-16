@@ -103,6 +103,7 @@ make -C doc/uscribe
 ```
 
 - [Built HTML (Pages)](uscribe/out/index.html) — generated user guide
+- [PDF](uscribe/out/uscribe-userguide.pdf) — same guide as a single PDF
 - [README](uscribe/README.md) — build notes
 - [`*.rst` sources](uscribe/) — manual chapters
 

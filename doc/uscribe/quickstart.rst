@@ -82,9 +82,11 @@ platform* section under :ref:`Installation`. Then:
 .. code-block:: sh
 
    uscribe --format=pdf --manifest=book.manifest \
-            --title="My Book" --targetDir=./out
+            --title="My Book" --name=my-book --targetDir=./out
 
-Or ``make pdf``. Output is ``out/book.pdf`` (and ``out/book.tex``).
+Or ``make pdf``. Output is ``out/STEM.pdf`` (and ``out/STEM.tex``);
+the default stem is ``book``. This user guide uses
+``--name=uscribe-userguide``.
 SVG figures are not embedded; convert them to PDF or PNG for TeX.
 
 Where files go
@@ -93,5 +95,5 @@ Where files go
 - ``*.rst`` — chapter sources
 - ``*.manifest`` — manifest (chapter order)
 - ``images/`` — figures (copied into ``out/images/``)
-- ``out/`` — generated HTML and/or ``book.tex`` / ``book.pdf``
+- ``out/`` — generated HTML and/or ``STEM.tex`` / ``STEM.pdf``
 - ``themes/`` — built-in skins shared across projects (HTML)

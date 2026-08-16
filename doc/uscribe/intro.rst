@@ -1,10 +1,6 @@
 Introduction
 ============
 
-.. image:: images/uscribe-logo.png
-
-   uscribe — Scribe with Unicon
-
 *uscribe* is a prose/book documentation generator for Unicon. It reads
 a small RST-like markup, builds a doctree, resolves cross-chapter
 references, and writes themed HTML (and optionally LaTeX/PDF) for

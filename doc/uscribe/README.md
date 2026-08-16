@@ -10,4 +10,5 @@ make -C doc/uscribe          # build this guide → out/index.html
 ```
 
 Themes: `make basic`, `make classic`, or `make dark` in this directory.
-Also `make latex` / `make pdf` when a TeX engine is installed.
+Also `make latex` / `make pdf` when a TeX engine is installed
+(`out/uscribe-userguide.pdf`).

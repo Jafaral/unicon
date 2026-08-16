@@ -141,16 +141,20 @@ TeX / PDF dependencies by platform
 . Then:
 </p>
 <pre><code class="language-sh">uscribe --format=pdf --manifest=book.manifest \
-         --title=&quot;My Book&quot; --targetDir=./out
+         --title=&quot;My Book&quot; --name=my-book --targetDir=./out
 </code></pre>
 <p>
 Or 
 <code>make pdf</code>
 . Output is 
-<code>out/book.pdf</code>
+<code>out/STEM.pdf</code>
  (and 
-<code>out/book.tex</code>
-). SVG figures are not embedded; convert them to PDF or PNG for TeX.
+<code>out/STEM.tex</code>
+); the default stem is 
+<code>book</code>
+. This user guide uses 
+<code>--name=uscribe-userguide</code>
+. SVG figures are not embedded; convert them to PDF or PNG for TeX.
 </p>
 <h3 id="where-files-go">
 Where files go
@@ -173,9 +177,9 @@ Where files go
 <li>
 <code>out/</code>
  — generated HTML and/or 
-<code>book.tex</code>
+<code>STEM.tex</code>
  / 
-<code>book.pdf</code>
+<code>STEM.pdf</code>
 </li>
 <li>
 <code>themes/</code>
@@ -187,7 +191,7 @@ Where files go
 <a href="markup.html">Markup Reference &rarr;</a>
 </div>
 <footer class="footer" role="contentinfo">
-&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="quickstart.pdf">pdf</a> | <a href="_sources/quickstart.rst.txt" rel="nofollow">source</a>
+&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="uscribe-userguide.pdf">pdf</a> | <a href="_sources/quickstart.rst.txt" rel="nofollow">source</a>
 </footer>
 </div></div>
 </body></html>
