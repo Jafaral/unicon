@@ -6,9 +6,6 @@ Book-wide settings live in ``book.conf``. Chapter order lives in
 the RST field list (see :doc:`markup`). Build invocation
 (``--format``, ``--targetDir``) stays on the command line.
 
-This is the same split Sphinx uses: ``conf.py`` for the project,
-``toctree`` for chapter order, bibliographic fields on a page.
-
 How the file is found
 ---------------------
 

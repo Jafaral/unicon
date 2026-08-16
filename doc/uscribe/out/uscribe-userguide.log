@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.16)  16 AUG 2026 04:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.16)  16 AUG 2026 04:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -392,14 +392,14 @@ Chapter 4.
 
 
 ]
-Overfull \hbox (65.00694pt too wide) in paragraph at lines 403--404
+Overfull \hbox (65.00694pt too wide) in paragraph at lines 400--401
 \T1/cmr/m/n/10.95 Book-wide footer text af-ter \TS1/cmr/m/n/10.95 © \T1/cmr/m/n
 /10.95 on HTML pages (for ex-am-ple \T1/cmtt/m/n/10.95 2026, Jafar Al-Gharaibeh
 \T1/cmr/m/n/10.95 ).
  []
 
 
-Overfull \hbox (2.78323pt too wide) in paragraph at lines 423--424
+Overfull \hbox (2.78323pt too wide) in paragraph at lines 420--421
 \T1/cmr/m/n/10.95 ac-cepted as \T1/cmtt/m/n/10.95 themepath \T1/cmr/m/n/10.95 o
 r \T1/cmtt/m/n/10.95 theme_path\T1/cmr/m/n/10.95 . If omit-ted, uscribe searche
 s \T1/cmtt/m/n/10.95 ./themes\T1/cmr/m/n/10.95 ,
@@ -411,7 +411,7 @@ Chapter 5.
 
 
 ] [17] [18]
-Overfull \hbox (26.09671pt too wide) in paragraph at lines 714--715
+Overfull \hbox (26.09671pt too wide) in paragraph at lines 711--712
 \T1/cmr/m/n/10.95 lects ex-plicit la-bels and ti-tle slugs; pass 2 turns ref ro
 les into \T1/cmtt/m/n/10.95 chapter.html#anchor
  []
@@ -420,12 +420,12 @@ les into \T1/cmtt/m/n/10.95 chapter.html#anchor
 <images/uscribe-logo.png, id=420, 1027.84pt x 1027.84pt>
 File: images/uscribe-logo.png Graphic file (type png)
 <use images/uscribe-logo.png>
-Package pdftex.def Info: images/uscribe-logo.png  used on input line 820.
+Package pdftex.def Info: images/uscribe-logo.png  used on input line 817.
 (pdftex.def)             Requested size: 323.9978pt x 323.99088pt.
 
 
 LaTeX Warning: Hyper reference `markup-logo-figure' on page 21 undefined on inp
-ut line 826.
+ut line 823.
 
 [21] [22 <./images/uscribe-logo.png (PNG copy)>] [23] [24]
 Chapter 6.
@@ -435,7 +435,7 @@ Chapter 6.
 ] [26]
 Chapter 7.
 
-Overfull \hbox (24.7305pt too wide) in paragraph at lines 1004--1005
+Overfull \hbox (24.7305pt too wide) in paragraph at lines 1001--1002
 []\T1/cmr/m/n/10.95 Book-level set-tings file. If omit-ted, uscribe loads \T1/c
 mtt/m/n/10.95 book.conf
  []
@@ -444,38 +444,38 @@ mtt/m/n/10.95 book.conf
 
 
 ]
-Overfull \hbox (6.49872pt too wide) in paragraph at lines 1020--1021
+Overfull \hbox (6.49872pt too wide) in paragraph at lines 1017--1018
 []\T1/cmr/m/n/10.95 Optional logo. HTML copies it into \T1/cmtt/m/n/10.95 targe
 tDir/_static/
  []
 
 
-Overfull \hbox (0.63715pt too wide) in paragraph at lines 1031--1032
+Overfull \hbox (0.63715pt too wide) in paragraph at lines 1028--1029
 []\T1/cmr/m/n/10.95 Output di-rec-tory. De-fault: \T1/cmtt/m/n/10.95 ./htmlBook
  \T1/cmr/m/n/10.95 for HTML,
  []
 
 
-Overfull \hbox (78.49689pt too wide) in paragraph at lines 1039--1040
+Overfull \hbox (78.49689pt too wide) in paragraph at lines 1036--1037
 []\T1/cmr/m/n/10.95 Directory that con-tains theme sub-di-rec-to-ries (\T1/cmtt
 /m/n/10.95 DIR/basic/static\T1/cmr/m/n/10.95 ,
  []
 
 
-Overfull \hbox (61.13113pt too wide) in paragraph at lines 1046--1047
+Overfull \hbox (61.13113pt too wide) in paragraph at lines 1043--1044
 \T1/cmr/bx/n/10.95 HTML \T1/cmr/m/n/10.95 (\T1/cmtt/m/n/10.95 --format=html\T1/
 cmr/m/n/10.95 ): for each chap-ter \T1/cmtt/m/n/10.95 path/name.rst\T1/cmr/m/n/
 10.95 , writes \T1/cmtt/m/n/10.95 targetDir/name.html\T1/cmr/m/n/10.95 ,
  []
 
 
-Overfull \hbox (0.29745pt too wide) in paragraph at lines 1056--1057
+Overfull \hbox (0.29745pt too wide) in paragraph at lines 1053--1054
 []\T1/cmtt/m/n/10.95 _sources/ \T1/cmr/m/n/10.95 --- chap-ter sources as \T1/cm
 tt/m/n/10.95 name.rst.txt \T1/cmr/m/n/10.95 (browser-viewable text;
  []
 
 
-Overfull \hbox (9.73788pt too wide) in paragraph at lines 1059--1060
+Overfull \hbox (9.73788pt too wide) in paragraph at lines 1056--1057
 []\T1/cmr/bx/n/10.95 LaTeX / PDF\T1/cmr/m/n/10.95 : book man-i-fests write \T1/
 cmtt/m/n/10.95 targetDir/STEM.tex \T1/cmr/m/n/10.95 (and \T1/cmtt/m/n/10.95 STE
 M.pdf
@@ -516,7 +516,7 @@ ec/ecsl1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecrm1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1095.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2488.600pk>
-Output written on uscribe-userguide.pdf (29 pages, 2097345 bytes).
+Output written on uscribe-userguide.pdf (29 pages, 2097220 bytes).
 PDF statistics:
  1010 PDF objects out of 1200 (max. 8388607)
  486 compressed objects within 5 object streams
