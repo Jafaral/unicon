@@ -37,7 +37,6 @@ placeholder="Search…" aria-label="Filter chapter list">
 <li><a href="markup.html">Markup Reference</a></li>
 <li><a href="themes.html">Themes</a></li>
 <li><a href="cli.html">Command Line</a></li>
-<li><a href="sphinx.html">uscribe and Sphinx</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
@@ -91,9 +90,7 @@ There is no Homebrew or apt package literally named
 <code>pdflatex</code>
 ; that name is a program shipped inside a TeX distribution. Install one of the packages below, then confirm:
 </p>
-<pre><code class="language-sh">
-
-which pdflatex || which xelatex || which lualatex
+<pre><code class="language-sh">which pdflatex || which xelatex || which lualatex
 </code></pre>
 <h3 id="tex-pdf-dependencies-by-platform">
 TeX / PDF dependencies by platform
@@ -104,16 +101,12 @@ macOS (Homebrew)
 <p>
 Compact (recommended for uscribe):
 </p>
-<pre><code class="language-sh">
-
-brew install --cask basictex
+<pre><code class="language-sh">brew install --cask basictex
 </code></pre>
 <p>
 Full MacTeX (much larger):
 </p>
-<pre><code class="language-sh">
-
-brew install --cask mactex
+<pre><code class="language-sh">brew install --cask mactex
 # or: brew install --cask mactex-no-gui
 </code></pre>
 <p>
@@ -129,9 +122,7 @@ Debian / Ubuntu
 <p>
 Minimal (often enough):
 </p>
-<pre><code class="language-sh">
-
-sudo apt update
+<pre><code class="language-sh">sudo apt update
 sudo apt install texlive-latex-base
 </code></pre>
 <p>
@@ -139,33 +130,25 @@ Recommended if
 <code>pdflatex</code>
  complains about missing packages (hyperref, fancyvrb, graphicx fonts, and similar):
 </p>
-<pre><code class="language-sh">
-
-sudo apt install texlive-latex-recommended texlive-fonts-recommended
+<pre><code class="language-sh">sudo apt install texlive-latex-recommended texlive-fonts-recommended
 </code></pre>
 <p>
 Larger kitchen-sink options:
 </p>
-<pre><code class="language-sh">
-
-sudo apt install texlive-latex-extra
+<pre><code class="language-sh">sudo apt install texlive-latex-extra
 # or everything: sudo apt install texlive-full
 </code></pre>
 <h4 id="fedora-rhel-family">
 Fedora / RHEL-family
 </h4>
-<pre><code class="language-sh">
-
-sudo dnf install texlive-latex
+<pre><code class="language-sh">sudo dnf install texlive-latex
 # fuller: sudo dnf install texlive-scheme-medium
 # everything: sudo dnf install texlive-scheme-full
 </code></pre>
 <h4 id="arch-linux">
 Arch Linux
 </h4>
-<pre><code class="language-sh">
-
-sudo pacman -S texlive-basic texlive-latex
+<pre><code class="language-sh">sudo pacman -S texlive-basic texlive-latex
 # or a broader set: sudo pacman -S texlive-meta
 </code></pre>
 <h4 id="windows">
@@ -214,9 +197,7 @@ Build uscribe
 <p>
 From the unicon tree:
 </p>
-<pre><code class="language-sh">
-
-cd uni/uscribe
+<pre><code class="language-sh">cd uni/uscribe
 make
 </code></pre>
 <p>
@@ -233,16 +214,12 @@ Regenerate Make dependencies after adding
 <code>.icn</code>
  files:
 </p>
-<pre><code class="language-sh">
-
-make deps
+<pre><code class="language-sh">make deps
 </code></pre>
 <h3 id="verify">
 Verify
 </h3>
-<pre><code class="language-sh">
-
-uscribe
+<pre><code class="language-sh">uscribe
 # prints usage and exits
 </code></pre>
 <h3 id="build-this-manual">
@@ -251,18 +228,14 @@ Build this manual
 <p>
 HTML:
 </p>
-<pre><code class="language-sh">
-
-cd doc/uscribe
+<pre><code class="language-sh">cd doc/uscribe
 make
 # open out/index.html
 </code></pre>
 <p>
 PDF (after installing a TeX engine as above):
 </p>
-<pre><code class="language-sh">
-
-cd doc/uscribe
+<pre><code class="language-sh">cd doc/uscribe
 make pdf
 # open out/book.pdf
 </code></pre>

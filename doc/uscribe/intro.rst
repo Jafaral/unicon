@@ -3,7 +3,7 @@ Introduction
 
 .. image:: images/uscribe-logo.png
 
-   Uscribe — documentation for Unicon
+   uscribe — Scribe with Unicon
 
 *uscribe* is a prose/book documentation generator for Unicon. It reads
 a small RST-like markup, builds a doctree, resolves cross-chapter
@@ -59,4 +59,3 @@ How to read this guide
 - :doc:`markup` — headings, lists, inline markup, directives
 - :doc:`themes` — basic, classic, dark, and the in-page switcher
 - :doc:`cli` — CLI options
-- :doc:`sphinx` — what maps to what if you know Sphinx

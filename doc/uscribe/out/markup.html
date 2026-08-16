@@ -37,7 +37,6 @@ placeholder="Search…" aria-label="Filter chapter list">
 <li class="current">Markup Reference</li>
 <li><a href="themes.html">Themes</a></li>
 <li><a href="cli.html">Command Line</a></li>
-<li><a href="sphinx.html">uscribe and Sphinx</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
@@ -59,9 +58,7 @@ restricted RST-like
 <h3 id="headings">
 Headings
 </h3>
-<pre><code class="language-rst">
-
-Chapter Title
+<pre><code class="language-rst">Chapter Title
 =============
 
 Section
@@ -94,8 +91,7 @@ Blank lines separate paragraphs. Bullet lists use
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-1. Install the ``uscribe`` binary (:doc:`install`)
+<pre><code class="language-rst">1. Install the ``uscribe`` binary (:doc:`install`)
 2. Write a tiny book (:doc:`quickstart`)
 #. Pick a theme (:doc:`themes`)
 </code></pre>
@@ -130,8 +126,7 @@ A term on its own line followed by an indented body. Blank lines inside the body
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-format
+<pre><code class="language-rst">format
    Selects the builder.
 
    Use ``html`` for a browsable book, or ``latex`` / ``pdf`` for print.
@@ -187,8 +182,7 @@ Simple
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-=====  ==========
+<pre><code class="language-rst">=====  ==========
 Flag   Meaning
 =====  ==========
 html   HTML book
@@ -252,8 +246,7 @@ Grid
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-+--------+--------+--------+
+<pre><code class="language-rst">+--------+--------+--------+
 | Left   | Mid    | Right  |
 +========+========+========+
 | A      | B spanning two  |
@@ -303,8 +296,7 @@ A plain grid without spans:
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-+--------+------------+
+<pre><code class="language-rst">+--------+------------+
 | Flag   | Meaning    |
 +========+============+
 | html   | HTML book  |
@@ -356,8 +348,7 @@ List tables
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-.. list-table::
+<pre><code class="language-rst">.. list-table::
    :header-rows: 1
 
    * - Flag
@@ -413,8 +404,7 @@ Place
 <p>
 Source:
 </p>
-<pre><code class="language-rst">
-.. _stable-labels:
+<pre><code class="language-rst">.. _stable-labels:
 
 Stable labels
 -------------
@@ -489,8 +479,7 @@ Directives
 <p>
 Admonition bodies are re-parsed as nested blocks (lists, code, nested directives). Source then rendered:
 </p>
-<pre><code class="language-rst">
-.. note::
+<pre><code class="language-rst">.. note::
 
    Admonition bodies can hold nested blocks:
 
@@ -547,9 +536,7 @@ Figures take a caption (numbered in HTML/LaTeX) and optional
 <code>.. _label:</code>
 :
 </p>
-<pre><code class="language-rst">
-
-.. _logo-figure:
+<pre><code class="language-rst">.. _logo-figure:
 
 .. figure:: images/uscribe-logo.png
 
@@ -571,9 +558,7 @@ See
 <p>
 Other authoring forms (shown literally):
 </p>
-<pre><code class="language-rst">
-
-.. code-block:: unicon
+<pre><code class="language-rst">.. code-block:: unicon
 
    procedure main()
       write(&quot;ok&quot;)
@@ -612,8 +597,7 @@ Source (
 <code>includes/shared-tip.rst</code>
 ):
 </p>
-<pre><code class="language-rst">
-.. tip::
+<pre><code class="language-rst">.. tip::
 
    Snippets under ``includes/`` can be pulled into any chapter with
    ``.. include::`` so the same advice is not copy-pasted.
@@ -642,8 +626,7 @@ Pull a real
 <code>:language:</code>
 :
 </p>
-<pre><code class="language-unicon">
-# Shared sample for literalinclude demos
+<pre><code class="language-unicon"># Shared sample for literalinclude demos
 procedure main()
    write(&quot;hello from includes/hello.icn&quot;)
    write(&amp;version)
@@ -652,8 +635,7 @@ end
 <p>
 The same file, only the body between markers:
 </p>
-<pre><code class="language-unicon">
-   write(&quot;hello from includes/hello.icn&quot;)
+<pre><code class="language-unicon">   write(&quot;hello from includes/hello.icn&quot;)
    write(&amp;version)
 </code></pre>
 <h3 id="unicon-listings">
@@ -686,9 +668,7 @@ Unicon listings
 <p>
 Example Unicon program as it appears in the built book:
 </p>
-<pre><code class="language-unicon">
-
-# Hello from a uscribe listing
+<pre><code class="language-unicon"># Hello from a uscribe listing
 procedure main()
    every i := 1 to 3 do
       write(&quot;tick &quot;, i)

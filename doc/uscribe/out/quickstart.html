@@ -37,7 +37,6 @@ placeholder="Search…" aria-label="Filter chapter list">
 <li><a href="markup.html">Markup Reference</a></li>
 <li><a href="themes.html">Themes</a></li>
 <li><a href="cli.html">Command Line</a></li>
-<li><a href="sphinx.html">uscribe and Sphinx</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
@@ -61,9 +60,7 @@ A uscribe project is a directory of chapter
 <code>book.manifest</code>
  (name is conventional; any path works):
 </p>
-<pre><code class="language-text">
-
-# comments and blank lines are ignored
+<pre><code class="language-text"># comments and blank lines are ignored
 preface.rst
 chapter1.rst
 chapter2.rst
@@ -76,9 +73,7 @@ Underline-style headings, paragraphs, lists, and directives. Example
 <code>chapter1.rst</code>
 :
 </p>
-<pre><code class="language-rst">
-
-First Chapter
+<pre><code class="language-rst">First Chapter
 =============
 
 Hello from uscribe. See :ref:`Second Chapter` later.
@@ -108,18 +103,14 @@ Underline rule:
 <p>
 Here is that Unicon listing as it appears when built (syntax highlighted in HTML):
 </p>
-<pre><code class="language-unicon">
-
-procedure main()
+<pre><code class="language-unicon">procedure main()
    write(&quot;hi&quot;)
 end
 </code></pre>
 <h3 id="3-build-html">
 3. Build HTML
 </h3>
-<pre><code class="language-sh">
-
-uscribe --manifest=book.manifest \
+<pre><code class="language-sh">uscribe --manifest=book.manifest \
          --title=&quot;My Book&quot; \
          --targetDir=./out \
          --theme=basic \
@@ -149,9 +140,7 @@ TeX / PDF dependencies by platform
 <a href="install.html#installation">Installation</a>
 . Then:
 </p>
-<pre><code class="language-sh">
-
-uscribe --format=pdf --manifest=book.manifest \
+<pre><code class="language-sh">uscribe --format=pdf --manifest=book.manifest \
          --title=&quot;My Book&quot; --targetDir=./out
 </code></pre>
 <p>
