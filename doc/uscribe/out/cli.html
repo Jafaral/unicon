@@ -34,6 +34,7 @@ placeholder="Search…" aria-label="Filter chapter list">
 <li><a href="intro.html">Introduction</a></li>
 <li><a href="install.html">Installation</a></li>
 <li><a href="quickstart.html">Quick Start</a></li>
+<li><a href="config.html">Book Configuration</a></li>
 <li><a href="markup.html">Markup Reference</a></li>
 <li><a href="themes.html">Themes</a></li>
 <li class="current">Command Line</li>
@@ -72,21 +73,9 @@ Plain-text chapter list: one source path per line. Lines starting with
 <p>
 Book-level settings file. If omitted, uscribe loads 
 <code>book.conf</code>
- next to the manifest when that file exists. Keys: 
-<code>title</code>
-, 
-<code>copyright</code>
-, 
-<code>logo</code>
-, 
-<code>name</code>
-, 
-<code>theme</code>
-, 
-<code>themePath</code>
-, 
-<code>docclass</code>
-. Paths in the file are relative to the config file. Any command-line option overrides the file.
+ next to the manifest when that file exists. See 
+<a href="config.html#book-configuration">Book Configuration</a>
+ for the key list, path rules, and defaults. Any command-line option overrides the file.
 </p>
 </dd>
 <dt>**--title=TITLE**</dt>

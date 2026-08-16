@@ -20,9 +20,8 @@ Options
 **--config=FILE**
   Book-level settings file. If omitted, uscribe loads
   ``book.conf`` next to the manifest when that file exists.
-  Keys: ``title``, ``copyright``, ``logo``, ``name``, ``theme``,
-  ``themePath``, ``docclass``. Paths in the file are relative to
-  the config file. Any command-line option overrides the file.
+  See :doc:`config` for the key list, path rules, and defaults.
+  Any command-line option overrides the file.
 
 **--title=TITLE**
   Book title for ``<title>``, the sidebar heading, the index page,

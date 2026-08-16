@@ -135,7 +135,7 @@ Verify
 .. code-block:: sh
 
    uscribe
-   # prints usage and exits
+   # no book.manifest in this directory: prints usage and exits
 
 Build this manual
 -----------------

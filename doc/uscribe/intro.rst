@@ -52,6 +52,7 @@ How to read this guide
 
 - :doc:`install` — build and install the ``uscribe`` binary
 - :doc:`quickstart` — generate HTML from a tiny book
+- :doc:`config` — ``book.conf`` keys, defaults, and CLI overrides
 - :doc:`markup` — headings, lists, inline markup, directives
 - :doc:`themes` — basic, classic, dark, and the in-page switcher
 - :doc:`cli` — CLI options

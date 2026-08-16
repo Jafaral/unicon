@@ -61,7 +61,8 @@ highlighted in HTML):
 3. Book settings
 ----------------
 
-``book.conf`` next to the manifest (optional; CLI overrides):
+``book.conf`` next to the manifest (optional; CLI overrides).
+Full key list: :doc:`config`.
 
 .. code-block:: text
 

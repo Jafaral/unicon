@@ -42,8 +42,7 @@ nothing is added. Reports also use ``:title:``, ``:trnumber:``,
    =============
 
 Book-wide title, logo, theme, and PDF name belong in
-``book.conf`` next to the manifest (CLI options override).
-They are not chapter fields.
+``book.conf`` (see :doc:`config`). They are not chapter fields.
 
 Paragraphs and lists
 --------------------
