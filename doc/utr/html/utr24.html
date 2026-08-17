@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Unicon Preprocessor</title>
+<script>
+(function(){try{var t=localStorage.getItem('uscribe-theme');
+if(t==='basic'||t==='classic'||t==='dark')
+document.documentElement.setAttribute('data-theme',t);
+else t='basic';
+document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.css">');
+}catch(e){document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-basic.css">');}})();
+</script>
+<noscript><link id="theme-css" rel="stylesheet" href="_static/theme-basic.css"></noscript>
+<link rel="stylesheet" href="_static/highlight.css">
+<script defer src="_static/search.js"></script>
+<script defer src="_static/highlight-unicon.js"></script>
+<script defer src="_static/theme-switcher.js"></script>
+</head><body>
+<div class="layout">
+<nav class="sidebar" aria-label="Book contents">
+<div class="book-title"><a href="index.html">Unicon Technical Reports</a></div>
+<label class="search-hint" for="theme-select">Theme</label>
+<select class="search-box" id="theme-select" aria-label="Color theme">
+<option value="basic">basic</option>
+<option value="classic">classic</option>
+<option value="dark">dark</option>
+</select>
+<p class="search-hint">Filter chapters; Enter for full search</p>
+<input class="search-box" id="nav-search" type="search" 
+placeholder="Search..." aria-label="Filter chapter list">
+<ol id="nav-toc">
+<li class="current">UTR 24: The Unicon Preprocessor</li>
+<li><a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon</a></li>
+</ol>
+<p class="search-hint"><a href="search.html">Search page</a></p>
+</nav>
+<div class="main">
+<div class="prevnext">
+<span></span>
+<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
+</div>
+<header class="report-masthead">
+<h1 class="report-title">The Unicon Preprocessor</h1>
+<p class="report-authors">Jafar Al-Gharaibeh</p>
+<p class="report-tr">Unicon Technical Report: 24</p>
+<p class="report-date">April 2026</p>
+<p class="report-pdf"><a href="utr24.pdf">pdf</a> | <a href="_sources/utr24.rst.txt">txt</a></p>
+<div class="report-abstract">
+<p class="report-abstract-label">Abstract</p>
+<p>The Unicon compiler runs a line-oriented source preprocessor before lexical analysis. The implementation, uni/unicon/preproce.icn, comes from Bob Alexander's Jcon preprocessor. It has been extended with triple-quoted multiline strings, function-like $define macros, and built-in assert / assert_not. This report describes those extensions, the architecture and directives they sit on, how #line and includes interact with them, and how to add further facilities. Keywords: Unicon, preprocessor, triple-quoted strings, function-like macros, assertions, technical report.</p>
+</div>
+</header>
+<h2 id="sec-intro">
+1. Introduction
+</h2>
+<p>
+This report describes the Unicon source preprocessor: how a file plus includes becomes the token stream the compiler scans, what the 
+<code>$</code>
+ directives do, and the three extensions added in 
+<code>uni/unicon/preproce.icn</code>
+ -- triple-quoted strings, function-like macros, and built-in 
+<code>assert</code>
+ / 
+<code>assert_not</code>
+. It is formatted as a Unicon Technical Report 
+[<a class="cite" href="#cite-jeffery-utr15">1</a>]. The language-facing command list lives in 
+<em>
+Programming with Unicon
+</em>
+ (language reference, &quot;Preprocessor&quot;) and UTR #8 
+[<a class="cite" href="#cite-jeffery-utr8">2</a>]; that text still states that 
+<code>$define</code>
+ does not take arguments. Automated tests live under 
+<code>tests/unicon/</code>
+ (
+<code>triple_strings.icn</code>
+, 
+<code>macros*.icn</code>
+, 
+<code>assert_*.icn</code>
+). 
+<code>unicon -E</code>
+ writes preprocessed source.
+</p>
+<p>
+The preprocessor is not optional. Every compilation runs it.
+</p>
+<h2 id="sec-motivation">
+2. Motivation and prior art
+</h2>
+<p>
+The implementation is Bob Alexander's Jcon preprocessor, brought into Unicon with small edits 
+[<a class="cite" href="#cite-alexander-jcon-preproc">3</a>]. It is line-oriented: it recognizes directives and identifiers, respects string and comment boundaries, and performs textual substitution. It is not a parser.
+</p>
+<p>
+The Jcon baseline provided object-like 
+<code>$define</code>
+, 
+<code>$include</code>
+, 
+<code>$ifdef</code>
+ / 
+<code>$ifndef</code>
+ / 
+<code>$else</code>
+ / 
+<code>$endif</code>
+, 
+<code>$error</code>
+, 
+<code>$line</code>
+ / 
+<code>#line</code>
+, and predefined symbols from 
+<code>&amp;features</code>
+. The implementation-book section &quot;The Unicon Preprocessor&quot; 
+[<a class="cite" href="#cite-jeffery-ib-preproc">4</a>] documents that baseline (generator interface, include and 
+<code>$ifdef</code>
+ stacks, quoted-string skipping, underscore continuation). It still says macros have no parameters. The language reference says the same 
+[<a class="cite" href="#cite-jeffery-utr8">2</a>].
+</p>
+<p>
+Three gaps in that baseline are filled here:
+</p>
+<p>
+<strong>
+Multiline string literals.
+</strong>
+ Unicon string literals are one physical line unless continued with a trailing 
+<code>_</code>
+. A triple-quoted form lets a literal span lines, including text that looks like comments or 
+<code>$</code>
+ directives, without changing the lexer grammar.
+</p>
+<p>
+<strong>
+Parameterized macros.
+</strong>
+ Object-like 
+<code>$define</code>
+ cannot abstract repeated call-shaped text. Function-like 
+<code>$define</code>
+ adds a parameter list and a replacement body, with C-style 
+<code>\</code>
+ continuation on the definition and call arguments that may span lines.
+</p>
+<p>
+<strong>
+Assertions.
+</strong>
+ Debug and test builds need a check that disappears entirely in release. Built-in 
+<code>assert</code>
+ / 
+<code>assert_not</code>
+ expand to runtime tests under 
+<code>__debug__</code>
+ / 
+<code>__test__</code>
+, and to nothing otherwise.
+</p>
+<h2 id="sec-arch">
+3. Architecture
+</h2>
+<p>
+Canonical source is 
+<code>uni/unicon/preproce.icn</code>
+. 
+<code>uni/parser/preproce.icn</code>
+ is a shorter, separate copy used by the standalone parser toolkit; it does not include the extensions in this report.
+</p>
+<h3 id="sec-public">
+3.1 Public procedures
+</h3>
+<table>
+<thead>
+<tr>
+<th>
+Procedure
+</th>
+<th>
+Role
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>preprocessor(fname, predefined_syms)</code>
+</td>
+<td>
+Main entry. Initializes state, loops over input, emits
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc(dummy, args)</code>
+</td>
+<td>
+Wrapper: 
+<code>suspend preprocessor(args[1], predefs())</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>predefs()</code>
+</td>
+<td>
+Table of predefined symbols (
+<code>_UNIX</code>
+, 
+<code>__DATE__</code>
+,
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+<code>preproc_new()</code>
+ initializes; 
+<code>preproc_done()</code>
+ clears large tables so they are not retained across compilations. 
+<code>preproc_install_builtin_macros()</code>
+ runs from 
+<code>preproc_new()</code>
+. If 
+<code>__test__</code>
+ is enabled there, 
+<code>__debug__</code>
+ is defaulted.
+</p>
+<h3 id="sec-state">
+3.2 State
+</h3>
+<p>
+<code>record preproc_fmacro(params, body)</code>
+ holds a function-like macro: parameter names in order and replacement text. Object-like 
+<code>$define</code>
+ symbols live only in 
+<code>preproc_sym_table</code>
+.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Global
+</th>
+<th>
+Purpose
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>preproc_sym_table</code>
+</td>
+<td>
+Object-like macros: symbol to replacement string.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_fun_table</code>
+</td>
+<td>
+Function-like macros: symbol to 
+<code>preproc_fmacro</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_builtin_fun_table</code>
+</td>
+<td>
+Names expanded specially (
+<code>assert</code>
+, 
+<code>assert_not</code>
+).
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_if_stack</code>
+, 
+<code>preproc_if_state</code>
+</td>
+<td>
+Conditional compilation.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_file_stack</code>
+, 
+<code>preproc_file</code>
+, 
+<code>preproc_filename</code>
+, 
+<code>preproc_line</code>
+</td>
+<td>
+Include stack and current input position.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_include_set</code>
+, 
+<code>preproc_include_name</code>
+</td>
+<td>
+Included paths; circular includes are errors.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_print_line</code>
+, 
+<code>preproc_print_filename</code>
+</td>
+<td>
+Last emitted position, for 
+<code>#line</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_ml_anchor</code>
+</td>
+<td>
+First physical line of a multiline macro call.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_nest_level</code>
+</td>
+<td>
+<code>$if</code>
+ depth at include start; paired on EOF unwind.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_word_chars</code>
+</td>
+<td>
+Identifier characters: letters, digits, 
+<code>_</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_command</code>
+</td>
+<td>
+Current directive name, for diagnostics.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_err_count</code>
+</td>
+<td>
+Errors reported.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_dollar_or_pound</code>
+</td>
+<td>
+Whether the directive started with 
+<code>#</code>
+ or 
+<code>$</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_fmacro_parse_error</code>
+</td>
+<td>
+Blocks object-like fallback after a failed
+</td>
+</tr>
+<tr>
+<td>
+<code>preproc_assert_uid</code>
+</td>
+<td>
+Suffix for unique temporaries in 
+<code>assert</code>
+ expansions.
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-driver">
+3.3 Driver
+</h3>
+<p>
+<code>preprocessor()</code>
+ is a generator. The translator drains it into 
+<code>yyin</code>
+:
+</p>
+<pre><code class="language-unicon">every yyin ||:= preprocessor(fname, uni_predefs) do
+   yyin ||:= &quot;\n&quot;
+</code></pre>
+<p>
+in 
+<code>uni/unicon/unicon.icn</code>
+. 
+<code>uni_predefs</code>
+ is 
+<code>predefs()</code>
+ plus 
+<code>-D</code>
+ options. After the generator finishes, a non-zero 
+<code>preproc_err_count</code>
+ or a non-empty 
+<code>parsingErrors</code>
+ aborts before 
+<code>yyparse()</code>
+.
+</p>
+<p>
+Each line from 
+<code>preproc_read()</code>
+ is scanned under 
+<code>line ? { ... }</code>
+. After leading 
+<code>preproc_space()</code>
+:
+</p>
+<ul>
+<li>
+<code>#line</code>
+ (optional spaces, GCC form) goes to 
+<code>preproc_scan_directive()</code>
+.
+</li>
+<li>
+<code>$</code>
+ followed by a character in 
+<code>nonpunctuation</code>
+ (letters, digits, space, tab, form feed, carriage return) goes to 
+<code>preproc_scan_directive()</code>
+.
+</li>
+<li>
+Otherwise 
+<code>&amp;pos := 1</code>
+ and the line goes to 
+<code>preproc_scan_text()</code>
+.
+</li>
+</ul>
+<p>
+Unicon directives are 
+<code>$</code>
+-prefixed. A 
+<code>#</code>
+ that is not 
+<code>#line</code>
+ is not a directive. With macros loaded, 
+<code>preproc_scan_text()</code>
+ treats 
+<code>#</code>
+ outside strings as a comment to end of line. Do not rely on C-style 
+<code>#define</code>
+ at column 0.
+</p>
+<p>
+There is no second pass over the same line.
+</p>
+<h3 id="sec-ifstate">
+3.4 Conditional compilation
+</h3>
+<p>
+<code>/preproc_if_state</code>
+ is Unicon's null test. After 
+<code>$ifdef</code>
+, the true branch sets 
+<code>preproc_if_state</code>
+ to null (emit); the false branch sets 
+<code>&quot;false&quot;</code>
+ or 
+<code>&quot;off&quot;</code>
+ (skip). So 
+<code>/preproc_if_state</code>
+ means the current region is active (or there is no 
+<code>$ifdef</code>
+). 
+<code>\preproc_if_state</code>
+ is the nonnull test.
+</p>
+<p>
+<code>$define</code>
+, 
+<code>$undef</code>
+, 
+<code>$include</code>
+, and text expansion run only when 
+<code>/preproc_if_state</code>
+ succeeds. 
+<code>preproc_scan_text()</code>
+ returns without emitting in skipped regions -- no triple-string rewrite, no macro expansion. 
+<code>$ifdef</code>
+ / 
+<code>$ifndef</code>
+ / 
+<code>$else</code>
+ / 
+<code>$endif</code>
+ still run in skipped regions so nested conditionals stay balanced. A bare 
+<code>if</code>
+ token inside skipped text is mapped to 
+<code>$if</code>
+, which pushes state and forces 
+<code>&quot;off&quot;</code>
+.
+</p>
+<h3 id="sec-text-order">
+3.5 Text scan order
+</h3>
+<p>
+When the region is active, 
+<code>preproc_scan_text()</code>
+:
+</p>
+<ol start="1">
+<li>
+Rewrites 
+<code>&quot;&quot;&quot;</code>
+ ... 
+<code>&quot;&quot;&quot;</code>
+ via 
+<code>preproc_rewrite_triple_strings()</code>
+ before identifier scans, so the body is never treated as directives or macros.
+</li>
+<li>
+If either symbol table is non-empty, scans for 
+<code>#</code>
+, strings, and identifiers. Otherwise it emits the line after 
+<code>preproc_sync_lines()</code>
+.
+</li>
+<li>
+Looks up function-like macros before object-like. A name in 
+<code>preproc_fun_table</code>
+ is a call only if 
+<code>preproc_expand_fmacro_call()</code>
+ sees 
+<code>(</code>
+ after optional space; otherwise 
+<code>&amp;pos</code>
+ is restored and the name may still match an object-like macro.
+</li>
+<li>
+Rescans replacements through 
+<code>preproc_scan_text(done_set)</code>
+. 
+<code>done_set</code>
+ is 
+<code>&amp;null</code>
+, a string, or a set of names on the current expansion chain; it blocks infinite recursion.
+</li>
+</ol>
+<p>
+String literals 
+<code>&quot;...&quot;</code>
+ / 
+<code>'...'</code>
+ are skipped with escape and trailing-
+<code>_</code>
+ continuation (
+<code>preproc_read()</code>
+, adjusting 
+<code>preproc_print_line</code>
+).
+</p>
+<h2 id="sec-directives">
+4. Directives
+</h2>
+<p>
+<code>preproc_scan_directive()</code>
+ reads the command with 
+<code>preproc_word()</code>
+. Unknown names in an active region call 
+<code>preproc_error(&quot;unknown preprocessor directive&quot;)</code>
+.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Command
+</th>
+<th>
+Behavior
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>define</code>
+</td>
+<td>
+Function-like 
+<code>name(params...) body</code>
+ via
+</td>
+</tr>
+<tr>
+<td>
+<code>undef</code>
+</td>
+<td>
+Removes the name from both tables and from the builtin
+</td>
+</tr>
+<tr>
+<td>
+<code>ifdef</code>
+ / 
+<code>ifndef</code>
+</td>
+<td>
+Pushes 
+<code>preproc_if_state</code>
+; sets state from
+</td>
+</tr>
+<tr>
+<td>
+<code>$if</code>
+</td>
+<td>
+Placeholder for 
+<code>if</code>
+ tokens inside excluded code:
+</td>
+</tr>
+<tr>
+<td>
+<code>else</code>
+ / 
+<code>endif</code>
+</td>
+<td>
+Pop, toggle, or close the branch; error on mismatch.
+</td>
+</tr>
+<tr>
+<td>
+<code>include</code>
+</td>
+<td>
+Quoted or bare filename via 
+<code>preproc_qword()</code>
+; circular
+</td>
+</tr>
+<tr>
+<td>
+<code>line</code>
+</td>
+<td>
+Sets 
+<code>preproc_filename</code>
+ / 
+<code>preproc_line</code>
+ from a
+</td>
+</tr>
+<tr>
+<td>
+<code>error</code>
+</td>
+<td>
+User error; message to end of line or 
+<code>#</code>
+.
+</td>
+</tr>
+<tr>
+<td>
+<code>ITRACE</code>
+</td>
+<td>
+Sets 
+<code>&amp;trace</code>
+ from an integer.
+</td>
+</tr>
+<tr>
+<td>
+<code>C</code>
+</td>
+<td>
+Accumulates lines until 
+<code>$Cend</code>
+; passes the text to
+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec-triple">
+5. Triple-quoted multiline strings
+</h2>
+<p>
+Delimiters 
+<code>&quot;&quot;&quot;</code>
+ ... 
+<code>&quot;&quot;&quot;</code>
+ mark a string whose body may span physical lines. The preprocessor collects raw text -- including lines that look like comments or 
+<code>$</code>
+ directives -- and rewrites the region to an ordinary quoted literal. The lexer grammar in 
+<code>uni/parser</code>
+ is unchanged.
+</p>
+<pre><code class="language-unicon">procedure main()
+   local x
+   x := &quot;&quot;&quot;line one
+line two&quot;&quot;&quot;
+   write(x)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">line one
+line two
+</code></pre>
+<p>
+The opener may sit on the same line as code or alone on a following line. Indentation and newlines in the body are kept. Multiline bodies do not shift 
+<code>&amp;line</code>
+ for surrounding statements (
+<code>triple_strings.icn</code>
+).
+</p>
+<pre><code class="language-unicon">procedure main()
+   local x
+   x := &quot;&quot;&quot;
+$ifdef __debug__
+inside triple
+$endif
+&quot;&quot;&quot;
+   write(&quot;[&quot;, x, &quot;]&quot;)
+   x := &quot;&quot;&quot;escaped triple: \&quot;\&quot;\&quot; inside&quot;&quot;&quot;
+   write(x)
+   x := &quot;contains \&quot;\&quot;\&quot; literally&quot;
+   write(x)
+   x := &quot;&quot;&quot;ends-with-backslash\&quot;&quot;&quot;
+   write(&quot;[&quot;, x, &quot;]&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">[
+$ifdef __debug__
+inside triple
+$endif
+]
+escaped triple: &quot;&quot;&quot; inside
+contains &quot;&quot;&quot; literally
+[ends-with-backslash\]
+</code></pre>
+<p>
+Inside 
+<code>&quot;...&quot;</code>
+ or 
+<code>'...'</code>
+, a 
+<code>&quot;&quot;&quot;</code>
+ sequence is copied through and does not start this mode. To put three double quotes in a triple-quoted body, write 
+<code>\&quot;\&quot;\&quot;</code>
+ (backslash before each quote). The four-character form 
+<code>\&quot;&quot;&quot;</code>
+ is not an escape, so a body may end with a single 
+<code>\</code>
+.
+</p>
+<p>
+<code>$ifdef</code>
+ / 
+<code>$endif</code>
+ and 
+<code>#</code>
+ comments inside the body are string content. Continuation lines pulled for an open triple are never scanned as directives.
+</p>
+<p>
+<code>preproc_rewrite_triple_strings()</code>
+ runs at the start of 
+<code>preproc_scan_text()</code>
+, only in an active region, and only if the current line contains 
+<code>&quot;&quot;&quot;</code>
+. Outside quotes it still honors 
+<code>#</code>
+ as a comment to end of that physical line. After an opener, it accumulates a body until the closer; if the line ends first, it appends a newline, 
+<code>preproc_read()</code>
+s the next line, and continues. An unclosed delimiter at EOF is 
+<code>unterminated triple-quoted string</code>
+.
+</p>
+<p>
+The body is turned into one ordinary string with 
+<code>preproc_quote_string()</code>
+: named Unicon escapes for specials (including DEL as 
+<code>\d</code>
+), backslash and quote escaped, other C0 bytes as three-digit octal via 
+<code>preproc_octal_escape()</code>
+. 
+<code>triple_strings.icn</code>
+ checks that a DEL byte in a triple string survives compilation (
+<code>ord</code>
+ 127).
+</p>
+<p>
+Tests: 
+<code>tests/unicon/triple_strings.icn</code>
+, 
+<code>tests/unicon/stand/triple_strings.std</code>
+.
+</p>
+<h2 id="sec-fmacros">
+6. Function-like macros
+</h2>
+<p>
+Function-like macros extend object-like 
+<code>$define</code>
+ with a parameter list and a replacement body. Nested calls, zero arguments, and commas inside quoted arguments are supported (
+<code>macros.icn</code>
+):
+</p>
+<pre><code class="language-unicon">$define SUM(a,b) ((a) + (b))
+$define TWICE(x) SUM(x,x)
+$define ZERO() 0
+procedure main()
+   write(SUM(2, 3))
+   write(TWICE(5))
+   write(ZERO())
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">5
+10
+0
+</code></pre>
+<p>
+Quoted commas and parentheses do not split arguments. A call may continue on the next line without 
+<code>\</code>
+:
+</p>
+<pre><code class="language-unicon">$define ID(x) x
+$define WRAP3(a,b,c) ((a) || &quot;|&quot; || (b) || &quot;|&quot; || (c))
+$define SUM(a,b) ((a) + (b))
+procedure main()
+   write(ID(&quot;a,b&quot;))
+   write(WRAP3(&quot;a,b&quot;, &quot;c(d)&quot;, &quot;e&quot;))
+   write(SUM(1,
+      2))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">a,b
+a,b|c(d)|e
+3
+</code></pre>
+<p>
+On 
+<code>$define</code>
+, 
+<code>(</code>
+ must follow the name immediately. 
+<code>$define SUM (a,b) ...</code>
+ is object-like: the value starts at the space. At a call site, space before 
+<code>(</code>
+ is allowed (
+<code>preproc_opt_space()</code>
+), so a body may write 
+<code>SUM (x,y)</code>
+.
+</p>
+<p>
+Zero parameters are legal (
+<code>ZERO()</code>
+). Whitespace-only between 
+<code>(</code>
+ and 
+<code>)</code>
+ is zero arguments (
+<code>ZERO( )</code>
+), not one empty argument.
+</p>
+<p>
+The replacement may continue on following lines if each continued line ends with 
+<code>\</code>
+ as the very last character (no trim). 
+<code>preproc_scan_define_value()</code>
+ and 
+<code>preproc_define_value_next_line()</code>
+ splice those lines: the 
+<code>\</code>
+ and newline are dropped; other spaces are kept. A 
+<code>\</code>
+ with trailing spaces is not a continuation. Leading space is skipped only before the first line of the body. The same 
+<code>\</code>
+ rule applies to object-like 
+<code>$define</code>
+ values (
+<code>macros_define_continuation.icn</code>
+). EOF after a splice is 
+<code>unterminated $define (line continuation)</code>
+.
+</p>
+<pre><code class="language-unicon">$define GREETING &quot;hello &quot; || \
+&quot;there&quot;
+$define SUMCONT(a,b) ((a) + \
+(b))
+procedure main()
+   write(GREETING)
+   write(SUMCONT(2, 3))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">hello there
+5
+</code></pre>
+<p>
+A call 
+<code>NAME(arg1, ...)</code>
+ may span physical lines without 
+<code>\</code>
+. 
+<code>preproc_scan_macro_args()</code>
+ pulls more lines via 
+<code>preproc_macro_arg_next_line()</code>
+ until the closing 
+<code>)</code>
+. A backslash inside a call is ordinary argument text (
+<code>macros_call_backslash_literal.icn</code>
+), not a 
+<code>$define</code>
+ splice.
+</p>
+<p>
+Arguments split on top-level commas, with parenthesis depth, and with 
+<code>&quot;...&quot;</code>
+ / 
+<code>'...'</code>
+ opaque (commas and parens inside quotes do not split). 
+<code>preproc_subst_fmacro()</code>
+ replaces whole identifiers in the body, not substrings, and does not substitute inside strings. The result is rescanned, so 
+<code>TWICE</code>
+ and chains such as 
+<code>A</code>
+ -&gt; 
+<code>E</code>
+ expand in one pipeline. 
+<code>done_set</code>
+ blocks expanding the same name again on that chain.
+</p>
+<p>
+Empty arguments (
+<code>SUM(1,)</code>
+) are 
+<code>empty macro argument</code>
+. Duplicate parameter names are 
+<code>duplicate parameter name in $define</code>
+. Arity must match (
+<code>wrong number of args in macro call to NAME</code>
+). Unclosed 
+<code>(</code>
+ is 
+<code>unterminated macro invocation</code>
+. If 
+<code>(</code>
+ follows the name on 
+<code>$define</code>
+ but the parameter list is malformed, 
+<code>preproc_fmacro_parse_error</code>
+ is set so the line is not treated as a bad object-like 
+<code>$define</code>
+.
+</p>
+<p>
+Call continuation anchors 
+<code>preproc_print_line</code>
+ to the first physical line of the call (
+<code>preproc_ml_anchor</code>
+). 
+<code>&amp;line</code>
+ inside the expansion is that line; the next source line after the call skips the continuation rows. 
+<code>$define</code>
+ 
+<code>\</code>
+ splicing does not adjust 
+<code>preproc_print_line</code>
+. 
+<code>&amp;line</code>
+ in a multiline body is the invocation line, not each physical line of the definition (
+<code>macros_define_multiline_line.icn</code>
+).
+</p>
+<pre><code class="language-unicon">$define ASLINE(x) x
+
+procedure main()
+   write(&amp;line)
+   write(ASLINE(&amp;line
+   ))
+   write(&amp;line)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">4
+5
+7
+</code></pre>
+<p>
+(The call starts on line 5; line 6 is the continuation; the next statement is line 7.)
+</p>
+<p>
+A function-like name is defined for 
+<code>$ifdef</code>
+. 
+<code>$undef</code>
+ removes it. A name is either function-like or object-like, not both; 
+<code>$define</code>
+ updates one table and clears the other. Redefinition of a function-like name is an error unless 
+<code>preproc_same_fmacro()</code>
+ finds the same parameters and body.
+</p>
+<pre><code class="language-unicon">$define SUM(a,b) ((a) + (b))
+$ifdef SUM
+$define HAS_SUM 1
+$else
+$define HAS_SUM 0
+$endif
+$undef SUM
+$ifdef SUM
+$define STILL 1
+$else
+$define STILL 0
+$endif
+procedure main()
+   write(HAS_SUM)
+   write(STILL)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">1
+0
+</code></pre>
+<p>
+<code>$undef assert</code>
+ then 
+<code>$define assert(...)</code>
+ replaces the builtin; 
+<code>macros.icn</code>
+ does this for both 
+<code>assert</code>
+ and 
+<code>assert_not</code>
+.
+</p>
+<p>
+Tests: 
+<code>tests/unicon/macros.icn</code>
+; 
+<code>macros_multiline_line.icn</code>
+, 
+<code>macros_define_multiline_line.icn</code>
+, 
+<code>macros_define_continuation.icn</code>
+, 
+<code>macros_call_backslash_literal.icn</code>
+; negatives under 
+<code>tests/unicon/data/macros_bad_*.icn</code>
+ and 
+<code>macros_bad_define_eof*.icn</code>
+.
+</p>
+<h2 id="sec-assert">
+7. Built-in 
+<code>assert</code>
+ and 
+<code>assert_not</code>
+</h2>
+<p>
+<code>preproc_install_builtin_macros()</code>
+ registers 
+<code>assert</code>
+ and 
+<code>assert_not</code>
+ in 
+<code>preproc_fun_table</code>
+ as placeholder 
+<code>preproc_fmacro</code>
+ records and marks them in 
+<code>preproc_builtin_fun_table</code>
+. Expansion is not 
+<code>preproc_subst_fmacro()</code>
+: 
+<code>preproc_expand_fmacro_call()</code>
+ builds a Unicon fragment from the argument text. Arity is one or two: 
+<code>assert(expr)</code>
+ or 
+<code>assert(expr, label)</code>
+. Any other count is 
+<code>wrong number of args in macro call</code>
+.
+</p>
+<p>
+Semantics follow Unicon success and failure, not Boolean truth: 
+<code>assert(expr)</code>
+ expects 
+<code>expr</code>
+ to succeed; 
+<code>assert_not(expr)</code>
+ expects 
+<code>expr</code>
+ to fail. 
+<code>assert</code>
+ is alternation (
+<code>expr | { ... }</code>
+); 
+<code>assert_not</code>
+ is 
+<code>if (expr) then { ... }</code>
+.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Mode
+</th>
+<th>
+Enable
+</th>
+<th>
+On failure
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Debugging
+</td>
+<td>
+<code>$define __debug__</code>
+ or 
+<code>-D__debug__</code>
+</td>
+<td>
+<code>runerr(219, payload)</code>
+. The process stops. Traceback
+</td>
+</tr>
+<tr>
+<td>
+Testing
+</td>
+<td>
+<code>$define __test__</code>
+ or 
+<code>-D__test__</code>
+</td>
+<td>
+<code>write</code>
+ of 
+<code>[file:line] assertion failed (expr)</code>
+</td>
+</tr>
+<tr>
+<td>
+Release
+</td>
+<td>
+neither
+</td>
+<td>
+Expands to nothing (
+<code>assert_strip.icn</code>
+).
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+If both 
+<code>__test__</code>
+ and 
+<code>__debug__</code>
+ are defined, the testing path (
+<code>fail</code>
+) wins. 
+<code>preproc_new()</code>
+ and a later 
+<code>$define __test__</code>
+ both default 
+<code>__debug__</code>
+ when it is absent.
+</p>
+<p>
+These macros are standalone statements. Disabled expansion is empty, so expression positions such as 
+<code>if assert(...)</code>
+ are not supported.
+</p>
+<p>
+The debug payload is the quoted expression text, then 
+<code>char(30)</code>
+ and the label if the label is non-empty (
+<code>AssertRunerrSep</code>
+ in 
+<code>errmsg.r</code>
+). 
+<code>assert_not</code>
+ prefixes 
+<code>char(29)</code>
+ so the traceback can print 
+<code>assert_not(</code>
+. Error 219 is 
+<code>assertion failed</code>
+ (
+<code>data.r</code>
+). 
+<code>errmsg.r</code>
+ skips the ordinary 
+<code>Run-time error 219</code>
+ banner and the offending- value line; it prints 
+<code>[file:line] assertion failed: ...</code>
+.
+</p>
+<p>
+If the label expression fails, the assertion diagnostic still runs: the expansion does 
+<code>lbl := ((label) | &quot;&quot;)</code>
+ (
+<code>assert_failing_label.icn</code>
+).
+</p>
+<p>
+Each expansion increments 
+<code>preproc_assert_uid</code>
+ so generated temporaries (
+<code>__preproc_assert_N_lbl</code>
+) do not collide -- icont has no block-local variables in expression-level 
+<code>{...}</code>
+ compounds. The fragment is rescanned so nested macros in the inserted code expand.
+</p>
+<p>
+<code>$undef assert</code>
+ then 
+<code>$define assert(...)</code>
+ replaces the builtin like any user function-like macro.
+</p>
+<pre><code class="language-unicon">$define __debug__
+procedure main()
+   local x
+   x := 1
+   assert(x = 1)
+   assert_not(x = 2)
+   assert(2 === 1 + 1, &quot;1 + 1 = 2&quot;)
+   write(&quot;ok&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">ok
+</code></pre>
+<p>
+A failing debug assert stops the process. The traceback names 
+<code>assert</code>
+ / 
+<code>assert_not</code>
+ rather than 
+<code>runerr</code>
+:
+</p>
+<pre><code class="language-unicon">$define __debug__
+procedure main()
+   assert_not(1 = 1)
+   write(&quot;should not reach here&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">[assert_ex.icn:3] assertion failed: 1 = 1
+Traceback:
+   main()
+   assert_not(1 = 1) from line 3 in assert_ex.icn
+</code></pre>
+<p>
+Under 
+<code>__test__</code>
+, failure writes a diagnostic and 
+<code>fail</code>
+s, so later statements still run:
+</p>
+<pre><code class="language-unicon">$define __test__
+procedure main()
+   assert(1 = 2, &quot;keep going&quot;)
+   write(&quot;after fail&quot;)
+   assert(1 = 1)
+   write(&quot;done&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">[assert_ex.icn:3] assertion failed (1 = 2) keep going
+after fail
+done
+</code></pre>
+<p>
+With neither symbol, the calls vanish. The asserts below would fail at run time if they were still present, so reaching 
+<code>write()</code>
+ is the proof they were stripped:
+</p>
+<pre><code class="language-unicon">procedure main()
+   local x
+   x := 1
+   assert(x = 2)
+   assert_not(x = 1)
+   write(&quot;strip-ok&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">strip-ok
+</code></pre>
+<p>
+Tests: 
+<code>assert_debugging.icn</code>
+ (passing cases, then a failing assert five frames down), 
+<code>assert_testing.icn</code>
+, 
+<code>assert_strip.icn</code>
+, 
+<code>assert_failing_label.icn</code>
+, 
+<code>assert_not_failing.icn</code>
+, matching 
+<code>stand/*.std</code>
+. Builtin override is in 
+<code>macros.icn</code>
+.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Concern
+</th>
+<th>
+Primary routines (
+<code>uni/unicon/preproce.icn</code>
+)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Triple-quoted strings
+</td>
+<td>
+<code>preproc_rewrite_triple_strings()</code>
+,
+</td>
+</tr>
+<tr>
+<td>
+Function-like macros
+</td>
+<td>
+<code>record preproc_fmacro</code>
+,
+</td>
+</tr>
+<tr>
+<td>
+Assertions
+</td>
+<td>
+<code>preproc_install_builtin_macros()</code>
+,
+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sec-support">
+8. Line numbers, errors, and includes
+</h2>
+<p>
+<code>preproc_sync_lines()</code>
+ emits 
+<code>#line N &quot;file&quot;</code>
+ when the filename changes or the gap is large; for small gaps it may emit blank lines. 
+<code>preproc_scan_text()</code>
+ can 
+<code>suspend</code>
+ more than once per logical line. Features that insert, delete, or merge lines must keep 
+<code>preproc_line</code>
+ and 
+<code>preproc_print_line</code>
+ consistent with that.
+</p>
+<p>
+<code>preproc_error(msg)</code>
+ builds 
+<code>File ...; Line N # $directive: ...</code>
+, increments 
+<code>preproc_err_count</code>
+, and pushes a 
+<code>ParseError</code>
+ onto 
+<code>parsingErrors</code>
+.
+</p>
+<p>
+<code>preproc_read()</code>
+ increments 
+<code>preproc_line</code>
+ and returns the next line from 
+<code>read()</code>
+ or from a list &quot;file.&quot; On EOF it checks 
+<code>preproc_if_stack</code>
+ depth against 
+<code>preproc_nest_level</code>
+, closes the file, pops 
+<code>preproc_file_stack</code>
+, and removes the path from 
+<code>preproc_include_set</code>
+. String continuation, triple-quoted bodies, and macro arguments that need another physical line all call 
+<code>preproc_read()</code>
+ again.
+</p>
+<p>
+<code>preproc_quote_string(s)</code>
+ escapes arbitrary text for a Unicon string literal. 
+<code>preproc_istring()</code>
+ / 
+<code>preproc_istring_radix()</code>
+ decode escapes in quoted filenames.
+</p>
+<h2 id="sec-extend">
+9. Extending the preprocessor
+</h2>
+<p>
+All of the following is in 
+<code>uni/unicon/preproce.icn</code>
+ unless noted. Coordinate any change with 
+<code>uni/parser/preproce.icn</code>
+ if that copy is still shipped; it does not currently match.
+</p>
+<h3 id="sec-extend-kinds">
+9.1 Kind and touchpoints
+</h3>
+<table>
+<thead>
+<tr>
+<th>
+Kind
+</th>
+<th>
+Touchpoints
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+New or changed 
+<code>$</code>
+ directive
+</td>
+<td>
+<code>preproc_scan_directive()</code>
+: add a 
+<code>case</code>
+ label; set
+</td>
+</tr>
+<tr>
+<td>
+Object-like macro behavior
+</td>
+<td>
+<code>preproc_sym_table</code>
+, substitution in
+</td>
+</tr>
+<tr>
+<td>
+Function-like macro behavior
+</td>
+<td>
+<code>preproc_fun_table</code>
+,
+</td>
+</tr>
+<tr>
+<td>
+Built-in special function macro
+</td>
+<td>
+<code>preproc_install_builtin_macros()</code>
+,
+</td>
+</tr>
+<tr>
+<td>
+Source syntax rewritten to plain Unicon
+</td>
+<td>
+A phase in 
+<code>preproc_scan_text()</code>
+. Must respect
+</td>
+</tr>
+<tr>
+<td>
+New predefined symbol
+</td>
+<td>
+<code>predefs()</code>
+. Symbols that depend on compiler options
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sec-extend-guards">
+9.2 Guards and line accounting
+</h3>
+<p>
+Directives that define, undefine, or include use 
+<code>if /preproc_if_state then</code>
+ so they do not run when code is stripped. Directives that only keep parser state in skipped regions follow 
+<code>ifdef</code>
+ / 
+<code>$if</code>
+ / 
+<code>else</code>
+ / 
+<code>endif</code>
+, not that guard.
+</p>
+<p>
+If the feature reads extra lines or changes output length, check 
+<code>preproc_line</code>
+, 
+<code>preproc_print_line</code>
+, and 
+<code>preproc_sync_lines()</code>
+. 
+<code>unicon -E</code>
+ shows the emitted 
+<code>#line</code>
+ stream. Multiple 
+<code>suspend</code>
+s per input line must leave 
+<code>preproc_print_line</code>
+ consistent at the end of 
+<code>preproc_scan_text()</code>
+.
+</p>
+<h3 id="sec-extend-tests">
+9.3 Errors and tests
+</h3>
+<p>
+Use 
+<code>preproc_error(msg)</code>
+ after 
+<code>preproc_command</code>
+ is set so the message includes 
+<code>$directive:</code>
+. The compiler exit path is 
+<code>preproc_err_count</code>
+ and 
+<code>parsingErrors</code>
+ in 
+<code>unicon.icn</code>
+.
+</p>
+<p>
+Add a driver under 
+<code>tests/unicon/</code>
+ and expected output under 
+<code>stand/</code>
+. Error cases belong in 
+<code>tests/unicon/data/</code>
+. Update 
+<a href="utr24.html#sec-triple">sections 5--7</a>
+ when user-visible semantics change.
+</p>
+<h3 id="sec-extend-directive">
+9.4 New 
+<code>$</code>
+ directive
+</h3>
+<p>
+After 
+<code>preproc_command := preproc_word()</code>
+, the 
+<code>case preproc_command of</code>
+ dispatch matches the word after 
+<code>$</code>
+. A new label:
+</p>
+<pre><code class="language-unicon">&quot;mydir&quot;: {
+   if /preproc_if_state then {
+      # parse remainder of line; on failure:
+      preproc_error(&quot;optional detail&quot;)
+   }
+}
+</code></pre>
+<p>
+Unknown names still hit 
+<code>default</code>
+ and 
+<code>preproc_error(&quot;unknown preprocessor directive&quot;)</code>
+ when active.
+</p>
+<h2 id="sec-related">
+10. Related documents
+</h2>
+<table>
+<thead>
+<tr>
+<th>
+Document
+</th>
+<th>
+Content
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+UTR #15 
+[<a class="cite" href="#cite-jeffery-utr15">1</a>]</td>
+<td>
+How to write and submit a Unicon Technical Report.
+</td>
+</tr>
+<tr>
+<td>
+UTR #8 
+[<a class="cite" href="#cite-jeffery-utr8">2</a>]</td>
+<td>
+Language reference preprocessor commands
+</td>
+</tr>
+<tr>
+<td>
+Implementation book 
+[<a class="cite" href="#cite-jeffery-ib-preproc">4</a>]</td>
+<td>
+<code>doc/ib/p3-unicon.tex</code>
+, &quot;The Unicon Preprocessor&quot;:
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+Other 
+<code>doc/ib/</code>
+ preprocessor mentions (Idol, Ratfor, rtt) are different tools, not 
+<code>preproce.icn</code>
+.
+</p>
+<h2 id="references">
+References
+</h2>
+<div class="bibliography">
+<ol class="bibliography-list">
+<li id="cite-jeffery-utr15" value="1">
+Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
+</li>
+<li id="cite-jeffery-utr8" value="2">
+Clinton Jeffery. &quot;Unicon Language Reference&quot;. doc/unicon/utr8.html.
+</li>
+<li id="cite-alexander-jcon-preproc" value="3">
+Bob Alexander. &quot;Preprocessor for Jcon&quot;. Basis for Unicon's preproce.icn.
+</li>
+<li id="cite-jeffery-ib-preproc" value="4">
+Clinton Jeffery. &quot;The Unicon Compiler&quot;. Course notes, doc/ib/p3-unicon.tex, section &quot;The Unicon Preprocessor&quot;.
+</li>
+<li id="cite-libssh" value="5">
+The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
+</li>
+<li id="cite-jeffery-utr13" value="6">
+Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
+</li>
+</ol></div>
+<div class="prevnext">
+<span></span>
+<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
+</div>
+<footer class="footer" role="contentinfo">
+&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr24.pdf">pdf</a> | <a href="_sources/utr24.rst.txt" rel="nofollow">source</a>
+</footer>
+</div></div>
+</body></html>

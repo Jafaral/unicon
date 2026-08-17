@@ -2,8 +2,8 @@ This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloade
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**utr26.tex
-(./utr26.tex
+**utr24.tex
+(./utr24.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -274,8 +274,8 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count286
 \l__pdf_internal_box=\box57
 )
-(./utr26.aux)
-\openout1 = `utr26.aux'.
+(./utr24.aux)
+\openout1 = `utr24.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
 LaTeX Font Info:    ... okay on input line 13.
@@ -320,16 +320,19 @@ e
 ))
 Package hyperref Info: Link coloring ON on input line 13.
 
-(./utr26.out) (./utr26.out)
+(./utr24.out) (./utr24.out)
 \@outlinefile=\write4
-\openout4 = `utr26.out'.
+\openout4 = `utr24.out'.
 
- [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Overfull \hbox (10.35141pt too wide) in paragraph at lines 27--28
+\T1/cmr/m/n/12 fore lex-i-cal anal-y-sis. The im-ple-men-ta-tion, uni/unicon/pr
+eproce.icn,
+ []
+
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 3
 2.
- (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
@@ -338,16 +341,68 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <14.4> on input line 32.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 32.
- [2]
+ [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
+Overfull \hbox (0.70544pt too wide) in paragraph at lines 73--74
+\T1/cmr/m/n/12 Canonical source is \T1/cmtt/m/n/12 uni/unicon/preproce.icn\T1/c
+mr/m/n/12 . \T1/cmtt/m/n/12 uni/parser/preproce.icn
+ []
+
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.67 
+l.74 
       [1]
-Overfull \hbox (6.80028pt too wide) in paragraph at lines 85--86
-[]\T1/cmr/m/n/12 Attributes are \T1/cmtt/m/n/12 "key=value" \T1/cmr/m/n/12 stri
-ngs passed as trail-ing ar-gu-ments to \T1/cmtt/m/n/12 open()\T1/cmr/m/n/12 ,
+Overfull \hbox (159.63272pt too wide) in alignment at lines 77--81
+ [] [] 
+ []
+
+
+Overfull \hbox (159.63272pt too wide) in alignment at lines 81--85
+ [] [] 
+ []
+
+
+Overfull \hbox (159.63272pt too wide) in alignment at lines 85--87
+ [] [] 
+ []
+
+
+Overfull \hbox (159.63272pt too wide) in alignment at lines 87--89
+ [] [] 
+ []
+
+
+Overfull \hbox (159.63272pt too wide) in alignment at lines 89--93
+ [] [] 
+ []
+
+
+Overfull \hbox (280.23094pt too wide) in alignment at lines 103--107
+ [] [] 
+ []
+
+
+Overfull \hbox (280.23094pt too wide) in alignment at lines 107--111
+ [] [] 
+ []
+
+
+Overfull \hbox (280.23094pt too wide) in alignment at lines 111--113
+ [] [] 
+ []
+
+
+Overfull \hbox (280.23094pt too wide) in alignment at lines 113--115
+ [] [] 
+ []
+
+
+Overfull \hbox (280.23094pt too wide) in alignment at lines 115--131
+ [] [] 
  []
 
 
@@ -355,339 +410,375 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.86 
-      [2]
-Overfull \hbox (2.94435pt too wide) in paragraph at lines 88--89
-[]\T1/cmr/m/n/12 All stream I/O fun-nels through one dis-patch point: \T1/cmtt/
-m/n/12 u_read() \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 u_write()
+l.131 \end{longtable}
+                      [2]
+Overfull \hbox (8.854pt too wide) in paragraph at lines 151--153
+[]\T1/cmtt/m/n/12 #line \T1/cmr/m/n/12 (op-tional spaces, GCC form) goes to \T1
+/cmtt/m/n/12 preproc_scan_directive()\T1/cmr/m/n/12 . 
  []
 
 
-Overfull \hbox (8.63461pt too wide) in paragraph at lines 88--89
-\T1/cmr/m/n/12 in \T1/cmtt/m/n/12 src/runtime/rposix.r\T1/cmr/m/n/12 , which al
--ready branch on \T1/cmtt/m/n/12 Fs_Socket \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 Fs_
-Encrypt\T1/cmr/m/n/12 .
+Overfull \hbox (52.65163pt too wide) in paragraph at lines 169--170
+[]\T1/cmtt/m/n/12 $define\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 $undef\T1/cmr/m/n/12 
+, \T1/cmtt/m/n/12 $include\T1/cmr/m/n/12 , and text ex-pan-sion run only when \
+T1/cmtt/m/n/12 /preproc_if_state
+ []
+
+[3]
+Overfull \hbox (46.6637pt too wide) in paragraph at lines 182--184
+[]\T1/cmr/m/n/12 Looks up function-like macros be-fore object-like. A name in \
+T1/cmtt/m/n/12 preproc_fun_table
  []
 
 
-Overfull \hbox (41.57796pt too wide) in paragraph at lines 88--89
-\T1/cmr/m/n/12 ([][]sec-tion 8[][]) or \T1/cmtt/m/n/12 sftp_read()\T1/cmr/m/n/1
-2 , and writ-ing via \T1/cmtt/m/n/12 ssh_channel_write() \T1/cmr/m/n/12 or \T1/
-cmtt/m/n/12 sftp_write()\T1/cmr/m/n/12 .
+Overfull \hbox (18.8496pt too wide) in paragraph at lines 184--185
+[]\T1/cmr/m/n/12 Rescans re-place-ments through \T1/cmtt/m/n/12 preproc_scan_te
+xt(done_set)\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 done_set
  []
 
 
-Overfull \hbox (5.10632pt too wide) in paragraph at lines 94--95
-[]\T1/cmtt/m/n/12 receive() \T1/cmr/m/n/12 al-ready re-turns a general-purpose 
-\T1/cmtt/m/n/12 posix_message \T1/cmr/m/n/12 record (fields
+Overfull \hbox (0.52087pt too wide) in paragraph at lines 192--193
+\T1/cmtt/m/n/12 preproc_scan_directive() \T1/cmr/m/n/12 reads the com-mand with
+ \T1/cmtt/m/n/12 preproc_word()\T1/cmr/m/n/12 . Un-
  []
 
 
-Overfull \hbox (21.49815pt too wide) in paragraph at lines 97--98
-\T1/cmr/m/n/12 iom that many func-tions take an op-tional lead-ing file or win-
-dow (\T1/cmtt/m/n/12 write("hello")
- []
-
-[3] [4]
-Overfull \hbox (162.87366pt too wide) in alignment at lines 154--158
- [] [] [] 
+Overfull \hbox (88.1735pt too wide) in paragraph at lines 192--193
+\T1/cmr/m/n/12 known names in an ac-tive re-gion call \T1/cmtt/m/n/12 preproc_e
+rror("unknown preprocessor directive")\T1/cmr/m/n/12 . 
  []
 
 
-Overfull \hbox (162.87366pt too wide) in alignment at lines 158--162
- [] [] [] 
+Overfull \hbox (10.23589pt too wide) in alignment at lines 194--198
+ [] [] 
  []
 
 
-Overfull \hbox (162.87366pt too wide) in alignment at lines 162--164
- [] [] [] 
+Overfull \hbox (10.23589pt too wide) in alignment at lines 198--202
+ [] [] 
  []
 
 
-Overfull \hbox (162.87366pt too wide) in alignment at lines 164--166
- [] [] [] 
+Overfull \hbox (10.23589pt too wide) in alignment at lines 202--204
+ [] [] 
  []
 
 
-Overfull \hbox (162.87366pt too wide) in alignment at lines 166--176
- [] [] [] 
+Overfull \hbox (10.23589pt too wide) in alignment at lines 204--206
+ [] [] 
  []
 
 
-Overfull \hbox (6.61293pt too wide) in paragraph at lines 179--180
-[]\T1/cmtt/m/n/12 keypass= \T1/cmr/m/n/12 is de-lib-er-ately dis-tinct from \T1
-/cmtt/m/n/12 password=\T1/cmr/m/n/12 . SSL's ex-ist-ing \T1/cmtt/m/n/12 passwor
-d
+Overfull \hbox (10.23589pt too wide) in alignment at lines 206--217
+ [] [] 
  []
 
-[5]
-Overfull \hbox (110.7726pt too wide) in paragraph at lines 198--199
-\T1/cmr/m/n/12 nec-tion fail-ures fail with \T1/cmtt/m/n/12 &errortext \T1/cmr/
-m/n/12 set; the usual form is \T1/cmtt/m/n/12 s := open(...) | stop(&errortext)
-\T1/cmr/m/n/12 .
+[4] [5]
+Overfull \hbox (44.92227pt too wide) in paragraph at lines 283--284
+[]\T1/cmtt/m/n/12 preproc_rewrite_triple_strings() \T1/cmr/m/n/12 runs at the s
+tart of \T1/cmtt/m/n/12 preproc_scan_text()\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (203.70541pt too wide) in alignment at lines 208--212
- [] [] [] 
+Overfull \hbox (11.24086pt too wide) in paragraph at lines 286--287
+[]\T1/cmr/m/n/12 The body is turned into one or-di-nary string with \T1/cmtt/m/
+n/12 preproc_quote_string()\T1/cmr/m/n/12 :
  []
 
 
-Overfull \hbox (203.70541pt too wide) in alignment at lines 212--216
- [] [] [] 
+Overfull \hbox (16.45769pt too wide) in paragraph at lines 286--287
+\T1/cmr/m/n/12 quote es-caped, other C0 bytes as three-digit oc-tal via \T1/cmt
+t/m/n/12 preproc_octal_escape()\T1/cmr/m/n/12 .
  []
 
 
-Overfull \hbox (203.70541pt too wide) in alignment at lines 216--218
- [] [] [] 
- []
+Overfull \hbox (91.21295pt too wide) in paragraph at lines 289--290
+[]\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/triple_strings.icn\T1/cmr/
+m/n/12 , \T1/cmtt/m/n/12 tests/unicon/stand/triple_strings.std\T1/cmr/m/n/12 . 
 
-
-Overfull \hbox (203.70541pt too wide) in alignment at lines 218--220
- [] [] [] 
- []
-
-
-Overfull \hbox (203.70541pt too wide) in alignment at lines 220--230
- [] [] [] 
  []
 
 [6]
-Overfull \hbox (86.80824pt too wide) in paragraph at lines 238--239
-\T1/cmr/m/n/12 With no \T1/cmtt/m/n/12 cmd=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ope
-n(..., "h") \T1/cmr/m/n/12 re-quests a re-mote PTY and shell. \T1/cmtt/m/n/12 n
-et::ssh_interactive(s)
- []
-
-
-Overfull \hbox (4.5259pt too wide) in paragraph at lines 252--253
-[]\T1/cmtt/m/n/12 term=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 cols=\T1/cmr/m/n/12 , a
-nd \T1/cmtt/m/n/12 rows= \T1/cmr/m/n/12 over-ride the PTY. Mode \T1/cmtt/m/n/12
- "h-" \T1/cmr/m/n/12 skips \T1/cmtt/m/n/12 known_hosts
+Overfull \hbox (13.10106pt too wide) in paragraph at lines 341--342
+[]\T1/cmr/m/n/12 On \T1/cmtt/m/n/12 $define\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ( \
+T1/cmr/m/n/12 must fol-low the name im-me-di-ately. \T1/cmtt/m/n/12 $define SUM
+ (a,b) ...
  []
 
 [7]
-Overfull \hbox (51.70839pt too wide) in paragraph at lines 299--300
-\T1/cmtt/m/n/12 channel=no \T1/cmr/m/n/12 opens an au-then-ti-cated trans-port.
- Later \T1/cmtt/m/n/12 open(s, "hc") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 open(s, "
-hs")
+Overfull \hbox (18.21376pt too wide) in paragraph at lines 347--348
+\T1/cmr/m/n/12 ends with \T1/cmtt/m/n/12 \ \T1/cmr/m/n/12 as the very last char
+-ac-ter (no trim). \T1/cmtt/m/n/12 preproc_scan_define_value()
  []
 
-[8] [9]
-Overfull \hbox (192.49837pt too wide) in alignment at lines 376--380
+
+Overfull \hbox (52.97377pt too wide) in paragraph at lines 347--348
+\T1/cmr/m/n/12 same \T1/cmtt/m/n/12 \ \T1/cmr/m/n/12 rule ap-plies to object-li
+ke \T1/cmtt/m/n/12 $define \T1/cmr/m/n/12 val-ues (\T1/cmtt/m/n/12 macros_defin
+e_continuation.icn\T1/cmr/m/n/12 ).
+ []
+
+
+Overfull \hbox (87.26439pt too wide) in paragraph at lines 369--370
+[]\T1/cmr/m/n/12 A call \T1/cmtt/m/n/12 NAME(arg1, ...) \T1/cmr/m/n/12 may span
+ phys-i-cal lines with-out \T1/cmtt/m/n/12 \\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 pr
+eproc_scan_macro_args()
+ []
+
+
+Overfull \hbox (68.8337pt too wide) in paragraph at lines 369--370
+\T1/cmr/m/n/12 back-slash in-side a call is or-di-nary ar-gu-ment text (\T1/cmt
+t/m/n/12 macros_call_backslash_literal.icn\T1/cmr/m/n/12 ),
+ []
+
+
+Overfull \hbox (168.826pt too wide) in paragraph at lines 375--376
+\T1/cmr/m/n/12 match (\T1/cmtt/m/n/12 wrong number of args in macro call to NAM
+E\T1/cmr/m/n/12 ). Un-closed \T1/cmtt/m/n/12 ( \T1/cmr/m/n/12 is \T1/cmtt/m/n/1
+2 unterminated macro invocation\T1/cmr/m/n/12 .
+ []
+
+[8]
+Overfull \hbox (69.57802pt too wide) in paragraph at lines 378--379
+\T1/cmr/m/n/12 ca-tion line, not each phys-i-cal line of the def-i-ni-tion (\T1
+/cmtt/m/n/12 macros_define_multiline_line.icn\T1/cmr/m/n/12 ). 
+ []
+
+[9]
+Overfull \hbox (22.06879pt too wide) in paragraph at lines 434--435
+[]\T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmtt/m/n/12 $define ass
+ert(...) \T1/cmr/m/n/12 re-places the builtin; \T1/cmtt/m/n/12 macros.icn
+ []
+
+
+Overfull \hbox (171.6035pt too wide) in paragraph at lines 437--438
+[]\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/macros.icn\T1/cmr/m/n/12 ;
+ \T1/cmtt/m/n/12 macros_multiline_line.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macr
+os_define_multiline_line.icn\T1/cmr/m/n/12 ,
+ []
+
+
+Overfull \hbox (8.32771pt too wide) in paragraph at lines 437--438
+\T1/cmtt/m/n/12 macros_define_continuation.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 
+macros_call_backslash_literal.icn\T1/cmr/m/n/12 ;
+ []
+
+
+Overfull \hbox (89.46213pt too wide) in paragraph at lines 437--438
+\T1/cmr/m/n/12 neg-a-tives un-der \T1/cmtt/m/n/12 tests/unicon/data/macros_bad_
+*.icn \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 macros_bad_define_eof*.icn\T1/cmr/m/n/
+12 . 
+ []
+
+LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 439.
+
+Overfull \hbox (0.94902pt too wide) in paragraph at lines 442--443
+\T1/cmtt/m/n/12 preproc_fun_table \T1/cmr/m/n/12 as place-holder \T1/cmtt/m/n/1
+2 preproc_fmacro \T1/cmr/m/n/12 records and marks them
+ []
+
+
+Overfull \hbox (9.97679pt too wide) in paragraph at lines 442--443
+\T1/cmr/m/n/12 in \T1/cmtt/m/n/12 preproc_builtin_fun_table\T1/cmr/m/n/12 . Ex-
+pan-sion is not \T1/cmtt/m/n/12 preproc_subst_fmacro()\T1/cmr/m/n/12 :
+ []
+
+
+Overfull \hbox (23.8002pt too wide) in paragraph at lines 445--446
+[]\T1/cmr/m/n/12 Semantics fol-low Uni-con suc-cess and fail-ure, not Boolean t
+ruth: \T1/cmtt/m/n/12 assert(expr)
+ []
+
+
+Overfull \hbox (175.40811pt too wide) in alignment at lines 447--451
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 380--384
+Overfull \hbox (175.40811pt too wide) in alignment at lines 451--455
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 384--386
+Overfull \hbox (175.40811pt too wide) in alignment at lines 455--457
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 386--388
+Overfull \hbox (175.40811pt too wide) in alignment at lines 457--459
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 388--395
+Overfull \hbox (175.40811pt too wide) in alignment at lines 459--463
  [] [] [] 
  []
 
 [10]
-LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 400.
- [11]
-Overfull \hbox (34.05081pt too wide) in paragraph at lines 446--447
-[]\T1/cmtt/m/n/12 receive(c) \T1/cmr/m/n/12 on an SSH chan-nel yields the next 
-queued event as a \T1/cmtt/m/n/12 posix_message
+Overfull \hbox (1.50397pt too wide) in paragraph at lines 466--467
+\T1/cmr/m/n/12 wins. \T1/cmtt/m/n/12 preproc_new() \T1/cmr/m/n/12 and a later \
+T1/cmtt/m/n/12 $define __test__ \T1/cmr/m/n/12 both de-fault \T1/cmtt/m/n/12 __
+debug__
  []
 
 
-Overfull \hbox (58.7057pt too wide) in paragraph at lines 464--465
-\T1/cmr/m/n/12 Preserving cross-stream or-der re-quires lib-ssh's \T1/cmr/bx/n/
-12 call-back API \T1/cmr/m/n/12 (\T1/cmtt/m/n/12 ssh_channel_callbacks\T1/cmr/m
-/n/12 ,
+Overfull \hbox (21.69966pt too wide) in paragraph at lines 472--473
+\T1/cmtt/m/n/12 assertion failed \T1/cmr/m/n/12 (\T1/cmtt/m/n/12 data.r\T1/cmr/
+m/n/12 ). \T1/cmtt/m/n/12 errmsg.r \T1/cmr/m/n/12 skips the or-di-nary \T1/cmtt
+/m/n/12 Run-time error 219
  []
 
 
-Overfull \hbox (61.97722pt too wide) in paragraph at lines 464--465
-\T1/cmr/m/n/12 with a \T1/cmtt/m/n/12 channel_data_function \T1/cmr/m/n/12 re-c
-eiv-ing an \T1/cmtt/m/n/12 is_stderr \T1/cmr/m/n/12 flag) -- not \T1/cmtt/m/n/1
-2 ssh_channel_poll()
+Overfull \hbox (44.92622pt too wide) in paragraph at lines 472--473
+\T1/cmr/m/n/12 ban-ner and the offending- value line; it prints \T1/cmtt/m/n/12
+ [file:line] assertion failed: ...\T1/cmr/m/n/12 . 
+ []
+
+[11] [12]
+Overfull \hbox (57.66707pt too wide) in paragraph at lines 566--567
+\T1/cmr/m/n/12 frames down), \T1/cmtt/m/n/12 assert_testing.icn\T1/cmr/m/n/12 ,
+ \T1/cmtt/m/n/12 assert_strip.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 assert_failin
+g_label.icn\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (0.54901pt too wide) in paragraph at lines 467--468
-\T1/cmr/m/n/12 block-ing lib-ssh calls made while the thread is un-reg-is-tered
- (\T1/cmtt/m/n/12 DEC_NARTHREADS\T1/cmr/m/n/12 ),
+Overfull \hbox (15.36209pt too wide) in paragraph at lines 589--590
+\T1/cmr/m/n/12 or the gap is large; for small gaps it may emit blank lines. \T1
+/cmtt/m/n/12 preproc_scan_text()
  []
 
 
-Overfull \hbox (67.53218pt too wide) in paragraph at lines 467--468
-\T1/cmr/m/n/12 where Uni-con al-lo-ca-tion is not al-lowed. \T1/cmtt/m/n/12 ssh
-_pump() \T1/cmr/m/n/12 drives \T1/cmtt/m/n/12 ssh_channel_poll_timeout()
+Overfull \hbox (4.44527pt too wide) in paragraph at lines 592--593
+[]\T1/cmtt/m/n/12 preproc_error(msg) \T1/cmr/m/n/12 builds \T1/cmtt/m/n/12 File
+ ...; Line N # $directive: ...\T1/cmr/m/n/12 , in-
  []
 
 
-Overfull \hbox (24.95554pt too wide) in paragraph at lines 467--468
-\T1/cmr/m/n/12 so the call-backs run. Stream reads con-sume std-out chunks; \T1
-/cmtt/m/n/12 Attrib(c, "stderr")
+Overfull \hbox (8.80406pt too wide) in paragraph at lines 592--593
+\T1/cmr/m/n/12 cre-ments \T1/cmtt/m/n/12 preproc_err_count\T1/cmr/m/n/12 , and 
+pushes a \T1/cmtt/m/n/12 ParseError \T1/cmr/m/n/12 onto \T1/cmtt/m/n/12 parsing
+Errors\T1/cmr/m/n/12 . 
  []
 
-[12]
-Overfull \hbox (5.95744pt too wide) in paragraph at lines 487--488
-[]\T1/cmr/m/n/12 On Win-dows, \T1/cmtt/m/n/12 select(&input) \T1/cmr/m/n/12 and
- \T1/cmtt/m/n/12 Attrib(f, "tty=raw") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 "tty=san
-e"
- []
-
-[13] [14]
-Overfull \hbox (62.82pt too wide) in paragraph at lines 516--517
-[]\T1/cmr/m/n/12 The SFTP sub-sys-tem is cre-ated lazily, once, on the ses-sion
- owner (\T1/cmtt/m/n/12 ssh_owner_sftp()\T1/cmr/m/n/12 )
+[13]
+Overfull \hbox (118.52315pt too wide) in alignment at lines 607--611
+ [] [] 
  []
 
 
-Overfull \hbox (55.184pt too wide) in paragraph at lines 542--543
-\T1/cmr/m/n/12 one en-try name per call. SFTP does the same: \T1/cmtt/m/n/12 op
-en(s, "hs", "path=/tmp/configs")
+Overfull \hbox (118.52315pt too wide) in alignment at lines 611--615
+ [] [] 
  []
 
 
-Overfull \hbox (24.25352pt too wide) in paragraph at lines 542--543
-\T1/cmr/m/n/12 checks the re-mote path with one \T1/cmtt/m/n/12 sftp_stat()\T1/
-cmr/m/n/12 ; if it is a di-rec-tory, \T1/cmtt/m/n/12 sftp_opendir()
- []
-
-[15]
-Overfull \hbox (35.36137pt too wide) in paragraph at lines 557--558
-[]\T1/cmtt/m/n/12 stat(s, path) \T1/cmr/m/n/12 -- a sin-gle \T1/cmtt/m/n/12 sft
-p_stat \T1/cmr/m/n/12 re-quest, with-out pay-ing for \T1/cmtt/m/n/12 sftp_open(
-)
+Overfull \hbox (118.52315pt too wide) in alignment at lines 615--617
+ [] [] 
  []
 
 
-Overfull \hbox (11.3737pt too wide) in paragraph at lines 565--566
-[]\T1/cmtt/m/n/12 sftp2rec() \T1/cmr/m/n/12 pop-u-lates the same \T1/cmtt/m/n/1
-2 posix_stat \T1/cmr/m/n/12 record as \T1/cmtt/m/n/12 stat2rec()\T1/cmr/m/n/12 
-. SFTP's
+Overfull \hbox (118.52315pt too wide) in alignment at lines 617--619
+ [] [] 
  []
 
 
-Overfull \hbox (14.31728pt too wide) in paragraph at lines 570--571
-\T1/cmtt/m/n/12 aclocal.m4 \T1/cmr/m/n/12 probes for \T1/cmtt/m/n/12 <libssh/li
-bssh.h> \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 ssh_new\T1/cmr/m/n/12 , set-ting \T1
-/cmtt/m/n/12 HAVE_LIBSSH\T1/cmr/m/n/12 .
- []
-
-[16]
-Overfull \hbox (68.38759pt too wide) in paragraph at lines 573--574
-[]\T1/cmtt/m/n/12 &features \T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shel
-l \T1/cmr/m/n/12 when the li-brary was found. \T1/cmtt/m/n/12 tests/posix/Makef
-ile
+Overfull \hbox (118.52315pt too wide) in alignment at lines 619--626
+ [] [] 
  []
 
 
-Overfull \hbox (22.85622pt too wide) in paragraph at lines 573--574
-\T1/cmr/m/n/12 README in-stall notes list \T1/cmtt/m/n/12 libssh-dev \T1/cmr/m/
-n/12 / \T1/cmtt/m/n/12 libssh-devel \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 brew insta
-ll libssh
+Overfull \hbox (17.37418pt too wide) in paragraph at lines 634--635
+[]\T1/cmr/m/n/12 If the fea-ture reads ex-tra lines or changes out-put length, 
+check \T1/cmtt/m/n/12 preproc_line\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (29.49626pt too wide) in paragraph at lines 576--577
-[]\T1/cmr/m/n/12 Guards are \T1/cmtt/m/n/12 #if HAVE_LIBSSH \T1/cmr/m/n/12 thro
-ugh-out \T1/cmtt/m/n/12 rstructs.h\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 rmacros.h\T1
-/cmr/m/n/12 , \T1/cmtt/m/n/12 feature.h\T1/cmr/m/n/12 ,
+Overfull \hbox (61.22966pt too wide) in paragraph at lines 634--635
+\T1/cmr/m/n/12 emit-ted \T1/cmtt/m/n/12 #line \T1/cmr/m/n/12 stream. Mul-ti-ple
+ \T1/cmtt/m/n/12 suspend\T1/cmr/m/n/12 s per in-put line must leave \T1/cmtt/m/
+n/12 preproc_print_line
+ []
+
+[14]
+Overfull \hbox (10.13985pt too wide) in paragraph at lines 647--648
+\T1/cmr/m/n/12 After \T1/cmtt/m/n/12 preproc_command := preproc_word()\T1/cmr/m
+/n/12 , the \T1/cmtt/m/n/12 case preproc_command of
  []
 
 
-Overfull \hbox (87.17656pt too wide) in paragraph at lines 584--585
-\T1/cmr/m/n/12 readi-ness is im-ple-mented; the I/O calls them-selves still blo
-ck. A \T1/cmtt/m/n/12 ssh_set_blocking(sess, 0)
+Overfull \hbox (109.59045pt too wide) in paragraph at lines 659--660
+[]\T1/cmr/m/n/12 Unknown names still hit \T1/cmtt/m/n/12 default \T1/cmr/m/n/12
+ and \T1/cmtt/m/n/12 preproc_error("unknown preprocessor directive")
  []
 
 
-Overfull \hbox (45.3694pt too wide) in paragraph at lines 596--597
-[]\T1/cmr/bx/n/12 Trust-on-first-use. \T1/cmr/m/n/12 Ver-i-fi-ca-tion is check-
-only (\T1/cmtt/m/n/12 ssh_session_is_known_server\T1/cmr/m/n/12 ).
- []
-
-[17]
-Overfull \hbox (23.60867pt too wide) in paragraph at lines 604--605
-\T1/cmtt/m/n/12 tests/posix/ssh.icn \T1/cmr/m/n/12 is de-ter-min-is-tic with-ou
-t a server: it checks that \T1/cmtt/m/n/12 &features
+Overfull \hbox (35.44211pt too wide) in alignment at lines 663--667
+ [] [] 
  []
 
 
-Overfull \hbox (0.90874pt too wide) in paragraph at lines 604--605
-\T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shell\T1/cmr/m/n/12 , and that b
-ad at-tributes, \T1/cmtt/m/n/12 channel=maybe\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 c
-hannel=no
+Overfull \hbox (35.44211pt too wide) in alignment at lines 667--671
+ [] [] 
  []
 
 
-Overfull \hbox (55.93286pt too wide) in paragraph at lines 604--605
-\T1/cmtt/m/n/12 UNICON_SSH_TESTHOST \T1/cmr/m/n/12 is set (host or \T1/cmtt/m/n
-/12 user@host\T1/cmr/m/n/12 ), with op-tional \T1/cmtt/m/n/12 UNICON_SSH_TESTPO
-RT\T1/cmr/m/n/12 ,
+Overfull \hbox (35.44211pt too wide) in alignment at lines 671--673
+ [] [] 
  []
 
 
-Overfull \hbox (4.60919pt too wide) in paragraph at lines 604--605
-\T1/cmtt/m/n/12 UNICON_SSH_TESTKEY\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_K
-NOWNHOSTS\T1/cmr/m/n/12 , and \T1/cmtt/m/n/12 UNICON_SSH_SFTPPATH\T1/cmr/m/n/12
- .
+Overfull \hbox (35.44211pt too wide) in alignment at lines 673--675
+ [] [] 
  []
 
 
-Underfull \hbox (badness 4779) in paragraph at lines 613--614
+Overfull \hbox (35.44211pt too wide) in alignment at lines 675--679
+ [] [] 
+ []
+
+
+Underfull \hbox (badness 4779) in paragraph at lines 688--689
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 625--626
+[15]
+Underfull \hbox (badness 10000) in paragraph at lines 700--701
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
-[18] (./utr26.aux)
+[16] (./utr24.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-Package rerunfilecheck Info: File `utr26.out' has not changed.
-(rerunfilecheck)             Checksum: A203DD818B5186A519F111B0118B6A5F;8092.
+Package rerunfilecheck Info: File `utr24.out' has not changed.
+(rerunfilecheck)             Checksum: 0CB2329342BBCE3363B5EADB7C164C24;3329.
  ) 
 Here is how much of TeX's memory you used:
- 9849 strings out of 476182
- 151473 string characters out of 5795595
- 1933975 words of memory out of 5000000
- 31672 multiletter control sequences out of 15000+600000
+ 9789 strings out of 476182
+ 150460 string characters out of 5795595
+ 1932975 words of memory out of 5000000
+ 31630 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,863b,650s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,790b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
-0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.
-600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm120
-0.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1
+0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.
+600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt109
+5.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1
 200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ect
-i1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+t1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
 cbx1728.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 /ectt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
 ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr26.pdf (20 pages, 186584 bytes).
+Output written on utr24.pdf (18 pages, 155050 bytes).
 PDF statistics:
- 795 PDF objects out of 1000 (max. 8388607)
- 327 compressed objects within 4 object streams
- 73 named destinations out of 1000 (max. 500000)
- 345 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 628 PDF objects out of 1000 (max. 8388607)
+ 218 compressed objects within 3 object streams
+ 55 named destinations out of 1000 (max. 500000)
+ 161 words of extra memory for PDF output out of 10000 (max. 10000000)
 
