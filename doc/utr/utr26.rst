@@ -273,13 +273,10 @@ must contain ``=``. SFTP is selected by mode character ``s`` after
      - Same convention as SSL's ``key=``
    * - ``keypass=``
      - Passphrase for an encrypted private key
-     - Same name as TLS/crypto; distinct from SSH ``password=``
+     - Distinct from ``password=``
    * - ``password=``
      - Remote login password
-     - Not a TLS attribute; crypto still accepts it as an alias for ``keypass=``
-   * - ``verifyPeer=``
-     - ``yes`` (default) or ``no``
-     - Same spelling as TLS; overrides mode ``-``
+     -
    * - ``hostkeyfile=``
      - Path to an OpenSSH ``known_hosts`` file
      - Passed to libssh as ``SSH_OPTIONS_KNOWNHOSTS``
@@ -296,16 +293,16 @@ must contain ``=``. SFTP is selected by mode character ``s`` after
      - PTY size
      - Default from the local tty, else 80x24
 
-``keypass=`` is the shared name for a key-file passphrase on TLS,
-crypto, and SSH. SSH ``password=`` remains the remote login
-password and is not accepted on TLS. Crypto still accepts
-``password=`` as an alias for ``keypass=``.
+``keypass=`` is deliberately distinct from ``password=``. SSL's
+existing ``password`` attribute means "key-decryption passphrase,"
+a different concept from an SSH login password. Reusing
+``password=`` for both would confuse the two.
 
-The ``-`` mode-character flag disables peer verification on TLS
-(``ne-``) and SSH (``h-``), the same as ``verifyPeer=no``. An
-explicit ``verifyPeer=`` overrides the mode flag. ``Fs_Encrypt``
-and ``Fs_SSH`` are mutually exclusive contexts, so there is no
-conflict.
+The ``-`` mode-character flag disables host-key verification,
+reusing the existing SSL peer-verification-disable flag
+(``do_verify``). ``Fs_Encrypt`` and ``Fs_SSH`` are mutually
+exclusive contexts, so there is no conflict. Mode ``"h-"`` is the
+usual spelling.
 
 A leading integer attribute is a connect timeout in milliseconds
 and is applied as libssh's ``SSH_OPTIONS_TIMEOUT`` /
