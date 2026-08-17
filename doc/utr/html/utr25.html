@@ -48,7 +48,7 @@ placeholder="Search..." aria-label="Filter chapter list">
 <p class="report-pdf"><a href="utr25.pdf">pdf</a> | <a href="_sources/utr25.rst.txt">txt</a></p>
 <div class="report-abstract">
 <p class="report-abstract-label">Abstract</p>
-<p>Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, the mechanisms that apply it, the operations that have been made Unicode-aware, the alternatives that were evaluated and why they were not chosen, and the work that remains. It is intended to remain useful as a reference after the feature has shipped, not only as a plan for building it. Keywords: Unicon, Unicode, UTF-8, strings, runtime, technical report.</p>
+<p>Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, the mechanisms that apply it, the operations that have been made Unicode-aware, examples, the alternatives that were evaluated and why they were not chosen, and the work that remains. It is intended to remain useful as a reference after the feature has shipped, not only as a plan for building it. Keywords: Unicon, Unicode, UTF-8, strings, runtime, technical report.</p>
 </div>
 </header>
 <h2 id="sec-intro">
@@ -56,9 +56,20 @@ placeholder="Search..." aria-label="Filter chapter list">
 </h2>
 <p>
 This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report 
-[<a class="cite" href="#cite-jeffery-utr15">1</a>]. Automated tests live under 
+[<a class="cite" href="#cite-jeffery-utr15">1</a>]. 
+<a href="utr26.html#sec-examples">section 8</a>
+ collects short programs by operation. Automated tests live under 
 <code>tests/unicode/</code>
 .
+</p>
+<p>
+The feature is optional. A 64-bit build without 
+<code>NoUniconUnicode</code>
+ reports 
+<code>Unicode</code>
+ in 
+<code>&amp;features</code>
+. On 32-bit, or with that switch, the tag macros are no-ops and the suite is skipped.
 </p>
 <h3 id="sec-term">
 1.1 Terminology: Unicode vs. UTF-8
@@ -176,7 +187,7 @@ scan position
 </p>
 <p>
 A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in 
-<a href="utr26.html#sec-status">section 8</a>
+<a href="utr26.html#sec-status">section 9</a>
 .
 </p>
 <h3 id="sec-macros">
@@ -312,7 +323,7 @@ One implementation detail is worth recording because it is not obvious from the 
 </p>
 <p>
 Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (
-<a href="utr26.html#sec-status">section 8</a>
+<a href="utr26.html#sec-status">section 9</a>
 ).
 </p>
 <h2 id="sec-uchar">
@@ -443,7 +454,7 @@ The
 , which sets a per-file or per-connection flag causing subsequent 
 <code>reads()</code>
  calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (
-<a href="utr26.html#sec-status">section 8</a>
+<a href="utr26.html#sec-status">section 9</a>
 ).
 </li>
 <li>
@@ -733,8 +744,253 @@ The last two rows have the same
 <code>unicode(s)</code>
 .
 </p>
+<h2 id="sec-examples">
+8. Examples
+</h2>
+<p>
+These examples assume a Unicon build with 
+<code>Unicode</code>
+ in 
+<code>&amp;features</code>
+. Non-ASCII literals are tagged at compile time, so 
+<code>&quot;café&quot;</code>
+ already has a text view: 
+<code>*s</code>
+ and 
+<code>s[i]</code>
+ are codepoints. The programs under 
+<code>tests/unicode/</code>
+ are the executable form of this section; 
+<code>languages.icn</code>
+ is a longer script sample.
+</p>
+<h3 id="sec-ex-size">
+8.1 Length and subscript
+</h3>
+<p>
+<code>*s</code>
+ is 4, not 5. 
+<code>s[4]</code>
+ is the letter é, not a continuation byte:
+</p>
+<pre><code class="language-unicon">procedure main()
+   local s, i
+   s := &quot;café&quot;
+   write(&quot;*s = &quot;, *s)
+   every i := 1 to *s do
+      write(&quot;s[&quot;, i, &quot;] = &quot;, s[i])
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">*s = 4
+s[1] = c
+s[2] = a
+s[3] = f
+s[4] = é
+</code></pre>
+<p>
+<code>&quot;hello&quot;</code>
+ is untagged ASCII, so 
+<code>*</code>
+ and 
+<code>[]</code>
+ still mean bytes, which for ASCII are the same as codepoints.
+</p>
+<p>
+8.2 
+<code>unicode()</code>
+, 
+<code>uchar()</code>
+, and 
+<code>uord()</code>
+ ---------------------------------------------
+</p>
+<p>
+<code>unicode(s)</code>
+ tags non-ASCII UTF-8. 
+<code>uchar</code>
+ / 
+<code>uord</code>
+ are the codepoint pair; 
+<code>char</code>
+ / 
+<code>ord</code>
+ stay byte-oriented (
+<a href="utr25.html#sec-uchar">section 4</a>
+):
+</p>
+<pre><code class="language-unicon">procedure main()
+   write(*unicode(&quot;hello&quot;))
+   write(*unicode(&quot;café&quot;))
+   write(unicode(&quot;café&quot;)[4])
+   write(uord(uchar(233)))
+   write(*uchar(233))
+   write(char(65), &quot; &quot;, ord(&quot;A&quot;))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">5
+4
+é
+233
+1
+A 65
+</code></pre>
+<p>
+<code>uord</code>
+ on more than one codepoint is error 205.
+</p>
+<h3 id="sec-ex-concat">
+8.3 Concatenation
+</h3>
+<p>
+<code>||</code>
+ tags the result if either operand is tagged, and adds cached codepoint counts when both are known (
+<a href="utr25.html#sec-concat">section 5</a>
+):
+</p>
+<pre><code class="language-unicon">procedure main()
+   write(*(&quot;café&quot; || &quot;naïve&quot;))
+   write(*(&quot;café&quot; || &quot;hello&quot;))
+   write(*(&quot;hello&quot; || &quot;café&quot;))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">9
+9
+9
+</code></pre>
+<p>
+<code>string(a, b, ...)</code>
+ concatenates too and 
+<strong>
+keeps
+</strong>
+ the tag, the same as 
+<code>||</code>
+. It is not a byte-view switch (
+<a href="utr25.html#sec-string">section 7.1</a>
+).
+</p>
+<h3 id="sec-ex-scan">
+8.4 Scanning
+</h3>
+<p>
+On a tagged subject, 
+<code>move</code>
+, 
+<code>tab</code>
+, and 
+<code>pos</code>
+ use codepoint positions:
+</p>
+<pre><code class="language-unicon">procedure main()
+   &amp;subject := &quot;café naïve&quot;
+   &amp;pos := 1
+   write(move(4))
+   &amp;pos := 1
+   write(tab(5))
+   &amp;pos := 1
+   write(pos(1))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">café
+café
+1
+</code></pre>
+<h3 id="sec-ex-io">
+8.5 
+<code>open()</code>
+ mode 
+<code>i</code>
+</h3>
+<p>
+Without 
+<code>i</code>
+, 
+<code>reads()</code>
+ is untagged (byte 
+<code>*</code>
+). With 
+<code>i</code>
+, the same UTF-8 is tagged (
+<a href="utr26.html#sec-io">section 6</a>
+):
+</p>
+<pre><code class="language-unicon">procedure main()
+   local f, s
+   f := open(&quot;uio.dat&quot;, &quot;wu&quot;) | stop(&quot;open&quot;)
+   writes(f, &quot;café&quot;)
+   close(f)
+
+   f := open(&quot;uio.dat&quot;, &quot;r&quot;) | stop(&quot;open&quot;)
+   s := reads(f, 100)
+   close(f)
+   write(*s)
+
+   f := open(&quot;uio.dat&quot;, &quot;ri&quot;) | stop(&quot;open&quot;)
+   s := reads(f, 100)
+   close(f)
+   write(*s)
+   write(s[4])
+   remove(&quot;uio.dat&quot;)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">5
+4
+é
+</code></pre>
+<h3 id="sec-ex-tag">
+8.6 Content vs. tag
+</h3>
+<p>
+Untagged UTF-8 from a file, or built from 
+<code>char()</code>
+ bytes, has byte 
+<code>*</code>
+. 
+<code>unicode()</code>
+ is the text view. The two disagree exactly when the payload is multi-byte (
+<a href="utr25.html#sec-tests">section 7.2</a>
+):
+</p>
+<pre><code class="language-unicon">procedure main()
+   local raw
+   raw := char(195) || char(169)    # UTF-8 of é, untagged
+   write(*raw)
+   write(*unicode(raw))
+   write(*string(unicode(raw)))
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">2
+1
+1
+</code></pre>
+<p>
+<code>string(s)</code>
+ on 
+<code>&quot;café&quot;</code>
+ also keeps the tag: 
+<code>*string(s) = *s</code>
+.
+</p>
 <h2 id="sec-status">
-8. Status and future work
+9. Status and future work
 </h2>
 <p>
 The following operations have been made Unicode-aware. Subscripting (
@@ -1002,7 +1258,7 @@ Automated tests specific to this feature live under
 /
 <code>utf8_ovld</code>
  tests (
-<a href="utr26.html#sec-status">section 8</a>
+<a href="utr26.html#sec-status">section 9</a>
 ) when the feature is enabled.
 </p>
 <h2 id="references">

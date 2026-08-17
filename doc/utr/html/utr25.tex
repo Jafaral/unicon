@@ -24,7 +24,7 @@
 \vskip 5.5em
 {\bfseries Abstract}\par
 \begin{quote}
-Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, the mechanisms that apply it, the operations that have been made Unicode-aware, the alternatives that were evaluated and why they were not chosen, and the work that remains. It is intended to remain useful as a reference after the feature has shipped, not only as a plan for building it. Keywords: Unicon, Unicode, UTF-8, strings, runtime, technical report.
+Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, the mechanisms that apply it, the operations that have been made Unicode-aware, examples, the alternatives that were evaluated and why they were not chosen, and the work that remains. It is intended to remain useful as a reference after the feature has shipped, not only as a plan for building it. Keywords: Unicon, Unicode, UTF-8, strings, runtime, technical report.
 \end{quote}
 \vskip 0.8in
 {\large\bfseries
@@ -42,7 +42,10 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr25-sec-intro}
 
-This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. Automated tests live under \texttt{tests/unicode/}.
+This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. \hyperref[utr26-sec-examples]{section 8} collects short programs by operation. Automated tests live under \texttt{tests/unicode/}.
+
+
+The feature is optional. A 64-bit build without \texttt{NoUniconUnicode} reports \texttt{Unicode} in \texttt{\&features}. On 32-bit, or with that switch, the tag macros are no-ops and the suite is skipped.
 
 \subsection{1.1 Terminology: Unicode vs. UTF-8}
 \label{utr25-sec-term}
@@ -85,7 +88,7 @@ bits 0-31    byte length    (32 bits, ~4.3 GB maximum)
 \textbf{Why the remaining bits were spent on a cached codepoint count rather than a cached scan position.} Two different kinds of cache were considered for these bits. A cached \emph{codepoint count} records how many codepoints a string contains, making the size operation (\texttt{*s}) constant-time. A cached \emph{scan position} instead records a single (codepoint index, byte offset) pair -- the last position looked up -- letting a subsequent lookup near that position resume without walking from the start of the string. Both are legitimate optimizations, but they help different things: a cached count benefits every size query uniformly, regardless of string length, since there is no cheaper way to answer "how many codepoints does this string have" without either counting or having already counted. A cached position only pays for itself when a string is subscripted repeatedly and nontrivially; for short strings accessed only a few times, walking from the start is already competitive with or faster than maintaining any index, a result obtained by direct measurement rather than assumed. Because a large share of string values in typical Unicon programs are short-lived tokens -- parsed, compared, and discarded, rarely subscripted more than once or twice -- the cached-count approach has the stronger claim on the representation's limited bits, and is what this design uses.
 
 
-A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in \hyperref[utr26-sec-status]{section 8}.
+A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in \hyperref[utr26-sec-status]{section 9}.
 
 \subsection{2.2 Core macros}
 \label{utr25-sec-macros}
@@ -150,7 +153,7 @@ The flag is carried through the compiler's intermediate representation using the
 One implementation detail is worth recording because it is not obvious from the surrounding code: the values involved in constructing this tagged length are 64 bits wide, while the pre-existing internal representation of a literal's length during compilation is 32 bits (\texttt{int}) in two places -- the parameter to the function that emits the final instruction, and the field holding a literal's length in the compiler's symbol table. Writing a 64-bit tagged value through either as originally typed would silently truncate it. The chosen fix widens only the function parameter at the point where the tagged value is actually constructed, leaving the symbol-table field's width and the compiler's intermediate file format untouched; the alternative of widening the symbol-table field would have required corresponding changes to that intermediate file's text-based serialization, a larger and riskier change for no additional benefit.
 
 
-Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (\hyperref[utr26-sec-status]{section 8}).
+Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (\hyperref[utr26-sec-status]{section 9}).
 
 \section{4. \texttt{uchar()} and \texttt{uord()}: Unicode-aware character conversion}
 \label{utr25-sec-uchar}
@@ -192,7 +195,7 @@ Three mechanisms give a program control over tagging where it is needed, rather 
 \item 
 \textbf{\texttt{unicode(s)}} (\texttt{src/runtime/omisc.r}), an explicit, on-demand function. If \texttt{s} is untagged, it is scanned; if the scan finds non-ASCII content, the result is tagged and its codepoint count cached. If \texttt{s} is already tagged but has no cached count (the common case for a compile-time-tagged literal, \hyperref[utr25-sec-compile]{section 3.1}), the count is computed and cached. If \texttt{s} is pure ASCII, it is returned unchanged. \texttt{string(s)} is not the inverse; see \hyperref[utr25-sec-api]{section 7}.
 \item 
-\textbf{The \texttt{i} mode character to \texttt{open()}}, which sets a per-file or per-connection flag causing subsequent \texttt{reads()} calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (\hyperref[utr26-sec-status]{section 8}).
+\textbf{The \texttt{i} mode character to \texttt{open()}}, which sets a per-file or per-connection flag causing subsequent \texttt{reads()} calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (\hyperref[utr26-sec-status]{section 9}).
 \item 
 \textbf{A global default}, changing what \texttt{open()} assumes when a caller does not specify a mode explicitly, has been designed but not implemented.
 \end{itemize}
@@ -272,7 +275,186 @@ café bytes, no \texttt{i} & 4 & 5 & yes & no \\
 
 The last two rows have the same \texttt{*} comparison and a different tag. A content test is not a tag test. Inverse plus \texttt{*} covers content. A tag predicate is needed only if a program must ask "am I in the text view?" without assigning \texttt{unicode(s)}.
 
-\section{8. Status and future work}
+\section{8. Examples}
+\label{utr25-sec-examples}
+
+These examples assume a Unicon build with \texttt{Unicode} in \texttt{\&features}. Non-ASCII literals are tagged at compile time, so \texttt{"café"} already has a text view: \texttt{*s} and \texttt{s[i]} are codepoints. The programs under \texttt{tests/unicode/} are the executable form of this section; \texttt{languages.icn} is a longer script sample.
+
+\subsection{8.1 Length and subscript}
+\label{utr25-sec-ex-size}
+
+\texttt{*s} is 4, not 5. \texttt{s[4]} is the letter é, not a continuation byte:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   local s, i
+   s := "café"
+   write("*s = ", *s)
+   every i := 1 to *s do
+      write("s[", i, "] = ", s[i])
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+*s = 4
+s[1] = c
+s[2] = a
+s[3] = f
+s[4] = é
+\end{Verbatim}
+
+
+\texttt{"hello"} is untagged ASCII, so \texttt{*} and \texttt{[]} still mean bytes, which for ASCII are the same as codepoints.
+
+
+8.2 \texttt{unicode()}, \texttt{uchar()}, and \texttt{uord()} ---------------------------------------------
+
+
+\texttt{unicode(s)} tags non-ASCII UTF-8. \texttt{uchar} / \texttt{uord} are the codepoint pair; \texttt{char} / \texttt{ord} stay byte-oriented (\hyperref[utr25-sec-uchar]{section 4}):
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   write(*unicode("hello"))
+   write(*unicode("café"))
+   write(unicode("café")[4])
+   write(uord(uchar(233)))
+   write(*uchar(233))
+   write(char(65), " ", ord("A"))
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+5
+4
+é
+233
+1
+A 65
+\end{Verbatim}
+
+
+\texttt{uord} on more than one codepoint is error 205.
+
+\subsection{8.3 Concatenation}
+\label{utr25-sec-ex-concat}
+
+\texttt{||} tags the result if either operand is tagged, and adds cached codepoint counts when both are known (\hyperref[utr25-sec-concat]{section 5}):
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   write(*("café" || "naïve"))
+   write(*("café" || "hello"))
+   write(*("hello" || "café"))
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+9
+9
+9
+\end{Verbatim}
+
+
+\texttt{string(a,~b,~...)} concatenates too and \textbf{keeps} the tag, the same as \texttt{||}. It is not a byte-view switch (\hyperref[utr25-sec-string]{section 7.1}).
+
+\subsection{8.4 Scanning}
+\label{utr25-sec-ex-scan}
+
+On a tagged subject, \texttt{move}, \texttt{tab}, and \texttt{pos} use codepoint positions:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   &subject := "café naïve"
+   &pos := 1
+   write(move(4))
+   &pos := 1
+   write(tab(5))
+   &pos := 1
+   write(pos(1))
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+café
+café
+1
+\end{Verbatim}
+
+\subsection{8.5 \texttt{open()} mode \texttt{i}}
+\label{utr25-sec-ex-io}
+
+Without \texttt{i}, \texttt{reads()} is untagged (byte \texttt{*}). With \texttt{i}, the same UTF-8 is tagged (\hyperref[utr26-sec-io]{section 6}):
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   local f, s
+   f := open("uio.dat", "wu") | stop("open")
+   writes(f, "café")
+   close(f)
+
+   f := open("uio.dat", "r") | stop("open")
+   s := reads(f, 100)
+   close(f)
+   write(*s)
+
+   f := open("uio.dat", "ri") | stop("open")
+   s := reads(f, 100)
+   close(f)
+   write(*s)
+   write(s[4])
+   remove("uio.dat")
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+5
+4
+é
+\end{Verbatim}
+
+\subsection{8.6 Content vs. tag}
+\label{utr25-sec-ex-tag}
+
+Untagged UTF-8 from a file, or built from \texttt{char()} bytes, has byte \texttt{*}. \texttt{unicode()} is the text view. The two disagree exactly when the payload is multi-byte (\hyperref[utr25-sec-tests]{section 7.2}):
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+procedure main()
+   local raw
+   raw := char(195) || char(169)    # UTF-8 of é, untagged
+   write(*raw)
+   write(*unicode(raw))
+   write(*string(unicode(raw)))
+end
+\end{Verbatim}
+
+
+Output:
+
+\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+2
+1
+1
+\end{Verbatim}
+
+
+\texttt{string(s)} on \texttt{"café"} also keeps the tag: \texttt{*string(s)~=~*s}.
+
+\section{9. Status and future work}
 \label{utr25-sec-status}
 
 The following operations have been made Unicode-aware. Subscripting (\texttt{s[i]}) and section extraction (\texttt{s[i:j]}) both include the case of extraction from a named variable, which for either operator is handled by a separate code path (\texttt{src/runtime/cnv.r}'s dereferencing of a trapped substring variable) rather than by the operator's own logic directly, and independently applies the same tagging rule -- the result is tagged only when the extracted range is genuinely multi-byte, not simply because the source was tagged, since a slice of a tagged string can itself be pure ASCII. Element generation (\texttt{!s}) and random selection (\texttt{?s}) use the same codepoint unit on a tagged string: each result is one complete UTF-8 character, matching \texttt{s[i]}, rather than a single byte that could split a multi-byte encoding. Substring assignment (\texttt{s[i]~:=~x} and the range form \texttt{s[i:j]~:=~x}) shares this same trapped-variable mechanism on assignment and is complete as well; assigning into a tagged string correctly recomputes the result's tag and codepoint count by scanning the assembled result rather than assuming either the prefix or the suffix inherits the source's tag. \texttt{move}, \texttt{tab}, and \texttt{pos}, which operate on \texttt{\&subject} and \texttt{\&pos}, have been made to interpret their positions as codepoints for a tagged subject wherever the underlying position arithmetic (\texttt{cvpos}) already treats units abstractly; only the point where an abstract position becomes an actual byte offset needed a tagged-aware branch. \texttt{many}, among the pattern-scanning functions, has been made Unicode-aware in one specific respect: it walks a tagged subject codepoint by codepoint rather than byte by byte, so that its notion of position is codepoint-based. It does not, and cannot yet, test a multi-byte codepoint against the character set argument at all -- a plain character set represents only codepoints 0-255, so there is no meaningful membership test to perform for one. The implementation reflects this directly rather than approximating it: on reaching a multi-byte codepoint, it stops immediately, without ever calling the character-set membership test on any of that codepoint's bytes. This was verified deliberately, not assumed -- including a check that a character set constructed to contain the exact raw byte values of a multi-byte codepoint's UTF-8 encoding still does not cause the scan to continue through it, ruling out the specific failure mode of accidentally testing individual continuation bytes as if they were independent ASCII characters. Extending \texttt{many} (and the character-set type more generally) to test Unicode content meaningfully requires a codepoint-range set type, which does not exist yet (below). \texttt{find} and \texttt{match}, which search for and test one string against another rather than testing a character set, have also been made Unicode-aware: the byte-level comparison each performs internally is unchanged and does not itself need to become codepoint-aware, since UTF-8 is self-synchronizing -- an exact byte match beginning and ending at codepoint boundaries is already a correct codepoint-level match. Only the bounds each accepts and the position each returns needed to change, to mean codepoints rather than bytes for a tagged subject; \texttt{find}, as a generator, walks one codepoint at a time across its search window for this reason, testing the byte comparison at each codepoint boundary rather than at each byte offset. The size operator (\texttt{*s}), concatenation (\texttt{||}), and the explicit \texttt{unicode()}, \texttt{uchar()}, and \texttt{uord()} functions are also complete, as described above.
@@ -327,7 +509,7 @@ A block-based representation with an optional index was designed and benchmarked
 \section{Appendix: test coverage}
 \label{utr25-sec-coverage}
 
-Automated tests specific to this feature live under \texttt{tests/unicode/}, one program per concern (\texttt{size}, \texttt{subsc}, \texttt{concat}, \texttt{convert}, \texttt{scan}, \texttt{section}, \texttt{bang}, \texttt{many}, \texttt{match}, \texttt{find}, \texttt{reverse}, \texttt{file\_i}, \texttt{socket\_i}, plus \texttt{ascii\_*} and \texttt{languages}). \texttt{tests/general/Makefile} excludes the pre-existing \texttt{utf8}/\texttt{utf8\_ovld} tests (\hyperref[utr26-sec-status]{section 8}) when the feature is enabled.
+Automated tests specific to this feature live under \texttt{tests/unicode/}, one program per concern (\texttt{size}, \texttt{subsc}, \texttt{concat}, \texttt{convert}, \texttt{scan}, \texttt{section}, \texttt{bang}, \texttt{many}, \texttt{match}, \texttt{find}, \texttt{reverse}, \texttt{file\_i}, \texttt{socket\_i}, plus \texttt{ascii\_*} and \texttt{languages}). \texttt{tests/general/Makefile} excludes the pre-existing \texttt{utf8}/\texttt{utf8\_ovld} tests (\hyperref[utr26-sec-status]{section 9}) when the feature is enabled.
 
 \section{References}
 \label{utr25-references}
