@@ -349,6 +349,25 @@ single role.
    ek := open("enc.key", "e", "keypass=" || pw)
    c  := open("bundle.pem", "e", "type=cert")
 
+A raw key is still a file value; ``Attrib(h, "type")`` reports the
+role:
+
+.. code-block:: unicon
+
+   procedure main()
+      local k
+      k := open("sixteen-byte-key-material-here!!", "er") |
+         stop(&errortext)
+      write(type(k))
+      write(Attrib(k, "type"))
+      close(k)
+   end
+
+Output::
+
+   file
+   symkey
+
 Material split across files can be merged:
 
 .. code-block:: unicon
@@ -389,87 +408,157 @@ These assume a build with ``secure sockets layer encryption``.
 Failures set ``&errortext``; the usual form is
 ``h := open(...) | stop(&errortext)``. Package ``crypto``
 (``uni/lib/crypto.icn``) supplies ``hexencode`` / ``hexbytes``
-and base64 helpers for dumping binary digests and keys.
+and base64 helpers for dumping binary digests and keys. The
+programs under ``tests/crypto/`` are the executable form of this
+section.
 
 .. _sec-ex-hash:
 
 8.1 Hash
 --------
 
+SHA-256 of the known vector ``abc``:
+
 .. code-block:: unicon
 
-   h := open("sha256", "eh")
-   write(h, msg)
-   digest := read(h)
-   close(h)
+   import crypto
+
+   procedure main()
+      local h, digest
+      h := open("sha256", "eh") | stop(&errortext)
+      write(h, "abc")
+      digest := read(h)
+      write(hexbytes(digest, 1))
+      close(h)
+   end
+
+Output::
+
+   ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 
 ``write()`` may be called many times; ``read()`` finalizes the
 digest **and resets** the handle, so the same handle can hash
-unrelated messages:
+unrelated messages. Chunked ``"hel"`` + ``"lo"`` matches a
+single write of ``"hello"``. A read with nothing pending fails:
 
 .. code-block:: unicon
 
-   h := open("sha256", "eh")
-   write(h, msg1)
-   d1 := read(h)
-   write(h, msg2)
-   write(h, msg3)
-   d2 := read(h)
-   read(h)                 # fails -- nothing written since last read()
-   close(h)
+   import crypto
 
-A whole file uses the file-transform shape:
+   procedure main()
+      local h, d1, d2
+      h := open("sha256", "eh") | stop(&errortext)
+      write(h, "hello")
+      d1 := hexbytes(read(h), 1)
+      write(h, "hel")
+      write(h, "lo")
+      d2 := hexbytes(read(h), 1)
+      write(d1)
+      write(d2)
+      if read(h) then write("idle:fail") else write("idle:ok")
+      close(h)
+   end
+
+Output::
+
+   2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+   2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+   idle:ok
+
+A whole file uses the file-transform shape. The first
+``read()`` consumes the file and returns the digest:
 
 .. code-block:: unicon
 
-   h := open("bigfile.dat", "re", "op=hash", "alg=sha256")
-   digest := read(h)
-   close(h)
+   import crypto
 
-The first ``read()`` consumes the file and returns the digest; a
-second fails.
+   procedure main()
+      local f, h, digest
+      f := open("hash.dat", "w") | stop(&errortext)
+      writes(f, "abc")
+      close(f)
+      h := open("hash.dat", "re", "op=hash", "alg=sha256") |
+         stop(&errortext)
+      digest := read(h)
+      write(hexbytes(digest, 1))
+      close(h)
+      remove("hash.dat")
+   end
+
+Output::
+
+   ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 
 .. _sec-ex-hmac:
 
 8.2 HMAC
 --------
 
+Raw key bytes use mode ``er``. ``read()`` returns the MAC; the
+same handle can MAC many messages after each finalize:
+
+.. code-block:: unicon
+
+   import crypto
+
+   procedure main()
+      local hm, mac
+      hm := open("secret-key-bytes", "er", "op=hmac", "alg=sha256") |
+         stop(&errortext)
+      write(hm, "message one")
+      mac := read(hm)
+      write(hexbytes(mac, 1))
+      write(*mac)
+      close(hm)
+   end
+
+Output::
+
+   9fd1a900325bd173af31bf6467de8139d6615202654cf0fe2645cd2997eaf879
+   32
+
+A key loaded from a file is the same, with the material handle
+as the ``open()`` target and ``op=hmac`` as an attribute:
+
 .. code-block:: unicon
 
    k  := open("hmac.key", "e")
    hm := open(k, "e", "op=hmac", "alg=sha256")
-   every msg := !messages do {
-      write(hm, msg)
-      mac := read(hm)
-      }
-   close(hm)
-
-Raw key bytes use mode ``er``:
-
-.. code-block:: unicon
-
-   hm := open(hmac_key_bytes, "er", "op=hmac", "alg=sha256")
-   write(hm, msg)
-   mac := read(hm)
 
 .. _sec-ex-sign:
 
 8.3 Sign and verify
 -------------------
 
+A private key signs; a certificate or public key verifies.
+``read()`` on the signer returns the signature bytes. The
+listing assumes ``signing.pem`` and ``verify.pem`` in the
+current directory:
+
 .. code-block:: unicon
 
-   k  := open("signing.pem", "e")
-   sg := open(k, "e", "op=sign", "alg=sha256")
-   write(sg, msg)
-   signature := read(sg)
-   close(sg)
+   procedure main()
+      local k, sg, pk, vf, signature
+      k := open("signing.pem", "e") | stop(&errortext)
+      sg := open(k, "e", "op=sign", "alg=sha256") | stop(&errortext)
+      write(sg, "hello")
+      signature := read(sg) | stop(&errortext)
+      close(sg)
 
-   pk := open("verify.pem", "e")
-   vf := open(pk, "e", "op=verify", "alg=sha256", "sig=" || signature)
-   write(vf, msg)
-   read(vf) | stop("bad signature: ", &errortext)
-   close(vf)
+      pk := open("verify.pem", "e") | stop(&errortext)
+      vf := open(pk, "e", "op=verify", "alg=sha256",
+         "sig=" || signature) | stop(&errortext)
+      write(vf, "hello")
+      if read(vf) then write("ok") else stop("bad signature: ",
+         &errortext)
+      close(vf)
+      close(k)
+      close(pk)
+   end
+
+Output::
+
+   ok
 
 A failed verify sets ``&errornumber`` 1315 so it is distinct from
 "nothing written." The same handle can check many messages by
@@ -477,49 +566,83 @@ setting ``sig=`` in the idle window:
 
 .. code-block:: unicon
 
-   pk := open("verify.pem", "e")
-   vf := open(pk, "e", "op=verify", "alg=sha256")
-   every m := !messages do {
-      Attrib(vf, "sig=" || m.signature)
-      write(vf, m.body)
-      if read(vf) then
-         ok(m)
-      else if &errornumber = 1315 then
-         bad(m)
-      else
-         stop("nothing written")
-      }
-   close(vf)
+   procedure main()
+      local k, sg, pk, vf, signature, msg
+      k := open("signing.pem", "e") | stop(&errortext)
+      sg := open(k, "e", "op=sign", "alg=sha256") | stop(&errortext)
+      pk := open("verify.pem", "e") | stop(&errortext)
+      vf := open(pk, "e", "op=verify", "alg=sha256") |
+         stop(&errortext)
+      every msg := !["one", "two"] do {
+         write(sg, msg)
+         signature := read(sg) | stop(&errortext)
+         Attrib(vf, "sig=" || signature)
+         write(vf, msg)
+         if read(vf) then write(msg, ":ok") else write(msg, ":fail")
+         }
+      every close(sg | vf | k | pk)
+   end
+
+Output::
+
+   one:ok
+   two:ok
 
 .. _sec-ex-enc:
 
 8.4 Symmetric encrypt and decrypt
 ---------------------------------
 
-.. code-block:: unicon
-
-   ky := open("aes.key", "e")
-   enc := open(ky, "e", "op=encrypt")
-   write(enc, plaintext)
-   ciphertext := read(enc)
-
-   Attrib(enc, "op=decrypt")
-   write(enc, ciphertext)
-   recovered := read(enc)
-   close(enc)
-   close(ky)
-
 The idle-window ``Attrib(..., "op=decrypt")`` reuses the bound
-key. With no ``iv=``, each ``read()`` generates a fresh IV and
-prepends it, so one handle can encrypt many messages:
+key. Ciphertext is binary; the recovered plaintext is what
+matters:
 
 .. code-block:: unicon
 
-   c := open(ky, "e", "op=encrypt")
-   every plaintext := !messages do {
-      write(c, plaintext)
-      ciphertext := read(c)
-      }
+   procedure main()
+      local ky, c, ct, pt
+      ky := open("sixteen-byte-key-material-here!!", "er") |
+         stop(&errortext)
+      c := open(ky, "e", "op=encrypt") | stop(&errortext)
+      write(c, "hello")
+      ct := read(c)
+      Attrib(c, "op=decrypt")
+      write(c, ct)
+      pt := read(c)
+      write(pt)
+      close(c)
+      close(ky)
+   end
+
+Output::
+
+   hello
+
+With no ``iv=``, each ``read()`` generates a fresh IV and
+prepends it, so one handle can encrypt many messages. Lengths
+below include the IV and AEAD tag:
+
+.. code-block:: unicon
+
+   procedure main()
+      local ky, c, msg, ct
+      ky := open("sixteen-byte-key-material-here!!", "er") |
+         stop(&errortext)
+      c := open(ky, "e", "op=encrypt") | stop(&errortext)
+      every msg := !["alpha", "beta", "gamma"] do {
+         write(c, msg)
+         ct := read(c)
+         write(msg, " ", *ct, " bytes")
+         }
+      close(c)
+      close(ky)
+   end
+
+Output::
+
+   alpha 33 bytes
+   beta 32 bytes
+   gamma 33 bytes
 
 For a wire format that does not prepend an IV, or for test
 vectors, set ``iv=`` in the idle window and take uniqueness
@@ -538,26 +661,42 @@ yourself:
 8.5 File encrypt and decrypt
 ----------------------------
 
-.. code-block:: unicon
-
-   f := open("secrets.dat", "we", "op=encrypt", "key=aes.key")
-   writes(f, plaintext)
-   close(f)
-
-   f := open("secrets.dat", "re", "op=decrypt", "key=aes.key")
-   pending := []
-   while chunk := reads(f, 4096) do put(pending, chunk)
-   if &errornumber then
-      stop("tampered: ", &errortext)
-   close(f)
-
 Writes encrypt and are finalized on ``close()``. Reads decrypt
 as a stream. AEAD authentication is checked on the **final**
 read: earlier ``reads()`` chunks are provisional. Nothing
 decrypted should be acted on until the stream completes without
-error. Callers who cannot defer processing should use the
-data-pipe shape, where a single ``read()`` returns plaintext
-only after the tag verifies.
+error.
+
+.. code-block:: unicon
+
+   procedure main()
+      local ky, f, chunk, pending
+      ky := open("sixteen-byte-key-material-here!!", "er") |
+         stop(&errortext)
+      f := open("secrets.dat", "we", "op=encrypt", ky) |
+         stop(&errortext)
+      writes(f, "classified")
+      close(f)
+      f := open("secrets.dat", "re", "op=decrypt", ky) |
+         stop(&errortext)
+      pending := ""
+      while chunk := reads(f, 4096) do
+         pending ||:= chunk
+      if \ &errornumber then
+         stop("tampered: ", &errortext)
+      write(pending)
+      close(f)
+      remove("secrets.dat")
+      close(ky)
+   end
+
+Output::
+
+   classified
+
+Callers who cannot defer processing should use the data-pipe
+shape, where a single ``read()`` returns plaintext only after
+the tag verifies.
 
 The same key handle can wrap many files:
 
