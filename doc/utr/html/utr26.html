@@ -31,13 +31,14 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 placeholder="Search..." aria-label="Filter chapter list">
 <ol id="nav-toc">
 <li class="current">UTR 26: Native SSH and SFTP Support in Unicon</li>
+<li><a href="utr27.html">UTR 27: Cryptographic Facilities in Unicon</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
 <div class="main">
 <div class="prevnext">
 <span></span>
-<span></span>
+<a href="utr27.html">UTR 27: Cryptographic Facilities in Unicon &rarr;</a>
 </div>
 <header class="report-masthead">
 <h1 class="report-title">Native SSH and SFTP Support in Unicon</h1>
@@ -74,7 +75,7 @@ Programming with Unicon
  / 
 <code>rename</code>
 ). 
-<a href="utr26.html#sec-examples">section 6</a>
+<a href="utr27.html#sec-examples">section 6</a>
  collects examples by mode and use case. Automated tests live in 
 <code>tests/posix/ssh.icn</code>
 .
@@ -263,7 +264,7 @@ All stream I/O funnels through one dispatch point:
 . SSH adds a third branch for 
 <code>Fs_SSH</code>
 , reading from the arrival-order queue (
-<a href="utr26.html#sec-io">section 8</a>
+<a href="utr27.html#sec-io">section 8</a>
 ) or 
 <code>sftp_read()</code>
 , and writing via 
@@ -539,7 +540,7 @@ Same convention as SSL's
 Passphrase for an encrypted private key
 </td>
 <td>
-Distinct from 
+Same name as TLS/crypto; distinct from SSH 
 <code>password=</code>
 </td>
 </tr>
@@ -551,6 +552,22 @@ Distinct from
 Remote login password
 </td>
 <td>
+Not a TLS attribute; crypto still accepts it as an alias for 
+<code>keypass=</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>verifyPeer=</code>
+</td>
+<td>
+<code>yes</code>
+ (default) or 
+<code>no</code>
+</td>
+<td>
+Same spelling as TLS; overrides mode 
+<code>-</code>
 </td>
 </tr>
 <tr>
@@ -628,26 +645,30 @@ Default from the local tty, else 80x24
 </table>
 <p>
 <code>keypass=</code>
- is deliberately distinct from 
+ is the shared name for a key-file passphrase on TLS, crypto, and SSH. SSH 
 <code>password=</code>
-. SSL's existing 
-<code>password</code>
- attribute means &quot;key-decryption passphrase,&quot; a different concept from an SSH login password. Reusing 
+ remains the remote login password and is not accepted on TLS. Crypto still accepts 
 <code>password=</code>
- for both would confuse the two.
+ as an alias for 
+<code>keypass=</code>
+.
 </p>
 <p>
 The 
 <code>-</code>
- mode-character flag disables host-key verification, reusing the existing SSL peer-verification-disable flag (
-<code>do_verify</code>
-). 
+ mode-character flag disables peer verification on TLS (
+<code>ne-</code>
+) and SSH (
+<code>h-</code>
+), the same as 
+<code>verifyPeer=no</code>
+. An explicit 
+<code>verifyPeer=</code>
+ overrides the mode flag. 
 <code>Fs_Encrypt</code>
  and 
 <code>Fs_SSH</code>
- are mutually exclusive contexts, so there is no conflict. Mode 
-<code>&quot;h-&quot;</code>
- is the usual spelling.
+ are mutually exclusive contexts, so there is no conflict.
 </p>
 <p>
 A leading integer attribute is a connect timeout in milliseconds and is applied as libssh's 
@@ -1021,7 +1042,7 @@ close(s)
 <p>
 <code>Attrib(c, &quot;stderr&quot;)</code>
  is the other stderr path: it drains bytes accumulated since the previous call, without preserving order against stdout. See 
-<a href="utr26.html#sec-io">section 8</a>
+<a href="utr27.html#sec-io">section 8</a>
 .
 </p>
 <h3 id="sec-ex-channels">
@@ -1969,10 +1990,19 @@ The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.or
 <li id="cite-jeffery-utr13" value="3">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
+<li id="cite-openssl" value="4">
+The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
+</li>
+<li id="cite-algharaibeh-utr26" value="5">
+Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
+</li>
+<li id="cite-rfc2104" value="6">
+H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
+</li>
 </ol></div>
 <div class="prevnext">
 <span></span>
-<span></span>
+<a href="utr27.html">UTR 27: Cryptographic Facilities in Unicon &rarr;</a>
 </div>
 <footer class="footer" role="contentinfo">
 &copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr26.pdf">pdf</a> | <a href="_sources/utr26.rst.txt" rel="nofollow">source</a>
