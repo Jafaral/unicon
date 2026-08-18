@@ -42,7 +42,7 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr25-sec-intro}
 
-This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. \hyperref[utr26-sec-examples]{section 8} collects short programs by operation. Automated tests live under \texttt{tests/unicode/}.
+This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. \hyperref[utr27-sec-examples]{section 8} collects short programs by operation. Automated tests live under \texttt{tests/unicode/}.
 
 
 The feature is optional. A 64-bit build without \texttt{NoUniconUnicode} reports \texttt{Unicode} in \texttt{\&features}. On 32-bit, or with that switch, the tag macros are no-ops and the suite is skipped.
@@ -88,7 +88,7 @@ bits 0-31    byte length    (32 bits, ~4.3 GB maximum)
 \textbf{Why the remaining bits were spent on a cached codepoint count rather than a cached scan position.} Two different kinds of cache were considered for these bits. A cached \emph{codepoint count} records how many codepoints a string contains, making the size operation (\texttt{*s}) constant-time. A cached \emph{scan position} instead records a single (codepoint index, byte offset) pair -- the last position looked up -- letting a subsequent lookup near that position resume without walking from the start of the string. Both are legitimate optimizations, but they help different things: a cached count benefits every size query uniformly, regardless of string length, since there is no cheaper way to answer "how many codepoints does this string have" without either counting or having already counted. A cached position only pays for itself when a string is subscripted repeatedly and nontrivially; for short strings accessed only a few times, walking from the start is already competitive with or faster than maintaining any index, a result obtained by direct measurement rather than assumed. Because a large share of string values in typical Unicon programs are short-lived tokens -- parsed, compared, and discarded, rarely subscripted more than once or twice -- the cached-count approach has the stronger claim on the representation's limited bits, and is what this design uses.
 
 
-A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in \hyperref[utr26-sec-status]{section 9}.
+A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in \hyperref[utr29-sec-status]{section 9}.
 
 \subsection{2.2 Core macros}
 \label{utr25-sec-macros}
@@ -153,7 +153,7 @@ The flag is carried through the compiler's intermediate representation using the
 One implementation detail is worth recording because it is not obvious from the surrounding code: the values involved in constructing this tagged length are 64 bits wide, while the pre-existing internal representation of a literal's length during compilation is 32 bits (\texttt{int}) in two places -- the parameter to the function that emits the final instruction, and the field holding a literal's length in the compiler's symbol table. Writing a 64-bit tagged value through either as originally typed would silently truncate it. The chosen fix widens only the function parameter at the point where the tagged value is actually constructed, leaving the symbol-table field's width and the compiler's intermediate file format untouched; the alternative of widening the symbol-table field would have required corresponding changes to that intermediate file's text-based serialization, a larger and riskier change for no additional benefit.
 
 
-Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (\hyperref[utr26-sec-status]{section 9}).
+Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (\hyperref[utr29-sec-status]{section 9}).
 
 \section{4. \texttt{uchar()} and \texttt{uord()}: Unicode-aware character conversion}
 \label{utr25-sec-uchar}
@@ -195,7 +195,7 @@ Three mechanisms give a program control over tagging where it is needed, rather 
 \item 
 \textbf{\texttt{unicode(s)}} (\texttt{src/runtime/omisc.r}), an explicit, on-demand function. If \texttt{s} is untagged, it is scanned; if the scan finds non-ASCII content, the result is tagged and its codepoint count cached. If \texttt{s} is already tagged but has no cached count (the common case for a compile-time-tagged literal, \hyperref[utr25-sec-compile]{section 3.1}), the count is computed and cached. If \texttt{s} is pure ASCII, it is returned unchanged. \texttt{string(s)} is not the inverse; see \hyperref[utr25-sec-api]{section 7}.
 \item 
-\textbf{The \texttt{i} mode character to \texttt{open()}}, which sets a per-file or per-connection flag causing subsequent \texttt{reads()} calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (\hyperref[utr26-sec-status]{section 9}).
+\textbf{The \texttt{i} mode character to \texttt{open()}}, which sets a per-file or per-connection flag causing subsequent \texttt{reads()} calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (\hyperref[utr29-sec-status]{section 9}).
 \item 
 \textbf{A global default}, changing what \texttt{open()} assumes when a caller does not specify a mode explicitly, has been designed but not implemented.
 \end{itemize}
@@ -395,7 +395,7 @@ café
 \subsection{8.5 \texttt{open()} mode \texttt{i}}
 \label{utr25-sec-ex-io}
 
-Without \texttt{i}, \texttt{reads()} is untagged (byte \texttt{*}). With \texttt{i}, the same UTF-8 is tagged (\hyperref[utr26-sec-io]{section 6}):
+Without \texttt{i}, \texttt{reads()} is untagged (byte \texttt{*}). With \texttt{i}, the same UTF-8 is tagged (\hyperref[utr29-sec-io]{section 6}):
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 procedure main()
@@ -501,7 +501,7 @@ A block-based representation with an optional index was designed and benchmarked
 \textbf{Codepoint-range character sets.} Unicon's existing cset type is a 256-bit membership table and cannot represent codepoints beyond 255. A design extending csets to represent arbitrary codepoint ranges, using a sorted range list for codepoints above 255 while leaving the existing bitmap representation untouched for 0-255, was evaluated against alternative representations and found to use substantially less memory across a range of real Unicode block compositions, but was not implemented. \texttt{many} (above) is a concrete existing example of what this blocks: it correctly walks a tagged subject by codepoint, but has no character-set representation capable of matching a non-ASCII codepoint against, regardless.
 
 
-\textbf{Pseudo-terminal reads} do not currently support the \texttt{i} mode mechanism described in \hyperref[utr26-sec-io]{section 6}; the internal function handling them constructs its return value through a different mechanism than the paths that have been adapted, requiring restructuring rather than a direct extension of the existing approach.
+\textbf{Pseudo-terminal reads} do not currently support the \texttt{i} mode mechanism described in \hyperref[utr29-sec-io]{section 6}; the internal function handling them constructs its return value through a different mechanism than the paths that have been adapted, requiring restructuring rather than a direct extension of the existing approach.
 
 
 \textbf{Existing UTF-8 support in the standard library.} \texttt{uni/lib/utf8.icn} [3], a pre-existing class-based UTF-8 implementation predating this work, manages UTF-8 content by walking strings byte-by-byte under the assumption that string indexing is always byte-oriented -- a correct assumption before this feature existed, and no longer a safe one for a tagged string, since indexing on a tagged string is codepoint-oriented. The library's tests are consequently excluded from the test suite when this feature is enabled (\texttt{tests/general/Makefile}, conditioned on the \texttt{unicode} feature being present in \texttt{\&features}). The library continues to provide functionality with no native equivalent yet -- codepoint-range set operations and several scanning primitives -- and remains usable by programs that do not enable native tagging; reconciling the two, either by adapting the library to native tagging or by extending native support to cover what it currently provides, is unresolved.
@@ -509,7 +509,7 @@ A block-based representation with an optional index was designed and benchmarked
 \section{Appendix: test coverage}
 \label{utr25-sec-coverage}
 
-Automated tests specific to this feature live under \texttt{tests/unicode/}, one program per concern (\texttt{size}, \texttt{subsc}, \texttt{concat}, \texttt{convert}, \texttt{scan}, \texttt{section}, \texttt{bang}, \texttt{many}, \texttt{match}, \texttt{find}, \texttt{reverse}, \texttt{file\_i}, \texttt{socket\_i}, plus \texttt{ascii\_*} and \texttt{languages}). \texttt{tests/general/Makefile} excludes the pre-existing \texttt{utf8}/\texttt{utf8\_ovld} tests (\hyperref[utr26-sec-status]{section 9}) when the feature is enabled.
+Automated tests specific to this feature live under \texttt{tests/unicode/}, one program per concern (\texttt{size}, \texttt{subsc}, \texttt{concat}, \texttt{convert}, \texttt{scan}, \texttt{section}, \texttt{bang}, \texttt{many}, \texttt{match}, \texttt{find}, \texttt{reverse}, \texttt{file\_i}, \texttt{socket\_i}, plus \texttt{ascii\_*} and \texttt{languages}). \texttt{tests/general/Makefile} excludes the pre-existing \texttt{utf8}/\texttt{utf8\_ovld} tests (\hyperref[utr29-sec-status]{section 9}) when the feature is enabled.
 
 \section{References}
 \label{utr25-references}
@@ -528,6 +528,42 @@ The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
 
 \bibitem[5]{cite-jeffery-utr13}
 Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
+
+\bibitem[6]{cite-openssl}
+The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
+
+\bibitem[7]{cite-algharaibeh-utr26}
+Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
+
+\bibitem[8]{cite-rfc2104}
+H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
+
+\bibitem[9]{cite-rfc1112}
+S. Deering. "Host Extensions for IP Multicasting". RFC 1112. 1989.
+
+\bibitem[10]{cite-jeffery-pwu}
+Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. "Programming with Unicon". doc/book/. 2026.
+
+\bibitem[11]{cite-algharaibeh-utr29}
+Jafar Al-Gharaibeh. "Raw Sockets and Packet Layouts in Unicon". doc/utr/utr29.rst. 2026.
+
+\bibitem[12]{cite-rfc4607}
+H. Holbrook and B. Cain. "Source-Specific Multicast for IP". RFC 4607. 2006.
+
+\bibitem[13]{cite-algharaibeh-utr28}
+Jafar Al-Gharaibeh. "Multicast and Socket Attributes in Unicon". doc/utr/utr28.rst. 2026.
+
+\bibitem[14]{cite-rfc792}
+J. Postel. "Internet Control Message Protocol". RFC 792. 1981.
+
+\bibitem[15]{cite-rfc2236}
+W. Fenner. "Internet Group Management Protocol, Version 2". RFC 2236. 1997.
+
+\bibitem[16]{cite-rfc3376}
+B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Internet Group Management Protocol, Version 3". RFC 3376. 2002.
+
+\bibitem[17]{cite-rfc1071}
+R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
 
 \end{thebibliography}
 \end{document}

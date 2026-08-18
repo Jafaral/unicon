@@ -18,7 +18,7 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <script defer src="_static/theme-switcher.js"></script>
 </head><body>
 <div class="layout">
-<nav class="sidebar" aria-label="Book contents">
+<nav class="sidebar" aria-label="Report contents">
 <div class="book-title"><a href="index.html">Unicon Technical Reports</a></div>
 <label class="search-hint" for="theme-select">Theme</label>
 <select class="search-box" id="theme-select" aria-label="Color theme">
@@ -26,20 +26,73 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <option value="classic">classic</option>
 <option value="dark">dark</option>
 </select>
-<p class="search-hint">Filter chapters; Enter for full search</p>
+<p class="search-hint">Filter sections; Enter for full search</p>
 <input class="search-box" id="nav-search" type="search" 
-placeholder="Search..." aria-label="Filter chapter list">
+placeholder="Search..." aria-label="Filter section list">
 <ol id="nav-toc">
-<li class="current">UTR 25: Native Unicode Support in the Unicon Runtime</li>
-<li><a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon</a></li>
+<li class="toc-l1"><a href="#sec-intro">1. Introduction
+</a></li>
+<li class="toc-l2"><a href="#sec-term">1.1 Terminology: Unicode vs. UTF-8
+</a></li>
+<li class="toc-l1"><a href="#sec-design">2. Design principle and representation
+</a></li>
+<li class="toc-l2"><a href="#sec-bits">2.1 Bit layout
+</a></li>
+<li class="toc-l2"><a href="#sec-macros">2.2 Core macros
+</a></li>
+<li class="toc-l2"><a href="#sec-strlen">2.3 
+<code>StrLen</code>
+ masking and 
+<code>SetStrLen</code>
+ overwrite semantics
+</a></li>
+<li class="toc-l1"><a href="#sec-promo">3. Promotion: how a string becomes tagged
+</a></li>
+<li class="toc-l2"><a href="#sec-compile">3.1 Compile-time tagging
+</a></li>
+<li class="toc-l1"><a href="#sec-uchar">4. 
+<code>uchar()</code>
+ and 
+<code>uord()</code>
+: Unicode-aware character conversion
+</a></li>
+<li class="toc-l1"><a href="#sec-concat">5. Concatenation
+</a></li>
+<li class="toc-l1"><a href="#sec-io">6. Deliberately unscanned input: files and sockets
+</a></li>
+<li class="toc-l1"><a href="#sec-api">7. Language API: views, conversion, and tests
+</a></li>
+<li class="toc-l2"><a href="#sec-string">7.1 
+<code>string()</code>
+ is not the inverse
+</a></li>
+<li class="toc-l2"><a href="#sec-tests">7.2 Content test vs. tag test
+</a></li>
+<li class="toc-l1"><a href="#sec-examples">8. Examples
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-size">8.1 Length and subscript
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-concat">8.3 Concatenation
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-scan">8.4 Scanning
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-io">8.5 
+<code>open()</code>
+ mode 
+<code>i</code>
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-tag">8.6 Content vs. tag
+</a></li>
+<li class="toc-l1"><a href="#sec-status">9. Status and future work
+</a></li>
+<li class="toc-l1"><a href="#sec-coverage">Appendix: test coverage
+</a></li>
+<li class="toc-l1"><a href="#references">References
+</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
 <div class="main">
-<div class="prevnext">
-<span></span>
-<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
-</div>
 <header class="report-masthead">
 <h1 class="report-title">Native Unicode Support in the Unicon Runtime</h1>
 <p class="report-authors">Jafar Al-Gharaibeh</p>
@@ -57,7 +110,7 @@ placeholder="Search..." aria-label="Filter chapter list">
 <p>
 This report records the as-built native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report 
 [<a class="cite" href="#cite-jeffery-utr15">1</a>]. 
-<a href="utr26.html#sec-examples">section 8</a>
+<a href="utr27.html#sec-examples">section 8</a>
  collects short programs by operation. Automated tests live under 
 <code>tests/unicode/</code>
 .
@@ -187,7 +240,7 @@ scan position
 </p>
 <p>
 A cached-position representation matching the same bit budget was designed and benchmarked in the course of this work (a 14-bit cached codepoint index paired with a 16-bit cached byte offset, packed into the same word) and was found to match a fully allocated index structure to within a few percent for strings up to roughly sixteen thousand codepoints. It was not adopted because the codepoint-count design above has the better-evidenced claim on the same bits, not because it does not work; it remains a candidate for a future representation, discussed in 
-<a href="utr26.html#sec-status">section 9</a>
+<a href="utr29.html#sec-status">section 9</a>
 .
 </p>
 <h3 id="sec-macros">
@@ -323,7 +376,7 @@ One implementation detail is worth recording because it is not obvious from the 
 </p>
 <p>
 Compile-time tagging encodes the UTF-8 tag but not a cached codepoint count, since doing so would require the same width change that was deliberately avoided above. As a consequence, a compile-time-tagged literal's codepoint count is not cached until something explicitly computes it; the size operation on such a literal remains correct, falling back to a full scan, but does not receive the constant-time benefit that a cached count would provide until a future revision addresses this (
-<a href="utr26.html#sec-status">section 9</a>
+<a href="utr29.html#sec-status">section 9</a>
 ).
 </p>
 <h2 id="sec-uchar">
@@ -454,7 +507,7 @@ The
 , which sets a per-file or per-connection flag causing subsequent 
 <code>reads()</code>
  calls on that file or connection to scan and tag their results automatically. This is implemented at all of the function's internal return points that produce a taggable result -- the file, socket, and secure-shell channel paths -- with the exception of pseudo-terminal reads, which return through a different internal mechanism not yet adapted for tagging (
-<a href="utr26.html#sec-status">section 9</a>
+<a href="utr29.html#sec-status">section 9</a>
 ).
 </li>
 <li>
@@ -923,7 +976,7 @@ Without
 ). With 
 <code>i</code>
 , the same UTF-8 is tagged (
-<a href="utr26.html#sec-io">section 6</a>
+<a href="utr29.html#sec-io">section 6</a>
 ):
 </p>
 <pre><code class="language-unicon">procedure main()
@@ -1197,7 +1250,7 @@ Pseudo-terminal reads
  do not currently support the 
 <code>i</code>
  mode mechanism described in 
-<a href="utr26.html#sec-io">section 6</a>
+<a href="utr29.html#sec-io">section 6</a>
 ; the internal function handling them constructs its return value through a different mechanism than the paths that have been adapted, requiring restructuring rather than a direct extension of the existing approach.
 </p>
 <p>
@@ -1258,7 +1311,7 @@ Automated tests specific to this feature live under
 /
 <code>utf8_ovld</code>
  tests (
-<a href="utr26.html#sec-status">section 9</a>
+<a href="utr29.html#sec-status">section 9</a>
 ) when the feature is enabled.
 </p>
 <h2 id="references">
@@ -1281,11 +1334,43 @@ The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.or
 <li id="cite-jeffery-utr13" value="5">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
+<li id="cite-openssl" value="6">
+The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
+</li>
+<li id="cite-algharaibeh-utr26" value="7">
+Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
+</li>
+<li id="cite-rfc2104" value="8">
+H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
+</li>
+<li id="cite-rfc1112" value="9">
+S. Deering. &quot;Host Extensions for IP Multicasting&quot;. RFC 1112. 1989.
+</li>
+<li id="cite-jeffery-pwu" value="10">
+Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. &quot;Programming with Unicon&quot;. doc/book/. 2026.
+</li>
+<li id="cite-algharaibeh-utr29" value="11">
+Jafar Al-Gharaibeh. &quot;Raw Sockets and Packet Layouts in Unicon&quot;. doc/utr/utr29.rst. 2026.
+</li>
+<li id="cite-rfc4607" value="12">
+H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
+</li>
+<li id="cite-algharaibeh-utr28" value="13">
+Jafar Al-Gharaibeh. &quot;Multicast and Socket Attributes in Unicon&quot;. doc/utr/utr28.rst. 2026.
+</li>
+<li id="cite-rfc792" value="14">
+J. Postel. &quot;Internet Control Message Protocol&quot;. RFC 792. 1981.
+</li>
+<li id="cite-rfc2236" value="15">
+W. Fenner. &quot;Internet Group Management Protocol, Version 2&quot;. RFC 2236. 1997.
+</li>
+<li id="cite-rfc3376" value="16">
+B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;Internet Group Management Protocol, Version 3&quot;. RFC 3376. 2002.
+</li>
+<li id="cite-rfc1071" value="17">
+R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
+</li>
 </ol></div>
-<div class="prevnext">
-<span></span>
-<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
-</div>
 <footer class="footer" role="contentinfo">
 &copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr25.pdf">pdf</a> | <a href="_sources/utr25.rst.txt" rel="nofollow">source</a>
 </footer>
