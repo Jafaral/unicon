@@ -50,7 +50,7 @@ The feature is optional in the same sense as TLS. A build with OpenSSL reports \
 \section{2. Motivation}
 \label{utr27-sec-motivation}
 
-Unicon already links OpenSSL [4] for mode \texttt{n} with \texttt{e} -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to leave the language. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through; loading a key once and signing many messages is the same pattern as opening an SSH session once and deriving channels [5].
+Unicon already links OpenSSL [7] for mode \texttt{n} with \texttt{e} -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to leave the language. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through; loading a key once and signing many messages is the same pattern as opening an SSH session once and deriving channels [8].
 
 
 No new external dependency is introduced. The implementation uses OpenSSL's EVP interface, which the encrypted-socket support already requires.
@@ -141,7 +141,7 @@ Mode \texttt{-} skips peer verification on TLS (\texttt{ne-}) and SSH (\texttt{h
 \end{longtable}
 
 
-HMAC is the construction of RFC 2104 [6] over the digest named by \texttt{alg=}. Algorithm and cipher names are OpenSSL's own (\texttt{sha256}, \texttt{aes-256-gcm}) and are passed through rather than mapped to a Unicon-defined set.
+HMAC is the construction of RFC 2104 [9] over the digest named by \texttt{alg=}. Algorithm and cipher names are OpenSSL's own (\texttt{sha256}, \texttt{aes-256-gcm}) and are passed through rather than mapped to a Unicon-defined set.
 
 
 Defaults are \texttt{alg=sha256} and \texttt{cipher=aes-256-gcm}.
@@ -689,19 +689,28 @@ Automated tests live under \texttt{tests/crypto/}, one program per concern: \tex
 \bibitem[1]{cite-jeffery-utr15}
 Clinton Jeffery. "How to Write a Unicon Technical Report". doc/utr/utr15.tex. 2013.
 
-\bibitem[2]{cite-libssh}
+\bibitem[2]{cite-jeffery-utr8}
+Clinton Jeffery. "Unicon Language Reference". doc/unicon/utr8.html.
+
+\bibitem[3]{cite-alexander-jcon-preproc}
+Bob Alexander. "Preprocessor for Jcon". Basis for Unicon's preproce.icn.
+
+\bibitem[4]{cite-jeffery-ib-preproc}
+Clinton Jeffery. "The Unicon Compiler". Course notes, doc/ib/p3-unicon.tex, section "The Unicon Preprocessor".
+
+\bibitem[5]{cite-libssh}
 The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
 
-\bibitem[3]{cite-jeffery-utr13}
+\bibitem[6]{cite-jeffery-utr13}
 Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
 
-\bibitem[4]{cite-openssl}
+\bibitem[7]{cite-openssl}
 The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
 
-\bibitem[5]{cite-algharaibeh-utr26}
+\bibitem[8]{cite-algharaibeh-utr26}
 Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
 
-\bibitem[6]{cite-rfc2104}
+\bibitem[9]{cite-rfc2104}
 H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
 
 \end{thebibliography}

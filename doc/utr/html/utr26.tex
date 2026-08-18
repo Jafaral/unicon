@@ -42,7 +42,7 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr26-sec-intro}
 
-This report describes the current design and implementation of native SSH in the Unicon runtime: how a session is opened, how additional channels and SFTP handles are derived from it, how stream I/O, ordered events, and metadata operations are exposed, and what remains out of scope. It is formatted as a Unicon Technical Report [1]. The language-facing reference lives in \emph{Programming with Unicon} (Chapter 6, "Secure Shell") and the language reference (\texttt{open} mode \texttt{h}, \texttt{Attrib}, \texttt{receive}, \texttt{stat} / \texttt{remove} / \texttt{rename}). \hyperref[utr26-sec-examples]{section 6} collects examples by mode and use case. Automated tests live in \texttt{tests/posix/ssh.icn}.
+This report describes the current design and implementation of native SSH in the Unicon runtime: how a session is opened, how additional channels and SFTP handles are derived from it, how stream I/O, ordered events, and metadata operations are exposed, and what remains out of scope. It is formatted as a Unicon Technical Report [1]. The language-facing reference lives in \emph{Programming with Unicon} (Chapter 6, "Secure Shell") and the language reference (\texttt{open} mode \texttt{h}, \texttt{Attrib}, \texttt{receive}, \texttt{stat} / \texttt{remove} / \texttt{rename}). \hyperref[utr27-sec-examples]{section 6} collects examples by mode and use case. Automated tests live in \texttt{tests/posix/ssh.icn}.
 
 
 The feature is optional. A build with libssh present reports \texttt{secure~shell} in \texttt{\&features} (the \texttt{\_SSH} feature flag). Without the library, mode \texttt{h} is ignored and the SSH paths are compiled out, as with other optional features.
@@ -85,7 +85,7 @@ Status bits live in \texttt{src/h/rmacros.h}. \texttt{Fs\_Encrypt} is \texttt{02
 Attributes are \texttt{"key=value"} strings passed as trailing arguments to \texttt{open()}, parsed in \texttt{create\_ssh\_session()} the same way \texttt{create\_ssl\_context()} parses SSL attributes -- not a fixed argument list. A leading integer, when present, is a connect timeout in milliseconds, as for plain sockets.
 
 
-All stream I/O funnels through one dispatch point: \texttt{u\_read()} / \texttt{u\_write()} in \texttt{src/runtime/rposix.r}, which already branch on \texttt{Fs\_Socket} / \texttt{Fs\_Encrypt}. SSH adds a third branch for \texttt{Fs\_SSH}, reading from the arrival-order queue (\hyperref[utr26-sec-io]{section 8}) or \texttt{sftp\_read()}, and writing via \texttt{ssh\_channel\_write()} or \texttt{sftp\_write()}. Nothing above this dispatch (\texttt{reads()}, \texttt{read()}, and so on) needs its own SSH case, except where a line-oriented helper must not wait for a newline that will never arrive (\hyperref[utr26-sec-partial]{section 9.2}).
+All stream I/O funnels through one dispatch point: \texttt{u\_read()} / \texttt{u\_write()} in \texttt{src/runtime/rposix.r}, which already branch on \texttt{Fs\_Socket} / \texttt{Fs\_Encrypt}. SSH adds a third branch for \texttt{Fs\_SSH}, reading from the arrival-order queue (\hyperref[utr27-sec-io]{section 8}) or \texttt{sftp\_read()}, and writing via \texttt{ssh\_channel\_write()} or \texttt{sftp\_write()}. Nothing above this dispatch (\texttt{reads()}, \texttt{read()}, and so on) needs its own SSH case, except where a line-oriented helper must not wait for a newline that will never arrive (\hyperref[utr26-sec-partial]{section 9.2}).
 
 
 Close is \textbf{explicit, not GC-driven}. The close hook in \texttt{fsys.r} frees SSL resources directly; there is no finalizer during garbage collection. SSH files follow the same convention -- leaking a channel or session means not calling \texttt{close()}, the same as any other file.
@@ -166,8 +166,9 @@ Attribute & Meaning & Notes \\
 \endlastfoot
 \texttt{user=} & Remote login name & Overridden by \texttt{user@host} \\
 \texttt{key=} & Path to a private key file & Same convention as SSL's \texttt{key=} \\
-\texttt{keypass=} & Passphrase for an encrypted private key & Distinct from \texttt{password=} \\
-\texttt{password=} & Remote login password &  \\
+\texttt{keypass=} & Passphrase for an encrypted private key & Same name as TLS/crypto; distinct from SSH \texttt{password=} \\
+\texttt{password=} & Remote login password & Not a TLS attribute; crypto still accepts it as an alias for \texttt{keypass=} \\
+\texttt{verifyPeer=} & \texttt{yes} (default) or \texttt{no} & Same spelling as TLS; overrides mode \texttt{-} \\
 \texttt{hostkeyfile=} & Path to an OpenSSH \texttt{known\_hosts} file & Passed to libssh as \texttt{SSH\_OPTIONS\_KNOWNHOSTS} \\
 \texttt{cmd=} & Command for a one-shot exec channel & Requires mode \texttt{hc}; contradicts \texttt{channel=no} \\
 \texttt{channel=} & \texttt{yes} (default) or \texttt{no} & \texttt{no} is transport-only \\
@@ -176,10 +177,10 @@ Attribute & Meaning & Notes \\
 \end{longtable}
 
 
-\texttt{keypass=} is deliberately distinct from \texttt{password=}. SSL's existing \texttt{password} attribute means "key-decryption passphrase," a different concept from an SSH login password. Reusing \texttt{password=} for both would confuse the two.
+\texttt{keypass=} is the shared name for a key-file passphrase on TLS, crypto, and SSH. SSH \texttt{password=} remains the remote login password and is not accepted on TLS. Crypto still accepts \texttt{password=} as an alias for \texttt{keypass=}.
 
 
-The \texttt{-} mode-character flag disables host-key verification, reusing the existing SSL peer-verification-disable flag (\texttt{do\_verify}). \texttt{Fs\_Encrypt} and \texttt{Fs\_SSH} are mutually exclusive contexts, so there is no conflict. Mode \texttt{"h-"} is the usual spelling.
+The \texttt{-} mode-character flag disables peer verification on TLS (\texttt{ne-}) and SSH (\texttt{h-}), the same as \texttt{verifyPeer=no}. An explicit \texttt{verifyPeer=} overrides the mode flag. \texttt{Fs\_Encrypt} and \texttt{Fs\_SSH} are mutually exclusive contexts, so there is no conflict.
 
 
 A leading integer attribute is a connect timeout in milliseconds and is applied as libssh's \texttt{SSH\_OPTIONS\_TIMEOUT} / \texttt{TIMEOUT\_USEC}. The default port is 22 when \texttt{:port} is omitted.
@@ -291,7 +292,7 @@ close(s)
 \end{Verbatim}
 
 
-\texttt{Attrib(c,~"stderr")} is the other stderr path: it drains bytes accumulated since the previous call, without preserving order against stdout. See \hyperref[utr26-sec-io]{section 8}.
+\texttt{Attrib(c,~"stderr")} is the other stderr path: it drains bytes accumulated since the previous call, without preserving order against stdout. See \hyperref[utr27-sec-io]{section 8}.
 
 \subsection{6.5 Several channels on one session}
 \label{utr26-sec-ex-channels}
@@ -626,6 +627,15 @@ The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
 
 \bibitem[6]{cite-jeffery-utr13}
 Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
+
+\bibitem[7]{cite-openssl}
+The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
+
+\bibitem[8]{cite-algharaibeh-utr26}
+Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
+
+\bibitem[9]{cite-rfc2104}
+H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
 
 \end{thebibliography}
 \end{document}

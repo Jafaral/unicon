@@ -30,6 +30,7 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <input class="search-box" id="nav-search" type="search" 
 placeholder="Search..." aria-label="Filter chapter list">
 <ol id="nav-toc">
+<li><a href="utr24.html">UTR 24: The Unicon Preprocessor</a></li>
 <li><a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon</a></li>
 <li class="current">UTR 27: Cryptographic Facilities in Unicon</li>
 </ol>
@@ -102,12 +103,12 @@ The feature is optional in the same sense as TLS. A build with OpenSSL reports
 </h2>
 <p>
 Unicon already links OpenSSL 
-[<a class="cite" href="#cite-openssl">4</a>] for mode 
+[<a class="cite" href="#cite-openssl">7</a>] for mode 
 <code>n</code>
  with 
 <code>e</code>
  -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to leave the language. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through; loading a key once and signing many messages is the same pattern as opening an SSH session once and deriving channels 
-[<a class="cite" href="#cite-algharaibeh-utr26">5</a>].
+[<a class="cite" href="#cite-algharaibeh-utr26">8</a>].
 </p>
 <p>
 No new external dependency is introduced. The implementation uses OpenSSL's EVP interface, which the encrypted-socket support already requires.
@@ -561,7 +562,7 @@ Symmetric decrypt
 </table>
 <p>
 HMAC is the construction of RFC 2104 
-[<a class="cite" href="#cite-rfc2104">6</a>] over the digest named by 
+[<a class="cite" href="#cite-rfc2104">9</a>] over the digest named by 
 <code>alg=</code>
 . Algorithm and cipher names are OpenSSL's own (
 <code>sha256</code>
@@ -1775,19 +1776,28 @@ References
 <li id="cite-jeffery-utr15" value="1">
 Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
 </li>
-<li id="cite-libssh" value="2">
+<li id="cite-jeffery-utr8" value="2">
+Clinton Jeffery. &quot;Unicon Language Reference&quot;. doc/unicon/utr8.html.
+</li>
+<li id="cite-alexander-jcon-preproc" value="3">
+Bob Alexander. &quot;Preprocessor for Jcon&quot;. Basis for Unicon's preproce.icn.
+</li>
+<li id="cite-jeffery-ib-preproc" value="4">
+Clinton Jeffery. &quot;The Unicon Compiler&quot;. Course notes, doc/ib/p3-unicon.tex, section &quot;The Unicon Preprocessor&quot;.
+</li>
+<li id="cite-libssh" value="5">
 The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
 </li>
-<li id="cite-jeffery-utr13" value="3">
+<li id="cite-jeffery-utr13" value="6">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
-<li id="cite-openssl" value="4">
+<li id="cite-openssl" value="7">
 The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
 </li>
-<li id="cite-algharaibeh-utr26" value="5">
+<li id="cite-algharaibeh-utr26" value="8">
 Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
 </li>
-<li id="cite-rfc2104" value="6">
+<li id="cite-rfc2104" value="9">
 H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
 </li>
 </ol></div>
