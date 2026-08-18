@@ -18,7 +18,7 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <script defer src="_static/theme-switcher.js"></script>
 </head><body>
 <div class="layout">
-<nav class="sidebar" aria-label="Book contents">
+<nav class="sidebar" aria-label="Report contents">
 <div class="book-title"><a href="index.html">Unicon Technical Reports</a></div>
 <label class="search-hint" for="theme-select">Theme</label>
 <select class="search-box" id="theme-select" aria-label="Color theme">
@@ -26,21 +26,61 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <option value="classic">classic</option>
 <option value="dark">dark</option>
 </select>
-<p class="search-hint">Filter chapters; Enter for full search</p>
+<p class="search-hint">Filter sections; Enter for full search</p>
 <input class="search-box" id="nav-search" type="search" 
-placeholder="Search..." aria-label="Filter chapter list">
+placeholder="Search..." aria-label="Filter section list">
 <ol id="nav-toc">
-<li><a href="utr24.html">UTR 24: The Unicon Preprocessor</a></li>
-<li><a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon</a></li>
-<li class="current">UTR 27: Cryptographic Facilities in Unicon</li>
+<li class="toc-l1"><a href="#sec-intro">1. Introduction
+</a></li>
+<li class="toc-l1"><a href="#sec-motivation">2. Motivation
+</a></li>
+<li class="toc-l1"><a href="#sec-principles">3. Design principles
+</a></li>
+<li class="toc-l1"><a href="#sec-modes">4. Modes
+</a></li>
+<li class="toc-l1"><a href="#sec-ops">5. Operations
+</a></li>
+<li class="toc-l1"><a href="#sec-attrs">6. Attributes
+</a></li>
+<li class="toc-l2"><a href="#sec-attrs-tls">6.1 TLS / DTLS attributes
+</a></li>
+<li class="toc-l2"><a href="#sec-attrs-crypto">6.2 Crypto attributes
+</a></li>
+<li class="toc-l2"><a href="#sec-attrs-shared">6.3 Shared names with SSH
+</a></li>
+<li class="toc-l1"><a href="#sec-handles">7. Material handles
+</a></li>
+<li class="toc-l1"><a href="#sec-examples">8. Examples
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-hash">8.1 Hash
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-hmac">8.2 HMAC
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-sign">8.3 Sign and verify
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-enc">8.4 Symmetric encrypt and decrypt
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-file">8.5 File encrypt and decrypt
+</a></li>
+<li class="toc-l2"><a href="#sec-ex-tls">8.6 TLS identity reuse and DTLS
+</a></li>
+<li class="toc-l1"><a href="#sec-io">9. I/O and 
+<code>Attrib()</code>
+</a></li>
+<li class="toc-l1"><a href="#sec-errors">10. Error handling
+</a></li>
+<li class="toc-l1"><a href="#sec-build">11. Build integration
+</a></li>
+<li class="toc-l1"><a href="#sec-status">12. Status and remaining work
+</a></li>
+<li class="toc-l1"><a href="#sec-coverage">Appendix: test coverage
+</a></li>
+<li class="toc-l1"><a href="#references">References
+</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
 <div class="main">
-<div class="prevnext">
-<a href="utr26.html">&larr; UTR 26: Native SSH and SFTP Support in Unicon</a>
-<span></span>
-</div>
 <header class="report-masthead">
 <h1 class="report-title">Cryptographic Facilities in Unicon</h1>
 <p class="report-authors">Jafar Al-Gharaibeh</p>
@@ -103,12 +143,12 @@ The feature is optional in the same sense as TLS. A build with OpenSSL reports
 </h2>
 <p>
 Unicon already links OpenSSL 
-[<a class="cite" href="#cite-openssl">7</a>] for mode 
+[<a class="cite" href="#cite-openssl">4</a>] for mode 
 <code>n</code>
  with 
 <code>e</code>
  -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to leave the language. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through; loading a key once and signing many messages is the same pattern as opening an SSH session once and deriving channels 
-[<a class="cite" href="#cite-algharaibeh-utr26">8</a>].
+[<a class="cite" href="#cite-algharaibeh-utr26">5</a>].
 </p>
 <p>
 No new external dependency is introduced. The implementation uses OpenSSL's EVP interface, which the encrypted-socket support already requires.
@@ -562,7 +602,7 @@ Symmetric decrypt
 </table>
 <p>
 HMAC is the construction of RFC 2104 
-[<a class="cite" href="#cite-rfc2104">9</a>] over the digest named by 
+[<a class="cite" href="#cite-rfc2104">6</a>] over the digest named by 
 <code>alg=</code>
 . Algorithm and cipher names are OpenSSL's own (
 <code>sha256</code>
@@ -1776,35 +1816,22 @@ References
 <li id="cite-jeffery-utr15" value="1">
 Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
 </li>
-<li id="cite-jeffery-utr8" value="2">
-Clinton Jeffery. &quot;Unicon Language Reference&quot;. doc/unicon/utr8.html.
-</li>
-<li id="cite-alexander-jcon-preproc" value="3">
-Bob Alexander. &quot;Preprocessor for Jcon&quot;. Basis for Unicon's preproce.icn.
-</li>
-<li id="cite-jeffery-ib-preproc" value="4">
-Clinton Jeffery. &quot;The Unicon Compiler&quot;. Course notes, doc/ib/p3-unicon.tex, section &quot;The Unicon Preprocessor&quot;.
-</li>
-<li id="cite-libssh" value="5">
+<li id="cite-libssh" value="2">
 The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
 </li>
-<li id="cite-jeffery-utr13" value="6">
+<li id="cite-jeffery-utr13" value="3">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
-<li id="cite-openssl" value="7">
+<li id="cite-openssl" value="4">
 The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
 </li>
-<li id="cite-algharaibeh-utr26" value="8">
+<li id="cite-algharaibeh-utr26" value="5">
 Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
 </li>
-<li id="cite-rfc2104" value="9">
+<li id="cite-rfc2104" value="6">
 H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
 </li>
 </ol></div>
-<div class="prevnext">
-<a href="utr26.html">&larr; UTR 26: Native SSH and SFTP Support in Unicon</a>
-<span></span>
-</div>
 <footer class="footer" role="contentinfo">
 &copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr27.pdf">pdf</a> | <a href="_sources/utr27.rst.txt" rel="nofollow">source</a>
 </footer>

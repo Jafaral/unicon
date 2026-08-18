@@ -42,7 +42,12 @@ Implementation-oriented LaTeX (parts 1–3, appendices) for *The Icon Programmin
 
 ## Unicon Technical Reports (UTRs)
 
-Numbered project reports (UTR #1, UTR #2, …). HTML, PDF, and office exports may live under `doc/utr/`, `doc/unicon/`, or `doc/udb/` depending on age and format. The [Technical Reports](https://unicon.sourceforge.io/reports.html) page on [unicon.sourceforge.io](https://unicon.sourceforge.io/) lists reports with links to PDFs/HTML on unicon.org and elsewhere. RST sources listed in `utr/utr.manifest` are built by `make -C doc/utr html` and indexed at [utr/html/](utr/html/).
+On GitHub Pages the RST report catalog is at
+[doc/utr/html/](utr/html/)
+(e.g. `https://…/unicon/doc/utr/html/`). RST sources listed in
+`utr/utr.manifest` are built by `make -C doc/utr html`.
+
+Numbered project reports (UTR #1, UTR #2, …). HTML, PDF, and office exports may live under `doc/utr/`, `doc/unicon/`, or `doc/udb/` depending on age and format. The [Technical Reports](https://unicon.sourceforge.io/reports.html) page on [unicon.sourceforge.io](https://unicon.sourceforge.io/) lists reports with links to PDFs/HTML on unicon.org and elsewhere.
 
 Standard Markdown tables use equal column widths, so a narrow “#” column still wastes space. Each report below is one line: **UTR #N** — format links — *title*.
 
@@ -61,9 +66,6 @@ Standard Markdown tables use equal column widths, so a narrow “#” column sti
 - **UTR #13** — [OpenDocument](utr/utr13.odt) — *The Unicon Messaging Facilities*
 - **UTR #14** — [Word](utr/utr14.docx) — *Unicon Threads User's Guide and Reference Manual*
 - **UTR #21** — [HTML](utr/utr21.html) — *Configuring and Building Version 13 of Unicon*
-- **UTR #22** — [LaTeX](utr/utr22.tex) — *Unicon OpenGL 2D and 2D/3D Graphics User's Guide*
-- **UTR #23** — [LaTeX](utr/utr23.tex) — *Unicon Unit Testing Framework User's Guide*
-- **UTR #24** — [RST](utr/utr24.rst), [HTML](utr/html/utr24.html) — *The Unicon Preprocessor* (architecture, directives, triple-quoted strings, function-like macros, asserts, and how to extend it; build with `make -C doc/utr html`)
 - **UTR #26** — [RST](utr/utr26.rst), [HTML](utr/html/utr26.html) — *Native SSH and SFTP Support in Unicon* (libssh-backed client)
 - **UTR #27** — [RST](utr/utr27.rst), [HTML](utr/html/utr27.html) — *Cryptographic Facilities in Unicon* (hash, HMAC, sign, encrypt, TLS/DTLS)
 
