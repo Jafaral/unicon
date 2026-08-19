@@ -639,9 +639,13 @@ writes. Writes to a transport-only session (no channel) fail with
 
 Status on SSH files is a non-destructive peek through ``[ ]``,
 not ``Attrib()``. ``Attrib()`` has no SSH setters. Unknown names
-raise 1321. An unpopulated field fails (it is not ``&null``).
-``key(c)`` generates the names that currently have a value --
-the same split as messaging: ``!`` generates content,
+raise 1321. An unpopulated field fails. Boolean fields that
+answered succeed with ``"yes"`` or ``&null`` (never ``"no"``).
+``key(c)`` generates every answerable field, including false
+booleans. ``c["*"]`` snapshots those fields under one lock.
+Peeking a closed handle is error 174; ``close()`` keeps the
+original name so ``image(c)`` remains ``file(user@host)``.
+The same split as messaging: ``!`` generates content,
 ``key()`` generates names. Channels keep line-generating
 ``!`` (they carry ``Fs_Socket``). Transport-only sessions
 (``channel=no``) are not line streams; ``!s`` fails.
@@ -667,8 +671,8 @@ Walk members with ``!s["authmethods"]``.
      - Accumulated stderr (a peek, not a drain). Fails if empty.
        Not gated on EOF.
    * - ``eof``
-     - ``1`` once the remote sent EOF, else ``0``. Fails on a
-       transport-only session with no channel.
+     - ``"yes"`` once the remote sent EOF, else ``&null``.
+       Fails on a transport-only session with no channel.
    * - ``bytesread`` / ``byteswritten``
      - Running counters (integers).
 
@@ -700,7 +704,7 @@ Walk members with ``!s["authmethods"]``.
    * - ``serverbanner``
      - Server identification string, e.g. ``SSH-2.0-OpenSSH_9.6``
    * - ``connected``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
 
 .. code-block:: unicon
 

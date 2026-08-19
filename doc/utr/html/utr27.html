@@ -980,13 +980,44 @@ Without
 </p>
 <ol start="1302">
 <li>
-An unpopulated field fails. 
-<code>key(h)</code>
- generates the names
+An unpopulated field fails. A boolean field that 
+<em>
+did
+</em>
 </li>
 </ol>
 <p>
-that currently have a value.
+answer succeeds: 
+<code>&quot;yes&quot;</code>
+ for true, 
+<code>&amp;null</code>
+ for false -- never 
+<code>&quot;no&quot;</code>
+, which would make 
+<code>if h[&quot;expired&quot;]</code>
+ succeed on a valid certificate. 
+<code>key(h)</code>
+ generates every 
+<em>
+answerable
+</em>
+ field, including false booleans, so any 
+<code>k</code>
+ from 
+<code>key(h)</code>
+ makes 
+<code>h[k]</code>
+ succeed. Dump with 
+<code>image(h[k])</code>
+ so 
+<code>&amp;null</code>
+ is visible.
+</p>
+<p>
+<code>h[&quot;*&quot;]</code>
+ returns a table of those same fields captured under one lock. No status field is named 
+<code>*</code>
+.
 </p>
 <p>
 <code>h[&quot;type&quot;]</code>
@@ -1006,7 +1037,9 @@ that currently have a value.
 <code>IP:1.2.3.4</code>
 ). 
 <code>conn[&quot;certchain&quot;]</code>
- is a list of PEM strings. A single item is still a list of length 1.
+ is a list of PEM strings. A single item is still a list of length 1. 
+<code>h[&quot;op&quot;]</code>
+ is always populated on an operation handle.
 </p>
 <p>
 <strong>
@@ -1105,9 +1138,9 @@ Validity timestamps (
 <code>expired</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 </td>
 </tr>
 <tr>
@@ -1169,10 +1202,10 @@ Digest name:
 </tr>
 <tr>
 <td>
-<code>digest</code>
+<code>hash</code>
 </td>
 <td>
-Current digest bytes without finalizing
+Current digest / MAC / signature bytes without
 </td>
 </tr>
 <tr>
@@ -1226,6 +1259,14 @@ Value
 </tr>
 <tr>
 <td>
+<code>hash</code>
+</td>
+<td>
+Running HMAC or signature bytes (same copy-and-finalize
+</td>
+</tr>
+<tr>
+<td>
 <code>alg</code>
 </td>
 <td>
@@ -1247,9 +1288,9 @@ Bytes written (integer)
 <code>verified</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
  after a verify; unpopulated before
 </td>
 </tr>
@@ -1411,9 +1452,9 @@ Peer SANs as a list (
 Peer validity; 
 <code>expired</code>
  is 
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 </td>
 </tr>
 <tr>
@@ -1421,9 +1462,10 @@ Peer validity;
 <code>certverified</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
+. Always populated: with
 </td>
 </tr>
 <tr>
@@ -1431,32 +1473,40 @@ Peer validity;
 <code>verifyresult</code>
 </td>
 <td>
-OpenSSL verify string: 
 <code>ok</code>
-, or e.g.
-</td>
-</tr>
-<tr>
-<td>
-<code>handshakestate</code>
-</td>
-<td>
-<code>SSL negotiation finished successfully</code>
- after handshake
+, 
+<code>expired</code>
+, 
+<code>self-signed</code>
+, 
+<code>untrusted-CA</code>
+,
 </td>
 </tr>
 <tr>
 <td>
 <code>hostnamematch</code>
- / 
-<code>alert</code>
 </td>
 <td>
-Reserved; currently always unpopulated
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+: did CN/SAN match the requested
 </td>
 </tr>
 </tbody>
 </table>
+<p>
+Handshake failure means 
+<code>open()</code>
+ failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via 
+<code>&amp;errornumber</code>
+ 1330--1335. 
+<code>alert</code>
+ and 
+<code>handshakestate</code>
+ are not peek fields.
+</p>
 <pre><code class="language-unicon">cert := open(&quot;client.crt&quot;, &quot;e&quot;) | stop(&amp;errortext)
 write(&quot;material &quot;, cert[&quot;type&quot;], &quot; &quot;, cert[&quot;subject&quot;])
 every name := !cert[&quot;san&quot;] do
@@ -1466,7 +1516,7 @@ every k := key(cert) do
 
 h := open(&quot;sha256&quot;, &quot;eh&quot;) | stop(&amp;errortext)
 write(h, &quot;abc&quot;)
-write(&quot;op=&quot;, h[&quot;op&quot;], &quot; peek digest *&quot;, *h[&quot;digest&quot;])
+write(&quot;op=&quot;, h[&quot;op&quot;], &quot; peek hash *&quot;, *h[&quot;hash&quot;])
 close(h)
 
 conn := open(&quot;host:443&quot;, &quot;ne&quot;, &quot;ca=unicon-ca.crt&quot;) | stop(&amp;errortext)

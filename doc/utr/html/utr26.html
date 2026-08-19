@@ -1433,11 +1433,23 @@ Status on SSH files is a non-destructive peek through
 <code>Attrib()</code>
 . 
 <code>Attrib()</code>
- has no SSH setters. Unknown names raise 1321. An unpopulated field fails (it is not 
+ has no SSH setters. Unknown names raise 1321. An unpopulated field fails. Boolean fields that answered succeed with 
+<code>&quot;yes&quot;</code>
+ or 
 <code>&amp;null</code>
+ (never 
+<code>&quot;no&quot;</code>
 ). 
 <code>key(c)</code>
- generates the names that currently have a value -- the same split as messaging: 
+ generates every answerable field, including false booleans. 
+<code>c[&quot;*&quot;]</code>
+ snapshots those fields under one lock. Peeking a closed handle is error 174; 
+<code>close()</code>
+ keeps the original name so 
+<code>image(c)</code>
+ remains 
+<code>file(user@host)</code>
+. The same split as messaging: 
 <code>!</code>
  generates content, 
 <code>key()</code>
@@ -1511,10 +1523,10 @@ Accumulated stderr (a peek, not a drain). Fails if empty.
 <code>eof</code>
 </td>
 <td>
-<code>1</code>
+<code>&quot;yes&quot;</code>
  once the remote sent EOF, else 
-<code>0</code>
-. Fails on a
+<code>&amp;null</code>
+.
 </td>
 </tr>
 <tr>
@@ -1621,9 +1633,9 @@ Server identification string, e.g.
 <code>connected</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 </td>
 </tr>
 </tbody>

@@ -421,7 +421,7 @@ SFTP regular files use \texttt{sftp\_write()} on the same path.
 \subsection{8.2 Peek fields (\texttt{[~]} and \texttt{key()})}
 \label{utr26-sec-attrib}
 
-Status on SSH files is a non-destructive peek through \texttt{[~]}, not \texttt{Attrib()}. \texttt{Attrib()} has no SSH setters. Unknown names raise 1321. An unpopulated field fails (it is not \texttt{\&null}). \texttt{key(c)} generates the names that currently have a value -- the same split as messaging: \texttt{!} generates content, \texttt{key()} generates names. Channels keep line-generating \texttt{!} (they carry \texttt{Fs\_Socket}). Transport-only sessions (\texttt{channel=no}) are not line streams; \texttt{!s} fails.
+Status on SSH files is a non-destructive peek through \texttt{[~]}, not \texttt{Attrib()}. \texttt{Attrib()} has no SSH setters. Unknown names raise 1321. An unpopulated field fails. Boolean fields that answered succeed with \texttt{"yes"} or \texttt{\&null} (never \texttt{"no"}). \texttt{key(c)} generates every answerable field, including false booleans. \texttt{c["*"]} snapshots those fields under one lock. Peeking a closed handle is error 174; \texttt{close()} keeps the original name so \texttt{image(c)} remains \texttt{file(user@host)}. The same split as messaging: \texttt{!} generates content, \texttt{key()} generates names. Channels keep line-generating \texttt{!} (they carry \texttt{Fs\_Socket}). Transport-only sessions (\texttt{channel=no}) are not line streams; \texttt{!s} fails.
 
 
 A few fields are lists: one item is still a list of length 1. Walk members with \texttt{!s["authmethods"]}.
@@ -445,7 +445,7 @@ Name & Value \\
 \texttt{type} & \texttt{channel} or \texttt{sftp} \\
 \texttt{exitstatus} & Integer remote exit code. **Fails until the exit-status \\
 \texttt{stderr} & Accumulated stderr (a peek, not a drain). Fails if empty. \\
-\texttt{eof} & \texttt{1} once the remote sent EOF, else \texttt{0}. Fails on a \\
+\texttt{eof} & \texttt{"yes"} once the remote sent EOF, else \texttt{\&null}. \\
 \texttt{bytesread} / \texttt{byteswritten} & Running counters (integers). \\
 \end{longtable}
 
@@ -472,7 +472,7 @@ Name & Value \\
 \texttt{kex} & Key-exchange algorithm: \texttt{curve25519-sha256}, \\
 \texttt{mac} & Inbound MAC: \texttt{hmac-sha2-256}, \texttt{hmac-sha2-512} \\
 \texttt{serverbanner} & Server identification string, e.g. \texttt{SSH-2.0-OpenSSH\_9.6} \\
-\texttt{connected} & \texttt{yes} or \texttt{no} \\
+\texttt{connected} & \texttt{"yes"} or \texttt{\&null} \\
 \end{longtable}
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]

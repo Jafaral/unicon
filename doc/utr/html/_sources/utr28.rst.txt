@@ -290,8 +290,10 @@ Output::
 Assignments in one call are applied together, preserving
 ``iface`` then ``join`` order. Status is peeked with
 ``f["name"]``; ``Attrib()`` only assigns. Unknown names raise
-1310. An unpopulated field fails. ``key(f)`` generates
-populated field names.
+1310. An unpopulated field fails. Boolean fields that answered
+succeed with ``"yes"`` or ``&null`` (never ``"no"``).
+``key(f)`` generates every answerable field. ``f["*"]``
+snapshots those fields under one lock.
 
 TCP, UDP, multicast, and raw sockets share one peek table
 (``sock_peek``). ``join``, ``leave``, and ``source`` are verbs,
@@ -313,18 +315,18 @@ is still a list of length 1.
      - List of joined groups, e.g. ``239.1.1.1``; SSM as
        ``192.0.2.1@239.1.1.1``. Unpopulated before any ``join=``
    * - ``mcastloop``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
    * - ``reuseaddr`` / ``reuseport``
-     - ``yes`` or ``no`` (``reuseport`` may be unpopulated)
+     - ``"yes"`` or ``&null`` (``reuseport`` may be unpopulated)
    * - ``broadcast``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
    * - ``rcvbuf`` / ``sndbuf``
      - Buffer sizes in bytes (integers)
    * - ``proto``
      - IP protocol number: ``1`` (ICMP), ``2`` (IGMP), ``89``
        (OSPF); typical on raw sockets
    * - ``hdrincl``
-     - ``yes`` or ``no``; typical on raw sockets
+     - ``"yes"`` or ``&null``; typical on raw sockets
 
 .. code-block:: unicon
 

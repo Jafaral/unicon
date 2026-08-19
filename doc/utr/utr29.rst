@@ -223,7 +223,7 @@ fields fail, ``Attrib()`` only assigns. Raw sockets add
      - IP protocol number from ``proto=``: ``1`` (``icmp``),
        ``2`` (``igmp``), ``89`` (``ospf``)
    * - ``hdrincl``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
    * - ``ttl``
      - Hop limit (integer), e.g. ``64``
    * - ``iface``
@@ -233,7 +233,7 @@ fields fail, ``Attrib()`` only assigns. Raw sockets add
        until ``join=``
    * - ``mcastloop`` / ``reuseaddr`` / ``reuseport`` /
        ``broadcast``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
    * - ``rcvbuf`` / ``sndbuf``
      - Buffer sizes in bytes (integers)
 

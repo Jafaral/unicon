@@ -248,10 +248,10 @@ Assignments in one call are applied together, preserving \texttt{iface} then \te
 
 \begin{enumerate}
 \item 
-An unpopulated field fails. \texttt{key(f)} generates
+An unpopulated field fails. Boolean fields that answered
 \end{enumerate}
 
-populated field names.
+succeed with \texttt{"yes"} or \texttt{\&null} (never \texttt{"no"}). \texttt{key(f)} generates every answerable field. \texttt{f["*"]} snapshots those fields under one lock.
 
 
 TCP, UDP, multicast, and raw sockets share one peek table (\texttt{sock\_peek}). \texttt{join}, \texttt{leave}, and \texttt{source} are verbs, not peek fields. \texttt{proto} is stored at \texttt{socket()} time on raw sockets [9]. \texttt{f["groups"]} is a list of joined groups (SSM as \texttt{source@group}); a single group is still a list of length 1.
@@ -272,12 +272,12 @@ Name & Value \\
 \texttt{ttl} & Hop limit (integer), typically \texttt{1} .. \texttt{255} \\
 \texttt{iface} & Dotted IPv4 address (\texttt{127.0.0.1}) or IPv6 ifindex (\texttt{1}) \\
 \texttt{groups} & List of joined groups, e.g. \texttt{239.1.1.1}; SSM as \\
-\texttt{mcastloop} & \texttt{yes} or \texttt{no} \\
-\texttt{reuseaddr} / \texttt{reuseport} & \texttt{yes} or \texttt{no} (\texttt{reuseport} may be unpopulated) \\
-\texttt{broadcast} & \texttt{yes} or \texttt{no} \\
+\texttt{mcastloop} & \texttt{"yes"} or \texttt{\&null} \\
+\texttt{reuseaddr} / \texttt{reuseport} & \texttt{"yes"} or \texttt{\&null} (\texttt{reuseport} may be unpopulated) \\
+\texttt{broadcast} & \texttt{"yes"} or \texttt{\&null} \\
 \texttt{rcvbuf} / \texttt{sndbuf} & Buffer sizes in bytes (integers) \\
 \texttt{proto} & IP protocol number: \texttt{1} (ICMP), \texttt{2} (IGMP), \texttt{89} \\
-\texttt{hdrincl} & \texttt{yes} or \texttt{no}; typical on raw sockets \\
+\texttt{hdrincl} & \texttt{"yes"} or \texttt{\&null}; typical on raw sockets \\
 \end{longtable}
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]

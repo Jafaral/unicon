@@ -523,13 +523,21 @@ Assignments in one call are applied together, preserving
 </p>
 <ol start="1310">
 <li>
-An unpopulated field fails. 
-<code>key(f)</code>
- generates
+An unpopulated field fails. Boolean fields that answered
 </li>
 </ol>
 <p>
-populated field names.
+succeed with 
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+ (never 
+<code>&quot;no&quot;</code>
+). 
+<code>key(f)</code>
+ generates every answerable field. 
+<code>f[&quot;*&quot;]</code>
+ snapshots those fields under one lock.
 </p>
 <p>
 TCP, UDP, multicast, and raw sockets share one peek table (
@@ -601,9 +609,9 @@ List of joined groups, e.g.
 <code>mcastloop</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 </td>
 </tr>
 <tr>
@@ -613,9 +621,9 @@ List of joined groups, e.g.
 <code>reuseport</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
  (
 <code>reuseport</code>
  may be unpopulated)
@@ -626,9 +634,9 @@ List of joined groups, e.g.
 <code>broadcast</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 </td>
 </tr>
 <tr>
@@ -659,9 +667,9 @@ IP protocol number:
 <code>hdrincl</code>
 </td>
 <td>
-<code>yes</code>
+<code>&quot;yes&quot;</code>
  or 
-<code>no</code>
+<code>&amp;null</code>
 ; typical on raw sockets
 </td>
 </tr>

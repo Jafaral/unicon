@@ -330,14 +330,22 @@ SSH uses ``hostkeyfile=`` (OpenSSH ``known_hosts``).
 ``h["name"]`` / ``conn["name"]`` is a non-destructive get.
 ``Attrib()`` only assigns in the idle window (``op=``, ``alg=``,
 ``sig=``, ...); a bare name is not a query. Unknown names raise
-1302. An unpopulated field fails. ``key(h)`` generates the names
-that currently have a value.
+1302. An unpopulated field fails. A boolean field that *did*
+answer succeeds: ``"yes"`` for true, ``&null`` for false -- never
+``"no"``, which would make ``if h["expired"]`` succeed on a valid
+certificate. ``key(h)`` generates every *answerable* field,
+including false booleans, so any ``k`` from ``key(h)`` makes
+``h[k]`` succeed. Dump with ``image(h[k])`` so ``&null`` is
+visible.
+
+``h["*"]`` returns a table of those same fields captured under
+one lock. No status field is named ``*``.
 
 ``h["type"]`` is a role label (``key``, ``cert``, ``key,cert``),
 not a list. ``h["san"]`` and ``conn["san"]`` are lists of
 SAN strings (``DNS:host``, ``IP:1.2.3.4``). ``conn["certchain"]``
 is a list of PEM strings. A single item is still a list of
-length 1.
+length 1. ``h["op"]`` is always populated on an operation handle.
 
 **Material** (mode ``e`` / ``er``, no ``op=``).
 
@@ -364,7 +372,7 @@ length 1.
    * - ``notbefore`` / ``notafter``
      - Validity timestamps (``2024-01-01T00:00:00Z``)
    * - ``expired``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``
    * - ``fingerprint``
      - SHA-256 of the cert or public key (hex)
 
@@ -383,9 +391,10 @@ Certificate names fail on a key-only handle.
      - Digest name: ``SHA256`` (default), ``SHA512``, ``SHA1``,
        ``SHA3-256``. ``alg=`` at open uses the lowercase OpenSSL
        spelling (``sha256``)
-   * - ``digest``
-     - Current digest bytes without finalizing
-       (``EVP_MD_CTX_copy_ex``)
+   * - ``hash``
+     - Current digest / MAC / signature bytes without
+       finalizing (``EVP_MD_CTX_copy_ex``). Unpopulated until
+       the first ``write()``. Not populated on ``verify``.
    * - ``bytecount``
      - Bytes written so far (integer)
    * - ``blocksize`` / ``digestsize``
@@ -400,13 +409,16 @@ Certificate names fail on a key-only handle.
      - Value
    * - ``op``
      - ``hmac``, ``sign``, or ``verify``
+   * - ``hash``
+     - Running HMAC or signature bytes (same copy-and-finalize
+       peek). Unpopulated on ``verify`` -- use ``verified``.
    * - ``alg``
      - Digest used for HMAC or for the signature: ``SHA256``,
        ``SHA512``, ``SHA1``
    * - ``bytecount``
      - Bytes written (integer)
    * - ``verified``
-     - ``yes`` or ``no`` after a verify; unpopulated before
+     - ``"yes"`` or ``&null`` after a verify; unpopulated before
 
 **Encrypt / decrypt.**
 
@@ -451,16 +463,25 @@ attributes.
    * - ``san``
      - Peer SANs as a list (``DNS:host.example``)
    * - ``notbefore`` / ``notafter`` / ``expired``
-     - Peer validity; ``expired`` is ``yes`` or ``no``
+     - Peer validity; ``expired`` is ``"yes"`` or ``&null``
    * - ``certverified``
-     - ``yes`` or ``no``
+     - ``"yes"`` or ``&null``. Always populated: with
+       ``verifyPeer=yes`` it is ``"yes"`` (otherwise ``open()``
+       failed). With ``verifyPeer=no`` it reports what strict
+       verification would have said.
    * - ``verifyresult``
-     - OpenSSL verify string: ``ok``, or e.g.
-       ``certificate has expired``
-   * - ``handshakestate``
-     - ``SSL negotiation finished successfully`` after handshake
-   * - ``hostnamematch`` / ``alert``
-     - Reserved; currently always unpopulated
+     - ``ok``, ``expired``, ``self-signed``, ``untrusted-CA``,
+       ``hostname-mismatch``, or ``revoked``. Always populated.
+   * - ``hostnamematch``
+     - ``"yes"`` or ``&null``: did CN/SAN match the requested
+       host, independent of chain trust. Always populated when
+       a peer certificate and hostname are available.
+
+Handshake failure means ``open()`` failed; there is no handle to
+subscript. Distinguish expired / untrusted CA / hostname
+mismatch / no shared cipher / protocol version via
+``&errornumber`` 1330--1335. ``alert`` and ``handshakestate``
+are not peek fields.
 
 .. code-block:: unicon
 
@@ -473,7 +494,7 @@ attributes.
 
    h := open("sha256", "eh") | stop(&errortext)
    write(h, "abc")
-   write("op=", h["op"], " peek digest *", *h["digest"])
+   write("op=", h["op"], " peek hash *", *h["hash"])
    close(h)
 
    conn := open("host:443", "ne", "ca=unicon-ca.crt") | stop(&errortext)

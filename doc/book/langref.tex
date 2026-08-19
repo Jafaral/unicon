@@ -1770,11 +1770,13 @@ Cryptographic handles, SSH files, TLS sockets, and network sockets may
 be subscripted by a status field name for a non-destructive peek
 (\texttt{h["type"]}, \texttt{c["exitstatus"]}, \texttt{f["ttl"]},
 \texttt{conn["cipher"]}); an unknown name is a runtime error and an
-unpopulated field fails.
+unpopulated field fails. Boolean peeks succeed with \texttt{"yes"} or
+\texttt{\&null}. \texttt{f["*"]} is a table snapshot of the answerable
+fields. Peeking a closed handle is error 174.
 \texttt{f["groups"]}, \texttt{s["authmethods"]}, \texttt{h["san"]}, and
 \texttt{conn["certchain"]} produce a list (a single item is still a
-list of length 1); other peeks are a string or integer.
-\texttt{key(f)} generates the populated field names, matching
+list of length 1); other peeks are a string, integer, or \texttt{\&null}.
+\texttt{key(f)} generates the answerable field names, matching
 \texttt{key()} on a messaging connection.
 
 Subsectioning works on strings and lists. For strings, the subsection is
@@ -1935,7 +1937,7 @@ For a cryptographic handle, assignments such as \texttt{op=}, \texttt{alg=},
 \texttt{cipher=}, \texttt{iv=}, and \texttt{sig=} are allowed only in
 the idle window between operations. Status including \texttt{type}
 (material role), \texttt{op} (operation), certificate identity, and a
-non-destructive hash \texttt{digest} peek uses \texttt{h["\textit{name}"]}.
+non-destructive hash \texttt{hash} peek uses \texttt{h["\textit{name}"]}.
 For a co-expression or list, integer attribute codes from
 \texttt{threadh.icn} query or set thread inbox/outbox and channel limits
 (see Chapter~8; requires Concurrent).
@@ -2628,7 +2630,7 @@ field names of record \texttt{R}.
 \texttt{key(D)} generates the string key values of a DBM database \texttt{D}.
 \texttt{key(M)} generates header names on a messaging connection
 \texttt{M} (including \texttt{Status-Code} and \texttt{Reason-Phrase}).
-\texttt{key(f)} generates populated status-field names on a cryptographic
+\texttt{key(f)} generates answerable status-field names on a cryptographic
 handle, SSH file, TLS socket, or network socket; \texttt{f[k]} peeks
 the corresponding value.
 

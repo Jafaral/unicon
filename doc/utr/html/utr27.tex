@@ -230,13 +230,16 @@ Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation
 
 \begin{enumerate}
 \item 
-An unpopulated field fails. \texttt{key(h)} generates the names
+An unpopulated field fails. A boolean field that \emph{did}
 \end{enumerate}
 
-that currently have a value.
+answer succeeds: \texttt{"yes"} for true, \texttt{\&null} for false -- never \texttt{"no"}, which would make \texttt{if~h["expired"]} succeed on a valid certificate. \texttt{key(h)} generates every \emph{answerable} field, including false booleans, so any \texttt{k} from \texttt{key(h)} makes \texttt{h[k]} succeed. Dump with \texttt{image(h[k])} so \texttt{\&null} is visible.
 
 
-\texttt{h["type"]} is a role label (\texttt{key}, \texttt{cert}, \texttt{key,cert}), not a list. \texttt{h["san"]} and \texttt{conn["san"]} are lists of SAN strings (\texttt{DNS:host}, \texttt{IP:1.2.3.4}). \texttt{conn["certchain"]} is a list of PEM strings. A single item is still a list of length 1.
+\texttt{h["*"]} returns a table of those same fields captured under one lock. No status field is named \texttt{*}.
+
+
+\texttt{h["type"]} is a role label (\texttt{key}, \texttt{cert}, \texttt{key,cert}), not a list. \texttt{h["san"]} and \texttt{conn["san"]} are lists of SAN strings (\texttt{DNS:host}, \texttt{IP:1.2.3.4}). \texttt{conn["certchain"]} is a list of PEM strings. A single item is still a list of length 1. \texttt{h["op"]} is always populated on an operation handle.
 
 
 \textbf{Material} (mode \texttt{e} / \texttt{er}, no \texttt{op=}).
@@ -260,7 +263,7 @@ Name & Value \\
 \texttt{subject} / \texttt{issuer} & Certificate DN, OpenSSL oneline \\
 \texttt{san} & List of Subject Alternative Names (\texttt{DNS:localhost}, \\
 \texttt{notbefore} / \texttt{notafter} & Validity timestamps (\texttt{2024-01-01T00:00:00Z}) \\
-\texttt{expired} & \texttt{yes} or \texttt{no} \\
+\texttt{expired} & \texttt{"yes"} or \texttt{\&null} \\
 \texttt{fingerprint} & SHA-256 of the cert or public key (hex) \\
 \end{longtable}
 
@@ -285,7 +288,7 @@ Name & Value \\
 \endlastfoot
 \texttt{op} & \texttt{hash} \\
 \texttt{alg} & Digest name: \texttt{SHA256} (default), \texttt{SHA512}, \texttt{SHA1}, \\
-\texttt{digest} & Current digest bytes without finalizing \\
+\texttt{hash} & Current digest / MAC / signature bytes without \\
 \texttt{bytecount} & Bytes written so far (integer) \\
 \texttt{blocksize} / \texttt{digestsize} & Algorithm sizes (integers); SHA-256 is 64 / 32 \\
 \end{longtable}
@@ -307,9 +310,10 @@ Name & Value \\
 \hline
 \endlastfoot
 \texttt{op} & \texttt{hmac}, \texttt{sign}, or \texttt{verify} \\
+\texttt{hash} & Running HMAC or signature bytes (same copy-and-finalize \\
 \texttt{alg} & Digest used for HMAC or for the signature: \texttt{SHA256}, \\
 \texttt{bytecount} & Bytes written (integer) \\
-\texttt{verified} & \texttt{yes} or \texttt{no} after a verify; unpopulated before \\
+\texttt{verified} & \texttt{"yes"} or \texttt{\&null} after a verify; unpopulated before \\
 \end{longtable}
 
 
@@ -357,12 +361,14 @@ Name & Value \\
 \texttt{certchain} & List of PEMs \\
 \texttt{subject} / \texttt{issuer} & Peer DN, e.g. \texttt{/CN=host.example} \\
 \texttt{san} & Peer SANs as a list (\texttt{DNS:host.example}) \\
-\texttt{notbefore} / \texttt{notafter} / \texttt{expired} & Peer validity; \texttt{expired} is \texttt{yes} or \texttt{no} \\
-\texttt{certverified} & \texttt{yes} or \texttt{no} \\
-\texttt{verifyresult} & OpenSSL verify string: \texttt{ok}, or e.g. \\
-\texttt{handshakestate} & \texttt{SSL~negotiation~finished~successfully} after handshake \\
-\texttt{hostnamematch} / \texttt{alert} & Reserved; currently always unpopulated \\
+\texttt{notbefore} / \texttt{notafter} / \texttt{expired} & Peer validity; \texttt{expired} is \texttt{"yes"} or \texttt{\&null} \\
+\texttt{certverified} & \texttt{"yes"} or \texttt{\&null}. Always populated: with \\
+\texttt{verifyresult} & \texttt{ok}, \texttt{expired}, \texttt{self-signed}, \texttt{untrusted-CA}, \\
+\texttt{hostnamematch} & \texttt{"yes"} or \texttt{\&null}: did CN/SAN match the requested \\
 \end{longtable}
+
+
+Handshake failure means \texttt{open()} failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via \texttt{\&errornumber} 1330--1335. \texttt{alert} and \texttt{handshakestate} are not peek fields.
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 cert := open("client.crt", "e") | stop(&errortext)
@@ -374,7 +380,7 @@ every k := key(cert) do
 
 h := open("sha256", "eh") | stop(&errortext)
 write(h, "abc")
-write("op=", h["op"], " peek digest *", *h["digest"])
+write("op=", h["op"], " peek hash *", *h["hash"])
 close(h)
 
 conn := open("host:443", "ne", "ca=unicon-ca.crt") | stop(&errortext)

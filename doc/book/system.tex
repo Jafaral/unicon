@@ -893,7 +893,7 @@ Status is a non-destructive peek: \texttt{f["ttl"]}, \texttt{f["iface"]},
 \texttt{f["groups"]}, \texttt{f["proto"]}, \texttt{f["hdrincl"]}.
 \texttt{f["groups"]} is a list of joined group names (SSM as
 \texttt{source@group}); generate members with \texttt{!f["groups"]}.
-\texttt{key(f)} generates populated field names.
+\texttt{key(f)} generates answerable field names.
 
 \iconcode{
 \>   Attrib(f, "ttl=4") \\
@@ -1129,8 +1129,9 @@ SFTP. Closing the session invalidates every handle derived from it.
 Ordinary \texttt{read}/\texttt{writes} use the remote standard streams.
 \texttt{c["exitstatus"]}, \texttt{c["stderr"]}, and
 \texttt{c["eof"]} report the command's exit status, the current
-accumulated stderr (a peek, not a drain), and whether remote EOF has arrived.
-\texttt{key(c)} generates populated field names.
+accumulated stderr (a peek, not a drain), and whether remote EOF has arrived
+(\texttt{"yes"} or \texttt{\&null}).
+\texttt{key(c)} generates answerable field names.
 On a session, \texttt{s["authmethods"]} is a list of advertised
 method names; \texttt{s["kex"]} is the key-exchange algorithm.
 \texttt{receive(c)} yields ordered events as
@@ -1252,10 +1253,11 @@ role (\texttt{symkey}, \texttt{key}, \texttt{cert}, \ldots);
 \texttt{h["op"]} reports the operation (\texttt{hash}, \texttt{hmac},
 \texttt{sign}, \texttt{verify}, \texttt{encrypt}, \texttt{decrypt});
 \texttt{h["subject"]}, \texttt{h["san"]}, \texttt{h["notafter"]}, and
-\texttt{h["expired"]} introspect a certificate. On a hash handle, \texttt{h["digest"]} peeks
-the current digest without finalizing. On encrypt/decrypt,
+\texttt{h["expired"]} introspect a certificate. On a hash, HMAC, or
+sign handle, \texttt{h["hash"]} peeks
+the current digest, MAC, or signature without finalizing. On encrypt/decrypt,
 \texttt{h["iv"]} peeks the IV that was set or generated.
-\texttt{key(h)} generates populated field names.
+\texttt{key(h)} generates answerable field names.
 
 \section{Messaging Facilities}
 

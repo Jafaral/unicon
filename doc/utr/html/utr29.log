@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.19)  19 AUG 2026 05:41
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.19)  19 AUG 2026 22:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -527,7 +527,7 @@ ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx2074.600pk>
-Output written on utr29.pdf (17 pages, 161424 bytes).
+Output written on utr29.pdf (17 pages, 161426 bytes).
 PDF statistics:
  629 PDF objects out of 1000 (max. 8388607)
  199 compressed objects within 2 object streams
