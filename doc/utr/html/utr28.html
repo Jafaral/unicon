@@ -537,7 +537,11 @@ succeed with
 <code>key(f)</code>
  generates every answerable field. 
 <code>f[&quot;*&quot;]</code>
- snapshots those fields under one lock.
+ snapshots those fields under one lock. Peeking a closed handle is error 174. 
+<code>key(f)</code>
+ that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, 
+<code>close()</code>
+ makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error.
 </p>
 <p>
 TCP, UDP, multicast, and raw sockets share one peek table (

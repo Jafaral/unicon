@@ -226,17 +226,10 @@ Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation
 \subsection{6.4 Status peek (\texttt{[~]} and \texttt{key()})}
 \label{utr27-sec-peek}
 
-\texttt{h["name"]} / \texttt{conn["name"]} is a non-destructive get. \texttt{Attrib()} only assigns in the idle window (\texttt{op=}, \texttt{alg=}, \texttt{sig=}, ...); a bare name is not a query. Unknown names raise
-
-\begin{enumerate}
-\item 
-An unpopulated field fails. A boolean field that \emph{did}
-\end{enumerate}
-
-answer succeeds: \texttt{"yes"} for true, \texttt{\&null} for false -- never \texttt{"no"}, which would make \texttt{if~h["expired"]} succeed on a valid certificate. \texttt{key(h)} generates every \emph{answerable} field, including false booleans, so any \texttt{k} from \texttt{key(h)} makes \texttt{h[k]} succeed. Dump with \texttt{image(h[k])} so \texttt{\&null} is visible.
+\texttt{h["name"]} / \texttt{conn["name"]} is a non-destructive get. \texttt{Attrib()} only assigns in the idle window (\texttt{op=}, \texttt{alg=}, \texttt{sig=}, ...); a bare name is not a query. Unknown names raise 1302 on a crypto handle and 1326 on a TLS socket. An unpopulated field fails. A boolean field that \emph{did} answer succeeds: \texttt{"yes"} for true, \texttt{\&null} for false -- never \texttt{"no"}, which would make \texttt{if~h["expired"]} succeed on a valid certificate. \texttt{key(h)} generates every \emph{answerable} field, including false booleans, so any \texttt{k} from \texttt{key(h)} makes \texttt{h[k]} succeed. Dump with \texttt{image(h[k])} so \texttt{\&null} is visible.
 
 
-\texttt{h["*"]} returns a table of those same fields captured under one lock. No status field is named \texttt{*}.
+\texttt{h["*"]} returns a table of those same fields captured under one lock. No status field is named \texttt{*}. Peeking a closed handle is error 174. \texttt{key(h)} that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, \texttt{close()} makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error.
 
 
 \texttt{h["type"]} is a role label (\texttt{key}, \texttt{cert}, \texttt{key,cert}), not a list. \texttt{h["san"]} and \texttt{conn["san"]} are lists of SAN strings (\texttt{DNS:host}, \texttt{IP:1.2.3.4}). \texttt{conn["certchain"]} is a list of PEM strings. A single item is still a list of length 1. \texttt{h["op"]} is always populated on an operation handle.
@@ -368,7 +361,7 @@ Name & Value \\
 \end{longtable}
 
 
-Handshake failure means \texttt{open()} failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via \texttt{\&errornumber} 1330--1335. \texttt{alert} and \texttt{handshakestate} are not peek fields.
+Handshake failure means \texttt{open()} failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via \texttt{\&errornumber} 1320--1325. \texttt{alert} and \texttt{handshakestate} are not peek fields.
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 cert := open("client.crt", "e") | stop(&errortext)

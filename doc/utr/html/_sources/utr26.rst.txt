@@ -256,7 +256,7 @@ status:
 ================================
 
 Trailing ``open()`` arguments are ``name=value`` strings. Empty
-values and unknown names fail (error 1321). Boolean-style
+values and unknown names fail (error 1331). Boolean-style
 attributes without a value are not accepted -- every attribute
 must contain ``=``. SFTP is selected by mode character ``s`` after
 ``h`` (``"hs"``), not by a valueless attribute.
@@ -399,7 +399,7 @@ intent (``"hsw"``, or ``open(..., "hs", ..., "w")``).
      - attribute (timeout)
      - Connect timeout in milliseconds
 
-``channel=no`` with ``hc`` or ``cmd=`` fails (error 1321).
+``channel=no`` with ``hc`` or ``cmd=`` fails (error 1331).
 ``cmd=`` without ``c`` also fails.
 
 .. _sec-ex-shell:
@@ -584,22 +584,22 @@ Error numbers, defined in ``src/runtime/data.r``:
    * - Number
      - Text
      - Typical cause
-   * - 1320
+   * - 1330
      - SSH error
      - Connect failure, allocation, bad host string
-   * - 1321
+   * - 1331
      - bad ssh attribute
      - Unknown name, empty value, ``cmd=`` without ``c``, ``channel=no`` with ``hc``
-   * - 1322
+   * - 1332
      - SSH authentication error
      - No method succeeded
-   * - 1323
+   * - 1333
      - SSH host key verification error
      - Server not in ``known_hosts`` (when verifying)
-   * - 1324
+   * - 1334
      - SSH channel error
      - Channel open, I/O, or a closed/cascaded handle
-   * - 1325
+   * - 1335
      - SFTP error
      - SFTP subsystem, path, or transfer failure
 
@@ -630,7 +630,7 @@ distinguish stderr or preserve cross-stream order.
 
 Writes to a channel call ``ssh_channel_write()`` and retry short
 writes. Writes to a transport-only session (no channel) fail with
-1324. SFTP regular files use ``sftp_write()`` on the same path.
+1334. SFTP regular files use ``sftp_write()`` on the same path.
 
 .. _sec-attrib:
 
@@ -639,12 +639,16 @@ writes. Writes to a transport-only session (no channel) fail with
 
 Status on SSH files is a non-destructive peek through ``[ ]``,
 not ``Attrib()``. ``Attrib()`` has no SSH setters. Unknown names
-raise 1321. An unpopulated field fails. Boolean fields that
+raise 1331. An unpopulated field fails. Boolean fields that
 answered succeed with ``"yes"`` or ``&null`` (never ``"no"``).
 ``key(c)`` generates every answerable field, including false
 booleans. ``c["*"]`` snapshots those fields under one lock.
 Peeking a closed handle is error 174; ``close()`` keeps the
 original name so ``image(c)`` remains ``file(user@host)``.
+``key(c)`` that has not yet produced a name also raises 174 if
+the handle is already closed. After the first suspend,
+``close()`` makes the generator fail instead of raising, so a
+walk does not turn a mid-generation close into an error.
 The same split as messaging: ``!`` generates content,
 ``key()`` generates names. Channels keep line-generating
 ``!`` (they carry ``Fs_Socket``). Transport-only sessions
@@ -1045,7 +1049,7 @@ what that covers, and no exec timeout -- a stuck command blocks
 until ``close()``, matching ordinary blocking sockets.
 
 **Trust-on-first-use.** Verification is check-only
-(``ssh_session_is_known_server``). A new host fails with 1323
+(``ssh_session_is_known_server``). A new host fails with 1333
 unless the caller uses ``h-`` or installs the key in
 ``known_hosts`` out of band. The runtime does not write the
 store.

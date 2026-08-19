@@ -600,7 +600,7 @@ Trailing
 <code>open()</code>
  arguments are 
 <code>name=value</code>
- strings. Empty values and unknown names fail (error 1321). Boolean-style attributes without a value are not accepted -- every attribute must contain 
+ strings. Empty values and unknown names fail (error 1331). Boolean-style attributes without a value are not accepted -- every attribute must contain 
 <code>=</code>
 . SFTP is selected by mode character 
 <code>s</code>
@@ -1054,7 +1054,7 @@ Connect timeout in milliseconds
 <code>hc</code>
  or 
 <code>cmd=</code>
- fails (error 1321). 
+ fails (error 1331). 
 <code>cmd=</code>
  without 
 <code>c</code>
@@ -1292,7 +1292,7 @@ Typical cause
 <tbody>
 <tr>
 <td>
-1320
+1330
 </td>
 <td>
 SSH error
@@ -1303,7 +1303,7 @@ Connect failure, allocation, bad host string
 </tr>
 <tr>
 <td>
-1321
+1331
 </td>
 <td>
 bad ssh attribute
@@ -1321,7 +1321,7 @@ Unknown name, empty value,
 </tr>
 <tr>
 <td>
-1322
+1332
 </td>
 <td>
 SSH authentication error
@@ -1332,7 +1332,7 @@ No method succeeded
 </tr>
 <tr>
 <td>
-1323
+1333
 </td>
 <td>
 SSH host key verification error
@@ -1345,7 +1345,7 @@ Server not in
 </tr>
 <tr>
 <td>
-1324
+1334
 </td>
 <td>
 SSH channel error
@@ -1356,7 +1356,7 @@ Channel open, I/O, or a closed/cascaded handle
 </tr>
 <tr>
 <td>
-1325
+1335
 </td>
 <td>
 SFTP error
@@ -1412,7 +1412,7 @@ Writes to a channel call
 <code>ssh_channel_write()</code>
  and retry short writes. Writes to a transport-only session (no channel) fail with
 </p>
-<ol start="1324">
+<ol start="1334">
 <li>
 SFTP regular files use 
 <code>sftp_write()</code>
@@ -1433,7 +1433,7 @@ Status on SSH files is a non-destructive peek through
 <code>Attrib()</code>
 . 
 <code>Attrib()</code>
- has no SSH setters. Unknown names raise 1321. An unpopulated field fails. Boolean fields that answered succeed with 
+ has no SSH setters. Unknown names raise 1331. An unpopulated field fails. Boolean fields that answered succeed with 
 <code>&quot;yes&quot;</code>
  or 
 <code>&amp;null</code>
@@ -1449,7 +1449,11 @@ Status on SSH files is a non-destructive peek through
 <code>image(c)</code>
  remains 
 <code>file(user@host)</code>
-. The same split as messaging: 
+. 
+<code>key(c)</code>
+ that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, 
+<code>close()</code>
+ makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error. The same split as messaging: 
 <code>!</code>
  generates content, 
 <code>key()</code>
@@ -2221,7 +2225,7 @@ Trust-on-first-use.
 </strong>
  Verification is check-only (
 <code>ssh_session_is_known_server</code>
-). A new host fails with 1323 unless the caller uses 
+). A new host fails with 1333 unless the caller uses 
 <code>h-</code>
  or installs the key in 
 <code>known_hosts</code>

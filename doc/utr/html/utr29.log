@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.19)  19 AUG 2026 22:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.19)  19 AUG 2026 22:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -457,7 +457,7 @@ Overfull \hbox (19.9777pt too wide) in paragraph at lines 432--433
 ni-tial-ized on first \T1/cmtt/m/n/12 IgmpPacket
  []
 
-[10]
+[10] [11]
 Overfull \hbox (21.12782pt too wide) in paragraph at lines 496--497
 \T1/cmr/m/n/12 un-til \T1/cmtt/m/n/12 sock_close()\T1/cmr/m/n/12 . \T1/cmtt/m/n
 /12 sock_write sendto\T1/cmr/m/n/12 s there. \T1/cmtt/m/n/12 sock_recv \T1/cmr/
@@ -471,7 +471,7 @@ to= \T1/cmr/m/n/12 is skipped in \T1/cmtt/m/n/12 setsockopt \T1/cmr/m/n/12 (al-
 ready con-sumed). \T1/cmtt/m/n/12 hdrincl=
  []
 
-[11]
+
 Overfull \hbox (6.84897pt too wide) in paragraph at lines 507--508
 \T1/cmtt/m/n/12 hdrincl=\T1/cmr/m/n/12 , data-gram \T1/cmtt/m/n/12 writes \T1/c
 mr/m/n/12 / \T1/cmtt/m/n/12 receive\T1/cmr/m/n/12 , Pack-et-Spec, ICMP echo, IG
@@ -527,7 +527,7 @@ ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx2074.600pk>
-Output written on utr29.pdf (17 pages, 161426 bytes).
+Output written on utr29.pdf (17 pages, 161619 bytes).
 PDF statistics:
  629 PDF objects out of 1000 (max. 8388607)
  199 compressed objects within 2 object streams

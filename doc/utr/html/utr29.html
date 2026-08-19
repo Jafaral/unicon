@@ -518,7 +518,11 @@ Multicast membership, including SSM
  get as UDP 
 [<a class="cite" href="#cite-algharaibeh-utr28">11</a>]: unknown names raise 1310, unpopulated fields fail, 
 <code>Attrib()</code>
- only assigns. Raw sockets add 
+ only assigns. Peeking a closed handle is error 174. 
+<code>key(f)</code>
+ that has not yet produced a name also raises 174 if the handle is already closed; after the first suspend, 
+<code>close()</code>
+ makes the generator fail instead of raising. Raw sockets add 
 <code>proto</code>
  (fixed at 
 <code>socket()</code>

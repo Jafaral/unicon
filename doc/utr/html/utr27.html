@@ -976,18 +976,11 @@ Without
 <code>alg=</code>
 , 
 <code>sig=</code>
-, ...); a bare name is not a query. Unknown names raise
-</p>
-<ol start="1302">
-<li>
-An unpopulated field fails. A boolean field that 
+, ...); a bare name is not a query. Unknown names raise 1302 on a crypto handle and 1326 on a TLS socket. An unpopulated field fails. A boolean field that 
 <em>
 did
 </em>
-</li>
-</ol>
-<p>
-answer succeeds: 
+ answer succeeds: 
 <code>&quot;yes&quot;</code>
  for true, 
 <code>&amp;null</code>
@@ -1017,7 +1010,11 @@ answerable
 <code>h[&quot;*&quot;]</code>
  returns a table of those same fields captured under one lock. No status field is named 
 <code>*</code>
-.
+. Peeking a closed handle is error 174. 
+<code>key(h)</code>
+ that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, 
+<code>close()</code>
+ makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error.
 </p>
 <p>
 <code>h[&quot;type&quot;]</code>
@@ -1501,7 +1498,7 @@ Handshake failure means
 <code>open()</code>
  failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via 
 <code>&amp;errornumber</code>
- 1330--1335. 
+ 1320--1325. 
 <code>alert</code>
  and 
 <code>handshakestate</code>

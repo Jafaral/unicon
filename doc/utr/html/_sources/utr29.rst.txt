@@ -211,8 +211,11 @@ multicast-only knobs.
 ``Attrib(f, "ttl=4")`` sets hop limits after ``open()``.
 Status uses the same ``[ ]`` / ``key()`` get as UDP
 :cite:`AlGharaibeh:UTR28`: unknown names raise 1310, unpopulated
-fields fail, ``Attrib()`` only assigns. Raw sockets add
-``proto`` (fixed at ``socket()``) and ``hdrincl``.
+fields fail, ``Attrib()`` only assigns. Peeking a closed handle
+is error 174. ``key(f)`` that has not yet produced a name also
+raises 174 if the handle is already closed; after the first
+suspend, ``close()`` makes the generator fail instead of raising.
+Raw sockets add ``proto`` (fixed at ``socket()``) and ``hdrincl``.
 
 .. list-table::
    :header-rows: 1

@@ -330,16 +330,20 @@ SSH uses ``hostkeyfile=`` (OpenSSH ``known_hosts``).
 ``h["name"]`` / ``conn["name"]`` is a non-destructive get.
 ``Attrib()`` only assigns in the idle window (``op=``, ``alg=``,
 ``sig=``, ...); a bare name is not a query. Unknown names raise
-1302. An unpopulated field fails. A boolean field that *did*
-answer succeeds: ``"yes"`` for true, ``&null`` for false -- never
-``"no"``, which would make ``if h["expired"]`` succeed on a valid
-certificate. ``key(h)`` generates every *answerable* field,
-including false booleans, so any ``k`` from ``key(h)`` makes
-``h[k]`` succeed. Dump with ``image(h[k])`` so ``&null`` is
-visible.
+1302 on a crypto handle and 1326 on a TLS socket. An unpopulated
+field fails. A boolean field that *did* answer succeeds:
+``"yes"`` for true, ``&null`` for false -- never ``"no"``, which
+would make ``if h["expired"]`` succeed on a valid certificate.
+``key(h)`` generates every *answerable* field, including false
+booleans, so any ``k`` from ``key(h)`` makes ``h[k]`` succeed.
+Dump with ``image(h[k])`` so ``&null`` is visible.
 
 ``h["*"]`` returns a table of those same fields captured under
-one lock. No status field is named ``*``.
+one lock. No status field is named ``*``. Peeking a closed handle
+is error 174. ``key(h)`` that has not yet produced a name also
+raises 174 if the handle is already closed. After the first
+suspend, ``close()`` makes the generator fail instead of raising,
+so a walk does not turn a mid-generation close into an error.
 
 ``h["type"]`` is a role label (``key``, ``cert``, ``key,cert``),
 not a list. ``h["san"]`` and ``conn["san"]`` are lists of
@@ -480,7 +484,7 @@ attributes.
 Handshake failure means ``open()`` failed; there is no handle to
 subscript. Distinguish expired / untrusted CA / hostname
 mismatch / no shared cipher / protocol version via
-``&errornumber`` 1330--1335. ``alert`` and ``handshakestate``
+``&errornumber`` 1320--1325. ``alert`` and ``handshakestate``
 are not peek fields.
 
 .. code-block:: unicon

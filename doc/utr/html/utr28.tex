@@ -251,7 +251,7 @@ Assignments in one call are applied together, preserving \texttt{iface} then \te
 An unpopulated field fails. Boolean fields that answered
 \end{enumerate}
 
-succeed with \texttt{"yes"} or \texttt{\&null} (never \texttt{"no"}). \texttt{key(f)} generates every answerable field. \texttt{f["*"]} snapshots those fields under one lock.
+succeed with \texttt{"yes"} or \texttt{\&null} (never \texttt{"no"}). \texttt{key(f)} generates every answerable field. \texttt{f["*"]} snapshots those fields under one lock. Peeking a closed handle is error 174. \texttt{key(f)} that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, \texttt{close()} makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error.
 
 
 TCP, UDP, multicast, and raw sockets share one peek table (\texttt{sock\_peek}). \texttt{join}, \texttt{leave}, and \texttt{source} are verbs, not peek fields. \texttt{proto} is stored at \texttt{socket()} time on raw sockets [9]. \texttt{f["groups"]} is a list of joined groups (SSM as \texttt{source@group}); a single group is still a list of length 1.

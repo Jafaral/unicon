@@ -1769,10 +1769,14 @@ connections may also be subscripted by 1-based integer message numbers.
 Cryptographic handles, SSH files, TLS sockets, and network sockets may
 be subscripted by a status field name for a non-destructive peek
 (\texttt{h["type"]}, \texttt{c["exitstatus"]}, \texttt{f["ttl"]},
-\texttt{conn["cipher"]}); an unknown name is a runtime error and an
+\texttt{conn["cipher"]}); an unknown name is a runtime error
+(1302 crypto, 1326 TLS, 1331 SSH, 1310 sockets) and an
 unpopulated field fails. Boolean peeks succeed with \texttt{"yes"} or
 \texttt{\&null}. \texttt{f["*"]} is a table snapshot of the answerable
 fields. Peeking a closed handle is error 174.
+\texttt{key(f)} that has not yet produced a name also raises 174 if the
+handle is already closed; after the first suspend, \texttt{close()}
+makes the generator fail instead of raising.
 \texttt{f["groups"]}, \texttt{s["authmethods"]}, \texttt{h["san"]}, and
 \texttt{conn["certchain"]} produce a list (a single item is still a
 list of length 1); other peeks are a string, integer, or \texttt{\&null}.
@@ -5135,12 +5139,19 @@ length\\
 1315 \ \ \ \ \ \ \ signature verification failed\\
 1316 \ \ \ \ \ \ \ invalid cryptographic operation state\\
 1317 \ \ \ \ \ \ \ cryptographic material could not be loaded\\
-1320 \ \ \ \ \ \ \ SSH error\\
-1321 \ \ \ \ \ \ \ bad ssh attribute\\
-1322 \ \ \ \ \ \ \ SSH authentication error\\
-1323 \ \ \ \ \ \ \ SSH host key verification error\\
-1324 \ \ \ \ \ \ \ SSH channel error\\
-1325 \ \ \ \ \ \ \ SFTP error\\
+1320 \ \ \ \ \ \ \ TLS certificate expired\\
+1321 \ \ \ \ \ \ \ TLS untrusted CA\\
+1322 \ \ \ \ \ \ \ TLS hostname mismatch\\
+1323 \ \ \ \ \ \ \ TLS no shared cipher\\
+1324 \ \ \ \ \ \ \ TLS protocol version mismatch\\
+1325 \ \ \ \ \ \ \ TLS handshake failed\\
+1326 \ \ \ \ \ \ \ bad TLS status field\\
+1330 \ \ \ \ \ \ \ SSH error\\
+1331 \ \ \ \ \ \ \ bad ssh attribute\\
+1332 \ \ \ \ \ \ \ SSH authentication error\\
+1333 \ \ \ \ \ \ \ SSH host key verification error\\
+1334 \ \ \ \ \ \ \ SSH channel error\\
+1335 \ \ \ \ \ \ \ SFTP error\\
 
 \subsection*{System errors}
 

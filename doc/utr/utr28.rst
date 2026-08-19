@@ -293,7 +293,11 @@ Assignments in one call are applied together, preserving
 1310. An unpopulated field fails. Boolean fields that answered
 succeed with ``"yes"`` or ``&null`` (never ``"no"``).
 ``key(f)`` generates every answerable field. ``f["*"]``
-snapshots those fields under one lock.
+snapshots those fields under one lock. Peeking a closed handle
+is error 174. ``key(f)`` that has not yet produced a name also
+raises 174 if the handle is already closed. After the first
+suspend, ``close()`` makes the generator fail instead of raising,
+so a walk does not turn a mid-generation close into an error.
 
 TCP, UDP, multicast, and raw sockets share one peek table
 (``sock_peek``). ``join``, ``leave``, and ``source`` are verbs,

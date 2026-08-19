@@ -175,7 +175,7 @@ Attribute & Role on a raw socket \\
 \end{longtable}
 
 
-\texttt{Attrib(f,~"ttl=4")} sets hop limits after \texttt{open()}. Status uses the same \texttt{[~]} / \texttt{key()} get as UDP [11]: unknown names raise 1310, unpopulated fields fail, \texttt{Attrib()} only assigns. Raw sockets add \texttt{proto} (fixed at \texttt{socket()}) and \texttt{hdrincl}.
+\texttt{Attrib(f,~"ttl=4")} sets hop limits after \texttt{open()}. Status uses the same \texttt{[~]} / \texttt{key()} get as UDP [11]: unknown names raise 1310, unpopulated fields fail, \texttt{Attrib()} only assigns. Peeking a closed handle is error 174. \texttt{key(f)} that has not yet produced a name also raises 174 if the handle is already closed; after the first suspend, \texttt{close()} makes the generator fail instead of raising. Raw sockets add \texttt{proto} (fixed at \texttt{socket()}) and \texttt{hdrincl}.
 
 \begin{longtable}{ll}
 \hline
