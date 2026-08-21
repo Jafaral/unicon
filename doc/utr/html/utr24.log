@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.18)  18 AUG 2026 01:31
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.21)  21 AUG 2026 04:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -330,21 +330,27 @@ Overfull \hbox (10.35141pt too wide) in paragraph at lines 27--28
 eproce.icn,
  []
 
+
+Overfull \hbox (2.67879pt too wide) in paragraph at lines 30--31
+[]\T1/cmr/bx/n/12 Keywords: \T1/cmr/m/n/12 Uni-con, pre-pro-ces-sor, triple-quo
+ted strings, function-
+ []
+
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 3
-2.
+5.
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 32.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 35.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 32.
+(Font)              <14.4> on input line 35.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 32.
+(Font)              <7> on input line 35.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
-Overfull \hbox (0.70544pt too wide) in paragraph at lines 73--74
+Overfull \hbox (0.70544pt too wide) in paragraph at lines 76--77
 \T1/cmr/m/n/12 Canonical source is \T1/cmtt/m/n/12 uni/unicon/preproce.icn\T1/c
 mr/m/n/12 . \T1/cmtt/m/n/12 uni/parser/preproce.icn
  []
@@ -354,54 +360,54 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.74 
+l.77 
       [1]
-Overfull \hbox (159.63272pt too wide) in alignment at lines 77--81
+Overfull \hbox (159.63272pt too wide) in alignment at lines 80--84
  [] [] 
  []
 
 
-Overfull \hbox (159.63272pt too wide) in alignment at lines 81--85
+Overfull \hbox (159.63272pt too wide) in alignment at lines 84--88
  [] [] 
  []
 
 
-Overfull \hbox (159.63272pt too wide) in alignment at lines 85--87
+Overfull \hbox (159.63272pt too wide) in alignment at lines 88--90
  [] [] 
  []
 
 
-Overfull \hbox (159.63272pt too wide) in alignment at lines 87--89
+Overfull \hbox (159.63272pt too wide) in alignment at lines 90--92
  [] [] 
  []
 
 
-Overfull \hbox (159.63272pt too wide) in alignment at lines 89--93
+Overfull \hbox (159.63272pt too wide) in alignment at lines 92--96
  [] [] 
  []
 
 
-Overfull \hbox (280.23094pt too wide) in alignment at lines 103--107
+Overfull \hbox (280.23094pt too wide) in alignment at lines 106--110
  [] [] 
  []
 
 
-Overfull \hbox (280.23094pt too wide) in alignment at lines 107--111
+Overfull \hbox (280.23094pt too wide) in alignment at lines 110--114
  [] [] 
  []
 
 
-Overfull \hbox (280.23094pt too wide) in alignment at lines 111--113
+Overfull \hbox (280.23094pt too wide) in alignment at lines 114--116
  [] [] 
  []
 
 
-Overfull \hbox (280.23094pt too wide) in alignment at lines 113--115
+Overfull \hbox (280.23094pt too wide) in alignment at lines 116--118
  [] [] 
  []
 
 
-Overfull \hbox (280.23094pt too wide) in alignment at lines 115--131
+Overfull \hbox (280.23094pt too wide) in alignment at lines 118--134
  [] [] 
  []
 
@@ -410,349 +416,349 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.131 \end{longtable}
+l.134 \end{longtable}
                       [2]
-Overfull \hbox (8.854pt too wide) in paragraph at lines 151--153
+Overfull \hbox (8.854pt too wide) in paragraph at lines 154--156
 []\T1/cmtt/m/n/12 #line \T1/cmr/m/n/12 (op-tional spaces, GCC form) goes to \T1
 /cmtt/m/n/12 preproc_scan_directive()\T1/cmr/m/n/12 . 
  []
 
 
-Overfull \hbox (52.65163pt too wide) in paragraph at lines 169--170
+Overfull \hbox (52.65163pt too wide) in paragraph at lines 172--173
 []\T1/cmtt/m/n/12 $define\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 $undef\T1/cmr/m/n/12 
 , \T1/cmtt/m/n/12 $include\T1/cmr/m/n/12 , and text ex-pan-sion run only when \
 T1/cmtt/m/n/12 /preproc_if_state
  []
 
 [3]
-Overfull \hbox (46.6637pt too wide) in paragraph at lines 182--184
+Overfull \hbox (46.6637pt too wide) in paragraph at lines 185--187
 []\T1/cmr/m/n/12 Looks up function-like macros be-fore object-like. A name in \
 T1/cmtt/m/n/12 preproc_fun_table
  []
 
 
-Overfull \hbox (18.8496pt too wide) in paragraph at lines 184--185
+Overfull \hbox (18.8496pt too wide) in paragraph at lines 187--188
 []\T1/cmr/m/n/12 Rescans re-place-ments through \T1/cmtt/m/n/12 preproc_scan_te
 xt(done_set)\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 done_set
  []
 
 
-Overfull \hbox (0.52087pt too wide) in paragraph at lines 192--193
+Overfull \hbox (0.52087pt too wide) in paragraph at lines 195--196
 \T1/cmtt/m/n/12 preproc_scan_directive() \T1/cmr/m/n/12 reads the com-mand with
  \T1/cmtt/m/n/12 preproc_word()\T1/cmr/m/n/12 . Un-
  []
 
 
-Overfull \hbox (88.1735pt too wide) in paragraph at lines 192--193
+Overfull \hbox (88.1735pt too wide) in paragraph at lines 195--196
 \T1/cmr/m/n/12 known names in an ac-tive re-gion call \T1/cmtt/m/n/12 preproc_e
 rror("unknown preprocessor directive")\T1/cmr/m/n/12 . 
  []
 
 
-Overfull \hbox (10.23589pt too wide) in alignment at lines 194--198
+Overfull \hbox (10.23589pt too wide) in alignment at lines 197--201
  [] [] 
  []
 
 
-Overfull \hbox (10.23589pt too wide) in alignment at lines 198--202
+Overfull \hbox (10.23589pt too wide) in alignment at lines 201--205
  [] [] 
  []
 
 
-Overfull \hbox (10.23589pt too wide) in alignment at lines 202--204
+Overfull \hbox (10.23589pt too wide) in alignment at lines 205--207
  [] [] 
  []
 
 
-Overfull \hbox (10.23589pt too wide) in alignment at lines 204--206
+Overfull \hbox (10.23589pt too wide) in alignment at lines 207--209
  [] [] 
  []
 
 
-Overfull \hbox (10.23589pt too wide) in alignment at lines 206--217
+Overfull \hbox (10.23589pt too wide) in alignment at lines 209--220
  [] [] 
  []
 
 [4] [5]
-Overfull \hbox (44.92227pt too wide) in paragraph at lines 283--284
+Overfull \hbox (44.92227pt too wide) in paragraph at lines 286--287
 []\T1/cmtt/m/n/12 preproc_rewrite_triple_strings() \T1/cmr/m/n/12 runs at the s
 tart of \T1/cmtt/m/n/12 preproc_scan_text()\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (11.24086pt too wide) in paragraph at lines 286--287
+Overfull \hbox (11.24086pt too wide) in paragraph at lines 289--290
 []\T1/cmr/m/n/12 The body is turned into one or-di-nary string with \T1/cmtt/m/
 n/12 preproc_quote_string()\T1/cmr/m/n/12 :
  []
 
 
-Overfull \hbox (16.45769pt too wide) in paragraph at lines 286--287
+Overfull \hbox (16.45769pt too wide) in paragraph at lines 289--290
 \T1/cmr/m/n/12 quote es-caped, other C0 bytes as three-digit oc-tal via \T1/cmt
 t/m/n/12 preproc_octal_escape()\T1/cmr/m/n/12 .
  []
 
 
-Overfull \hbox (91.21295pt too wide) in paragraph at lines 289--290
+Overfull \hbox (91.21295pt too wide) in paragraph at lines 292--293
 []\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/triple_strings.icn\T1/cmr/
 m/n/12 , \T1/cmtt/m/n/12 tests/unicon/stand/triple_strings.std\T1/cmr/m/n/12 . 
 
  []
 
 [6]
-Overfull \hbox (13.10106pt too wide) in paragraph at lines 341--342
+Overfull \hbox (13.10106pt too wide) in paragraph at lines 344--345
 []\T1/cmr/m/n/12 On \T1/cmtt/m/n/12 $define\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ( \
 T1/cmr/m/n/12 must fol-low the name im-me-di-ately. \T1/cmtt/m/n/12 $define SUM
  (a,b) ...
  []
 
 [7]
-Overfull \hbox (18.21376pt too wide) in paragraph at lines 347--348
+Overfull \hbox (18.21376pt too wide) in paragraph at lines 350--351
 \T1/cmr/m/n/12 ends with \T1/cmtt/m/n/12 \ \T1/cmr/m/n/12 as the very last char
 -ac-ter (no trim). \T1/cmtt/m/n/12 preproc_scan_define_value()
  []
 
 
-Overfull \hbox (52.97377pt too wide) in paragraph at lines 347--348
+Overfull \hbox (52.97377pt too wide) in paragraph at lines 350--351
 \T1/cmr/m/n/12 same \T1/cmtt/m/n/12 \ \T1/cmr/m/n/12 rule ap-plies to object-li
 ke \T1/cmtt/m/n/12 $define \T1/cmr/m/n/12 val-ues (\T1/cmtt/m/n/12 macros_defin
 e_continuation.icn\T1/cmr/m/n/12 ).
  []
 
 
-Overfull \hbox (87.26439pt too wide) in paragraph at lines 369--370
+Overfull \hbox (87.26439pt too wide) in paragraph at lines 372--373
 []\T1/cmr/m/n/12 A call \T1/cmtt/m/n/12 NAME(arg1, ...) \T1/cmr/m/n/12 may span
  phys-i-cal lines with-out \T1/cmtt/m/n/12 \\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 pr
 eproc_scan_macro_args()
  []
 
 
-Overfull \hbox (68.8337pt too wide) in paragraph at lines 369--370
+Overfull \hbox (68.8337pt too wide) in paragraph at lines 372--373
 \T1/cmr/m/n/12 back-slash in-side a call is or-di-nary ar-gu-ment text (\T1/cmt
 t/m/n/12 macros_call_backslash_literal.icn\T1/cmr/m/n/12 ),
  []
 
 
-Overfull \hbox (168.826pt too wide) in paragraph at lines 375--376
+Overfull \hbox (168.826pt too wide) in paragraph at lines 378--379
 \T1/cmr/m/n/12 match (\T1/cmtt/m/n/12 wrong number of args in macro call to NAM
 E\T1/cmr/m/n/12 ). Un-closed \T1/cmtt/m/n/12 ( \T1/cmr/m/n/12 is \T1/cmtt/m/n/1
 2 unterminated macro invocation\T1/cmr/m/n/12 .
  []
 
 [8]
-Overfull \hbox (69.57802pt too wide) in paragraph at lines 378--379
+Overfull \hbox (69.57802pt too wide) in paragraph at lines 381--382
 \T1/cmr/m/n/12 ca-tion line, not each phys-i-cal line of the def-i-ni-tion (\T1
 /cmtt/m/n/12 macros_define_multiline_line.icn\T1/cmr/m/n/12 ). 
  []
 
 [9]
-Overfull \hbox (22.06879pt too wide) in paragraph at lines 434--435
+Overfull \hbox (22.06879pt too wide) in paragraph at lines 437--438
 []\T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmtt/m/n/12 $define ass
 ert(...) \T1/cmr/m/n/12 re-places the builtin; \T1/cmtt/m/n/12 macros.icn
  []
 
 
-Overfull \hbox (171.6035pt too wide) in paragraph at lines 437--438
+Overfull \hbox (171.6035pt too wide) in paragraph at lines 440--441
 []\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/macros.icn\T1/cmr/m/n/12 ;
  \T1/cmtt/m/n/12 macros_multiline_line.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macr
 os_define_multiline_line.icn\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (8.32771pt too wide) in paragraph at lines 437--438
+Overfull \hbox (8.32771pt too wide) in paragraph at lines 440--441
 \T1/cmtt/m/n/12 macros_define_continuation.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 
 macros_call_backslash_literal.icn\T1/cmr/m/n/12 ;
  []
 
 
-Overfull \hbox (89.46213pt too wide) in paragraph at lines 437--438
+Overfull \hbox (89.46213pt too wide) in paragraph at lines 440--441
 \T1/cmr/m/n/12 neg-a-tives un-der \T1/cmtt/m/n/12 tests/unicon/data/macros_bad_
 *.icn \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 macros_bad_define_eof*.icn\T1/cmr/m/n/
 12 . 
  []
 
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 439.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 442.
 
-Overfull \hbox (0.94902pt too wide) in paragraph at lines 442--443
+Overfull \hbox (0.94902pt too wide) in paragraph at lines 445--446
 \T1/cmtt/m/n/12 preproc_fun_table \T1/cmr/m/n/12 as place-holder \T1/cmtt/m/n/1
 2 preproc_fmacro \T1/cmr/m/n/12 records and marks them
  []
 
 
-Overfull \hbox (9.97679pt too wide) in paragraph at lines 442--443
+Overfull \hbox (9.97679pt too wide) in paragraph at lines 445--446
 \T1/cmr/m/n/12 in \T1/cmtt/m/n/12 preproc_builtin_fun_table\T1/cmr/m/n/12 . Ex-
 pan-sion is not \T1/cmtt/m/n/12 preproc_subst_fmacro()\T1/cmr/m/n/12 :
  []
 
 
-Overfull \hbox (23.8002pt too wide) in paragraph at lines 445--446
+Overfull \hbox (23.8002pt too wide) in paragraph at lines 448--449
 []\T1/cmr/m/n/12 Semantics fol-low Uni-con suc-cess and fail-ure, not Boolean t
 ruth: \T1/cmtt/m/n/12 assert(expr)
  []
 
 
-Overfull \hbox (175.40811pt too wide) in alignment at lines 447--451
+Overfull \hbox (175.40811pt too wide) in alignment at lines 450--454
  [] [] [] 
  []
 
 
-Overfull \hbox (175.40811pt too wide) in alignment at lines 451--455
+Overfull \hbox (175.40811pt too wide) in alignment at lines 454--458
  [] [] [] 
  []
 
 
-Overfull \hbox (175.40811pt too wide) in alignment at lines 455--457
+Overfull \hbox (175.40811pt too wide) in alignment at lines 458--460
  [] [] [] 
  []
 
 
-Overfull \hbox (175.40811pt too wide) in alignment at lines 457--459
+Overfull \hbox (175.40811pt too wide) in alignment at lines 460--462
  [] [] [] 
  []
 
 
-Overfull \hbox (175.40811pt too wide) in alignment at lines 459--463
+Overfull \hbox (175.40811pt too wide) in alignment at lines 462--466
  [] [] [] 
  []
 
 [10]
-Overfull \hbox (1.50397pt too wide) in paragraph at lines 466--467
+Overfull \hbox (1.50397pt too wide) in paragraph at lines 469--470
 \T1/cmr/m/n/12 wins. \T1/cmtt/m/n/12 preproc_new() \T1/cmr/m/n/12 and a later \
 T1/cmtt/m/n/12 $define __test__ \T1/cmr/m/n/12 both de-fault \T1/cmtt/m/n/12 __
 debug__
  []
 
 
-Overfull \hbox (21.69966pt too wide) in paragraph at lines 472--473
+Overfull \hbox (21.69966pt too wide) in paragraph at lines 475--476
 \T1/cmtt/m/n/12 assertion failed \T1/cmr/m/n/12 (\T1/cmtt/m/n/12 data.r\T1/cmr/
 m/n/12 ). \T1/cmtt/m/n/12 errmsg.r \T1/cmr/m/n/12 skips the or-di-nary \T1/cmtt
 /m/n/12 Run-time error 219
  []
 
 
-Overfull \hbox (44.92622pt too wide) in paragraph at lines 472--473
+Overfull \hbox (44.92622pt too wide) in paragraph at lines 475--476
 \T1/cmr/m/n/12 ban-ner and the offending- value line; it prints \T1/cmtt/m/n/12
  [file:line] assertion failed: ...\T1/cmr/m/n/12 . 
  []
 
 [11] [12]
-Overfull \hbox (57.66707pt too wide) in paragraph at lines 566--567
+Overfull \hbox (57.66707pt too wide) in paragraph at lines 569--570
 \T1/cmr/m/n/12 frames down), \T1/cmtt/m/n/12 assert_testing.icn\T1/cmr/m/n/12 ,
  \T1/cmtt/m/n/12 assert_strip.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 assert_failin
 g_label.icn\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (15.36209pt too wide) in paragraph at lines 589--590
+Overfull \hbox (15.36209pt too wide) in paragraph at lines 592--593
 \T1/cmr/m/n/12 or the gap is large; for small gaps it may emit blank lines. \T1
 /cmtt/m/n/12 preproc_scan_text()
  []
 
 
-Overfull \hbox (4.44527pt too wide) in paragraph at lines 592--593
+Overfull \hbox (4.44527pt too wide) in paragraph at lines 595--596
 []\T1/cmtt/m/n/12 preproc_error(msg) \T1/cmr/m/n/12 builds \T1/cmtt/m/n/12 File
  ...; Line N # $directive: ...\T1/cmr/m/n/12 , in-
  []
 
 
-Overfull \hbox (8.80406pt too wide) in paragraph at lines 592--593
+Overfull \hbox (8.80406pt too wide) in paragraph at lines 595--596
 \T1/cmr/m/n/12 cre-ments \T1/cmtt/m/n/12 preproc_err_count\T1/cmr/m/n/12 , and 
 pushes a \T1/cmtt/m/n/12 ParseError \T1/cmr/m/n/12 onto \T1/cmtt/m/n/12 parsing
 Errors\T1/cmr/m/n/12 . 
  []
 
 [13]
-Overfull \hbox (118.52315pt too wide) in alignment at lines 607--611
+Overfull \hbox (118.52315pt too wide) in alignment at lines 610--614
  [] [] 
  []
 
 
-Overfull \hbox (118.52315pt too wide) in alignment at lines 611--615
+Overfull \hbox (118.52315pt too wide) in alignment at lines 614--618
  [] [] 
  []
 
 
-Overfull \hbox (118.52315pt too wide) in alignment at lines 615--617
+Overfull \hbox (118.52315pt too wide) in alignment at lines 618--620
  [] [] 
  []
 
 
-Overfull \hbox (118.52315pt too wide) in alignment at lines 617--619
+Overfull \hbox (118.52315pt too wide) in alignment at lines 620--622
  [] [] 
  []
 
 
-Overfull \hbox (118.52315pt too wide) in alignment at lines 619--626
+Overfull \hbox (118.52315pt too wide) in alignment at lines 622--629
  [] [] 
  []
 
 
-Overfull \hbox (17.37418pt too wide) in paragraph at lines 634--635
+Overfull \hbox (17.37418pt too wide) in paragraph at lines 637--638
 []\T1/cmr/m/n/12 If the fea-ture reads ex-tra lines or changes out-put length, 
 check \T1/cmtt/m/n/12 preproc_line\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (61.22966pt too wide) in paragraph at lines 634--635
+Overfull \hbox (61.22966pt too wide) in paragraph at lines 637--638
 \T1/cmr/m/n/12 emit-ted \T1/cmtt/m/n/12 #line \T1/cmr/m/n/12 stream. Mul-ti-ple
  \T1/cmtt/m/n/12 suspend\T1/cmr/m/n/12 s per in-put line must leave \T1/cmtt/m/
 n/12 preproc_print_line
  []
 
 [14]
-Overfull \hbox (10.13985pt too wide) in paragraph at lines 647--648
+Overfull \hbox (10.13985pt too wide) in paragraph at lines 650--651
 \T1/cmr/m/n/12 After \T1/cmtt/m/n/12 preproc_command := preproc_word()\T1/cmr/m
 /n/12 , the \T1/cmtt/m/n/12 case preproc_command of
  []
 
 
-Overfull \hbox (109.59045pt too wide) in paragraph at lines 659--660
+Overfull \hbox (109.59045pt too wide) in paragraph at lines 662--663
 []\T1/cmr/m/n/12 Unknown names still hit \T1/cmtt/m/n/12 default \T1/cmr/m/n/12
  and \T1/cmtt/m/n/12 preproc_error("unknown preprocessor directive")
  []
 
 
-Overfull \hbox (35.44211pt too wide) in alignment at lines 663--667
+Overfull \hbox (35.44211pt too wide) in alignment at lines 666--670
  [] [] 
  []
 
 
-Overfull \hbox (35.44211pt too wide) in alignment at lines 667--671
+Overfull \hbox (35.44211pt too wide) in alignment at lines 670--674
  [] [] 
  []
 
 
-Overfull \hbox (35.44211pt too wide) in alignment at lines 671--673
+Overfull \hbox (35.44211pt too wide) in alignment at lines 674--676
  [] [] 
  []
 
 
-Overfull \hbox (35.44211pt too wide) in alignment at lines 673--675
+Overfull \hbox (35.44211pt too wide) in alignment at lines 676--678
  [] [] 
  []
 
 
-Overfull \hbox (35.44211pt too wide) in alignment at lines 675--679
+Overfull \hbox (35.44211pt too wide) in alignment at lines 678--682
  [] [] 
  []
 
 
-Underfull \hbox (badness 4779) in paragraph at lines 688--689
+Underfull \hbox (badness 4779) in paragraph at lines 691--692
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
 [15]
-Underfull \hbox (badness 10000) in paragraph at lines 700--701
+Underfull \hbox (badness 10000) in paragraph at lines 706--707
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 706--707
+Underfull \hbox (badness 1072) in paragraph at lines 712--713
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
-[16] (./utr24.aux)
+[16] [17] (./utr24.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -761,13 +767,13 @@ Package rerunfilecheck Info: File `utr24.out' has not changed.
 (rerunfilecheck)             Checksum: 0CB2329342BBCE3363B5EADB7C164C24;3329.
  ) 
 Here is how much of TeX's memory you used:
- 9795 strings out of 476182
- 150573 string characters out of 5795595
+ 9814 strings out of 476182
+ 150905 string characters out of 5795595
  1932975 words of memory out of 5000000
- 31633 multiletter control sequences out of 15000+600000
+ 31642 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,790b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,794b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
 0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.
 600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt109
@@ -780,10 +786,10 @@ ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr24.pdf (18 pages, 155390 bytes).
+Output written on utr24.pdf (19 pages, 158010 bytes).
 PDF statistics:
- 631 PDF objects out of 1000 (max. 8388607)
- 221 compressed objects within 3 object streams
- 58 named destinations out of 1000 (max. 500000)
+ 651 PDF objects out of 1000 (max. 8388607)
+ 236 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
  161 words of extra memory for PDF output out of 10000 (max. 10000000)
 

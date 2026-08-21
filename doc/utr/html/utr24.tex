@@ -24,7 +24,10 @@
 \vskip 5.5em
 {\bfseries Abstract}\par
 \begin{quote}
-The Unicon compiler runs a line-oriented source preprocessor before lexical analysis. The implementation, uni/unicon/preproce.icn, comes from Bob Alexander's Jcon preprocessor. It has been extended with triple-quoted multiline strings, function-like \$define macros, and built-in assert / assert\_not. This report describes those extensions, the architecture and directives they sit on, how \#line and includes interact with them, and how to add further facilities. Keywords: Unicon, preprocessor, triple-quoted strings, function-like macros, assertions, technical report.
+The Unicon compiler runs a line-oriented source preprocessor before lexical analysis. The implementation, uni/unicon/preproce.icn, comes from Bob Alexander's Jcon preprocessor. It has been extended with triple-quoted multiline strings, function-like \$define macros, and built-in assert / assert\_not. This report describes those extensions, the architecture and directives they sit on, how \#line and includes interact with them, and how to add further facilities.
+\end{quote}
+\begin{quote}
+{\bfseries Keywords:} Unicon, preprocessor, triple-quoted strings, function-like macros, assertions, technical report.
 \end{quote}
 \vskip 0.8in
 {\large\bfseries
@@ -42,7 +45,7 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr24-sec-intro}
 
-This report describes the Unicon source preprocessor: how a file plus includes becomes the token stream the compiler scans, what the \texttt{\$} directives do, and the three extensions added in \texttt{uni/unicon/preproce.icn} -- triple-quoted strings, function-like macros, and built-in \texttt{assert} / \texttt{assert\_not}. It is formatted as a Unicon Technical Report [1]. The language-facing command list lives in \emph{Programming with Unicon} (language reference, "Preprocessor") and UTR \#8 [2]; that text still states that \texttt{\$define} does not take arguments. Automated tests live under \texttt{tests/unicon/} (\texttt{triple\_strings.icn}, \texttt{macros*.icn}, \texttt{assert\_*.icn}). \texttt{unicon~-E} writes preprocessed source.
+This report describes the Unicon source preprocessor: how a file plus includes becomes the token stream the compiler scans, what the \texttt{\$} directives do, and the three extensions added in \texttt{uni/unicon/preproce.icn} -- triple-quoted strings, function-like macros, and built-in \texttt{assert} / \texttt{assert\_not}. It is formatted as a Unicon Technical Report [1]. The language-facing command list lives in \emph{Programming with Unicon} [2] (language reference, "Preprocessor") and UTR \#8 [3]; that text still states that \texttt{\$define} does not take arguments. Automated tests live under \texttt{tests/unicon/} (\texttt{triple\_strings.icn}, \texttt{macros*.icn}, \texttt{assert\_*.icn}). \texttt{unicon~-E} writes preprocessed source.
 
 
 The preprocessor is not optional. Every compilation runs it.
@@ -50,10 +53,10 @@ The preprocessor is not optional. Every compilation runs it.
 \section{2. Motivation and prior art}
 \label{utr24-sec-motivation}
 
-The implementation is Bob Alexander's Jcon preprocessor, brought into Unicon with small edits [3]. It is line-oriented: it recognizes directives and identifiers, respects string and comment boundaries, and performs textual substitution. It is not a parser.
+The implementation is Bob Alexander's Jcon preprocessor, brought into Unicon with small edits [4]. It is line-oriented: it recognizes directives and identifiers, respects string and comment boundaries, and performs textual substitution. It is not a parser.
 
 
-The Jcon baseline provided object-like \texttt{\$define}, \texttt{\$include}, \texttt{\$ifdef} / \texttt{\$ifndef} / \texttt{\$else} / \texttt{\$endif}, \texttt{\$error}, \texttt{\$line} / \texttt{\#line}, and predefined symbols from \texttt{\&features}. The implementation-book section "The Unicon Preprocessor" [4] documents that baseline (generator interface, include and \texttt{\$ifdef} stacks, quoted-string skipping, underscore continuation). It still says macros have no parameters. The language reference says the same [2].
+The Jcon baseline provided object-like \texttt{\$define}, \texttt{\$include}, \texttt{\$ifdef} / \texttt{\$ifndef} / \texttt{\$else} / \texttt{\$endif}, \texttt{\$error}, \texttt{\$line} / \texttt{\#line}, and predefined symbols from \texttt{\&features}. The implementation-book section "The Unicon Preprocessor" [5] documents that baseline (generator interface, include and \texttt{\$ifdef} stacks, quoted-string skipping, underscore continuation). It still says macros have no parameters. The language reference says the same [3].
 
 
 Three gaps in that baseline are filled here:
@@ -674,8 +677,8 @@ Document & Content \\
 \hline
 \endlastfoot
 UTR \#15 [1] & How to write and submit a Unicon Technical Report. \\
-UTR \#8 [2] & Language reference preprocessor commands \\
-Implementation book [4] & \texttt{doc/ib/p3-unicon.tex}, "The Unicon Preprocessor": \\
+UTR \#8 [3] & Language reference preprocessor commands \\
+Implementation book [5] & \texttt{doc/ib/p3-unicon.tex}, "The Unicon Preprocessor": \\
 \end{longtable}
 
 
@@ -687,29 +690,56 @@ Other \texttt{doc/ib/} preprocessor mentions (Idol, Ratfor, rtt) are different t
 \bibitem[1]{cite-jeffery-utr15}
 Clinton Jeffery. "How to Write a Unicon Technical Report". doc/utr/utr15.tex. 2013.
 
-\bibitem[2]{cite-jeffery-utr8}
+\bibitem[2]{cite-jeffery-pwu}
+Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. "Programming with Unicon". doc/book/. 2026.
+
+\bibitem[3]{cite-jeffery-utr8}
 Clinton Jeffery. "Unicon Language Reference". doc/unicon/utr8.html.
 
-\bibitem[3]{cite-alexander-jcon-preproc}
+\bibitem[4]{cite-alexander-jcon-preproc}
 Bob Alexander. "Preprocessor for Jcon". Basis for Unicon's preproce.icn.
 
-\bibitem[4]{cite-jeffery-ib-preproc}
+\bibitem[5]{cite-jeffery-ib-preproc}
 Clinton Jeffery. "The Unicon Compiler". Course notes, doc/ib/p3-unicon.tex, section "The Unicon Preprocessor".
 
-\bibitem[5]{cite-libssh}
+\bibitem[6]{cite-libssh}
 The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
 
-\bibitem[6]{cite-jeffery-utr13}
+\bibitem[7]{cite-jeffery-utr13}
 Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
 
-\bibitem[7]{cite-openssl}
+\bibitem[8]{cite-openssl}
 The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
 
-\bibitem[8]{cite-algharaibeh-utr26}
+\bibitem[9]{cite-algharaibeh-utr26}
 Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
 
-\bibitem[9]{cite-rfc2104}
+\bibitem[10]{cite-rfc2104}
 H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
+
+\bibitem[11]{cite-rfc1112}
+S. Deering. "Host Extensions for IP Multicasting". RFC 1112. 1989.
+
+\bibitem[12]{cite-algharaibeh-utr29}
+Jafar Al-Gharaibeh. "Raw Sockets and Packet Layouts in Unicon". doc/utr/utr29.rst. 2026.
+
+\bibitem[13]{cite-rfc4607}
+H. Holbrook and B. Cain. "Source-Specific Multicast for IP". RFC 4607. 2006.
+
+\bibitem[14]{cite-algharaibeh-utr28}
+Jafar Al-Gharaibeh. "Multicast and Socket Attributes in Unicon". doc/utr/utr28.rst. 2026.
+
+\bibitem[15]{cite-rfc792}
+J. Postel. "Internet Control Message Protocol". RFC 792. 1981.
+
+\bibitem[16]{cite-rfc2236}
+W. Fenner. "Internet Group Management Protocol, Version 2". RFC 2236. 1997.
+
+\bibitem[17]{cite-rfc3376}
+B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Internet Group Management Protocol, Version 3". RFC 3376. 2002.
+
+\bibitem[18]{cite-rfc1071}
+R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
 
 \end{thebibliography}
 \end{document}

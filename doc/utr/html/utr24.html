@@ -18,7 +18,7 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <script defer src="_static/theme-switcher.js"></script>
 </head><body>
 <div class="layout">
-<nav class="sidebar" aria-label="Book contents">
+<nav class="sidebar" aria-label="Report contents">
 <div class="book-title"><a href="index.html">Unicon Technical Reports</a></div>
 <label class="search-hint" for="theme-select">Theme</label>
 <select class="search-box" id="theme-select" aria-label="Color theme">
@@ -26,21 +26,59 @@ document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.
 <option value="classic">classic</option>
 <option value="dark">dark</option>
 </select>
-<p class="search-hint">Filter chapters; Enter for full search</p>
+<p class="search-hint">Filter sections; Enter for full search</p>
 <input class="search-box" id="nav-search" type="search" 
-placeholder="Search..." aria-label="Filter chapter list">
+placeholder="Search..." aria-label="Filter section list">
 <ol id="nav-toc">
-<li class="current">UTR 24: The Unicon Preprocessor</li>
-<li><a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon</a></li>
-<li><a href="utr27.html">UTR 27: Cryptographic Facilities in Unicon</a></li>
+<li class="toc-l1"><a href="#sec-intro">1. Introduction
+</a></li>
+<li class="toc-l1"><a href="#sec-motivation">2. Motivation and prior art
+</a></li>
+<li class="toc-l1"><a href="#sec-arch">3. Architecture
+</a></li>
+<li class="toc-l2"><a href="#sec-public">3.1 Public procedures
+</a></li>
+<li class="toc-l2"><a href="#sec-state">3.2 State
+</a></li>
+<li class="toc-l2"><a href="#sec-driver">3.3 Driver
+</a></li>
+<li class="toc-l2"><a href="#sec-ifstate">3.4 Conditional compilation
+</a></li>
+<li class="toc-l2"><a href="#sec-text-order">3.5 Text scan order
+</a></li>
+<li class="toc-l1"><a href="#sec-directives">4. Directives
+</a></li>
+<li class="toc-l1"><a href="#sec-triple">5. Triple-quoted multiline strings
+</a></li>
+<li class="toc-l1"><a href="#sec-fmacros">6. Function-like macros
+</a></li>
+<li class="toc-l1"><a href="#sec-assert">7. Built-in 
+<code>assert</code>
+ and 
+<code>assert_not</code>
+</a></li>
+<li class="toc-l1"><a href="#sec-support">8. Line numbers, errors, and includes
+</a></li>
+<li class="toc-l1"><a href="#sec-extend">9. Extending the preprocessor
+</a></li>
+<li class="toc-l2"><a href="#sec-extend-kinds">9.1 Kind and touchpoints
+</a></li>
+<li class="toc-l2"><a href="#sec-extend-guards">9.2 Guards and line accounting
+</a></li>
+<li class="toc-l2"><a href="#sec-extend-tests">9.3 Errors and tests
+</a></li>
+<li class="toc-l2"><a href="#sec-extend-directive">9.4 New 
+<code>$</code>
+ directive
+</a></li>
+<li class="toc-l1"><a href="#sec-related">10. Related documents
+</a></li>
+<li class="toc-l1"><a href="#references">References
+</a></li>
 </ol>
 <p class="search-hint"><a href="search.html">Search page</a></p>
 </nav>
 <div class="main">
-<div class="prevnext">
-<span></span>
-<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
-</div>
 <header class="report-masthead">
 <h1 class="report-title">The Unicon Preprocessor</h1>
 <p class="report-authors">Jafar Al-Gharaibeh</p>
@@ -49,7 +87,8 @@ placeholder="Search..." aria-label="Filter chapter list">
 <p class="report-pdf"><a href="utr24.pdf">pdf</a> | <a href="_sources/utr24.rst.txt">txt</a></p>
 <div class="report-abstract">
 <p class="report-abstract-label">Abstract</p>
-<p>The Unicon compiler runs a line-oriented source preprocessor before lexical analysis. The implementation, uni/unicon/preproce.icn, comes from Bob Alexander's Jcon preprocessor. It has been extended with triple-quoted multiline strings, function-like $define macros, and built-in assert / assert_not. This report describes those extensions, the architecture and directives they sit on, how #line and includes interact with them, and how to add further facilities. Keywords: Unicon, preprocessor, triple-quoted strings, function-like macros, assertions, technical report.</p>
+<p>The Unicon compiler runs a line-oriented source preprocessor before lexical analysis. The implementation, uni/unicon/preproce.icn, comes from Bob Alexander's Jcon preprocessor. It has been extended with triple-quoted multiline strings, function-like $define macros, and built-in assert / assert_not. This report describes those extensions, the architecture and directives they sit on, how #line and includes interact with them, and how to add further facilities.</p>
+<p class="report-keywords"><span class="report-keywords-label">Keywords:</span> Unicon, preprocessor, triple-quoted strings, function-like macros, assertions, technical report.</p>
 </div>
 </header>
 <h2 id="sec-intro">
@@ -69,8 +108,9 @@ This report describes the Unicon source preprocessor: how a file plus includes b
 <em>
 Programming with Unicon
 </em>
- (language reference, &quot;Preprocessor&quot;) and UTR #8 
-[<a class="cite" href="#cite-jeffery-utr8">2</a>]; that text still states that 
+ 
+[<a class="cite" href="#cite-jeffery-pwu">2</a>] (language reference, &quot;Preprocessor&quot;) and UTR #8 
+[<a class="cite" href="#cite-jeffery-utr8">3</a>]; that text still states that 
 <code>$define</code>
  does not take arguments. Automated tests live under 
 <code>tests/unicon/</code>
@@ -92,7 +132,7 @@ The preprocessor is not optional. Every compilation runs it.
 </h2>
 <p>
 The implementation is Bob Alexander's Jcon preprocessor, brought into Unicon with small edits 
-[<a class="cite" href="#cite-alexander-jcon-preproc">3</a>]. It is line-oriented: it recognizes directives and identifiers, respects string and comment boundaries, and performs textual substitution. It is not a parser.
+[<a class="cite" href="#cite-alexander-jcon-preproc">4</a>]. It is line-oriented: it recognizes directives and identifiers, respects string and comment boundaries, and performs textual substitution. It is not a parser.
 </p>
 <p>
 The Jcon baseline provided object-like 
@@ -116,10 +156,10 @@ The Jcon baseline provided object-like
 , and predefined symbols from 
 <code>&amp;features</code>
 . The implementation-book section &quot;The Unicon Preprocessor&quot; 
-[<a class="cite" href="#cite-jeffery-ib-preproc">4</a>] documents that baseline (generator interface, include and 
+[<a class="cite" href="#cite-jeffery-ib-preproc">5</a>] documents that baseline (generator interface, include and 
 <code>$ifdef</code>
  stacks, quoted-string skipping, underscore continuation). It still says macros have no parameters. The language reference says the same 
-[<a class="cite" href="#cite-jeffery-utr8">2</a>].
+[<a class="cite" href="#cite-jeffery-utr8">3</a>].
 </p>
 <p>
 Three gaps in that baseline are filled here:
@@ -1676,7 +1716,7 @@ How to write and submit a Unicon Technical Report.
 <tr>
 <td>
 UTR #8 
-[<a class="cite" href="#cite-jeffery-utr8">2</a>]</td>
+[<a class="cite" href="#cite-jeffery-utr8">3</a>]</td>
 <td>
 Language reference preprocessor commands
 </td>
@@ -1684,7 +1724,7 @@ Language reference preprocessor commands
 <tr>
 <td>
 Implementation book 
-[<a class="cite" href="#cite-jeffery-ib-preproc">4</a>]</td>
+[<a class="cite" href="#cite-jeffery-ib-preproc">5</a>]</td>
 <td>
 <code>doc/ib/p3-unicon.tex</code>
 , &quot;The Unicon Preprocessor&quot;:
@@ -1707,35 +1747,58 @@ References
 <li id="cite-jeffery-utr15" value="1">
 Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
 </li>
-<li id="cite-jeffery-utr8" value="2">
+<li id="cite-jeffery-pwu" value="2">
+Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. &quot;Programming with Unicon&quot;. doc/book/. 2026.
+</li>
+<li id="cite-jeffery-utr8" value="3">
 Clinton Jeffery. &quot;Unicon Language Reference&quot;. doc/unicon/utr8.html.
 </li>
-<li id="cite-alexander-jcon-preproc" value="3">
+<li id="cite-alexander-jcon-preproc" value="4">
 Bob Alexander. &quot;Preprocessor for Jcon&quot;. Basis for Unicon's preproce.icn.
 </li>
-<li id="cite-jeffery-ib-preproc" value="4">
+<li id="cite-jeffery-ib-preproc" value="5">
 Clinton Jeffery. &quot;The Unicon Compiler&quot;. Course notes, doc/ib/p3-unicon.tex, section &quot;The Unicon Preprocessor&quot;.
 </li>
-<li id="cite-libssh" value="5">
+<li id="cite-libssh" value="6">
 The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
 </li>
-<li id="cite-jeffery-utr13" value="6">
+<li id="cite-jeffery-utr13" value="7">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
-<li id="cite-openssl" value="7">
+<li id="cite-openssl" value="8">
 The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
 </li>
-<li id="cite-algharaibeh-utr26" value="8">
+<li id="cite-algharaibeh-utr26" value="9">
 Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
 </li>
-<li id="cite-rfc2104" value="9">
+<li id="cite-rfc2104" value="10">
 H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
 </li>
+<li id="cite-rfc1112" value="11">
+S. Deering. &quot;Host Extensions for IP Multicasting&quot;. RFC 1112. 1989.
+</li>
+<li id="cite-algharaibeh-utr29" value="12">
+Jafar Al-Gharaibeh. &quot;Raw Sockets and Packet Layouts in Unicon&quot;. doc/utr/utr29.rst. 2026.
+</li>
+<li id="cite-rfc4607" value="13">
+H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
+</li>
+<li id="cite-algharaibeh-utr28" value="14">
+Jafar Al-Gharaibeh. &quot;Multicast and Socket Attributes in Unicon&quot;. doc/utr/utr28.rst. 2026.
+</li>
+<li id="cite-rfc792" value="15">
+J. Postel. &quot;Internet Control Message Protocol&quot;. RFC 792. 1981.
+</li>
+<li id="cite-rfc2236" value="16">
+W. Fenner. &quot;Internet Group Management Protocol, Version 2&quot;. RFC 2236. 1997.
+</li>
+<li id="cite-rfc3376" value="17">
+B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;Internet Group Management Protocol, Version 3&quot;. RFC 3376. 2002.
+</li>
+<li id="cite-rfc1071" value="18">
+R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
+</li>
 </ol></div>
-<div class="prevnext">
-<span></span>
-<a href="utr26.html">UTR 26: Native SSH and SFTP Support in Unicon &rarr;</a>
-</div>
 <footer class="footer" role="contentinfo">
 &copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr24.pdf">pdf</a> | <a href="_sources/utr24.rst.txt" rel="nofollow">source</a>
 </footer>

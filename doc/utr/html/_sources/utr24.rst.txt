@@ -11,8 +11,9 @@
    assert / assert_not. This report describes those extensions,
    the architecture and directives they sit on, how #line and
    includes interact with them, and how to add further
-   facilities. Keywords: Unicon, preprocessor, triple-quoted
-   strings, function-like macros, assertions, technical report.
+   facilities.
+:keywords: Unicon, preprocessor, triple-quoted strings,
+   function-like macros, assertions, technical report.
 :docclass: report
 
 .. _sec-intro:
@@ -27,9 +28,10 @@ the ``$`` directives do, and the three extensions added in
 function-like macros, and built-in ``assert`` /
 ``assert_not``. It is formatted as a Unicon Technical Report
 :cite:`Jeffery:UTR15`. The language-facing command list lives in
-*Programming with Unicon* (language reference, "Preprocessor")
-and UTR #8 :cite:`Jeffery:UTR8`; that text still states that
-``$define`` does not take arguments. Automated tests live under
+*Programming with Unicon* :cite:`Jeffery:PwU` (language
+reference, "Preprocessor") and UTR #8 :cite:`Jeffery:UTR8`;
+that text still states that ``$define`` does not take
+arguments. Automated tests live under
 ``tests/unicon/`` (``triple_strings.icn``, ``macros*.icn``,
 ``assert_*.icn``). ``unicon -E`` writes preprocessed source.
 
