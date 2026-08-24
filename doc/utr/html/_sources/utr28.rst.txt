@@ -1,13 +1,14 @@
 :title: Multicast and Socket Attributes in Unicon
 :author: Jafar Al-Gharaibeh
 :trnumber: 28
-:date: June 2026
+:date: August 2026
 :copyright: 2026, Jafar Al-Gharaibeh
 :abstract: Unicon could open TCP and UDP sockets, but applications
    had no way to join a multicast group, pick an interface, or set
    TTL from the language. This report describes trailing
    name=value attributes on open(), the same style as SSL and
-   graphics windows, plus Attrib() after open(). Binding a UDP
+   graphics windows, plus Attrib() after open() for mutation and
+   f["name"] / key(f) for status. Binding a UDP
    socket to a group address joins that group; source@group or
    source= selects source-specific multicast. Defaults cover
    reuse, all-interface IPv4 joins, and outbound interface
@@ -28,13 +29,9 @@ with ``setsockopt(2)``. After ``open()``, ``Attrib()`` uses the
 same names. The language-facing reference lives in *Programming
 with Unicon* :cite:`Jeffery:PwU` (Chapter 5, "Multicast and
 Socket Attributes") and the language reference (``open``
-trailing attributes, ``Attrib``). Automated tests live in
-``tests/posix/mcast.icn``.
-
-The work is part of POSIX networking, not an optional library.
-A later report covers raw sockets :cite:`AlGharaibeh:UTR29`,
-which reuse these attributes (``ttl``, ``iface``, ``join``) on
-mode ``nr``.
+trailing attributes, ``Attrib``, subscript peek, ``key()``).
+Automated tests live in ``tests/posix/mcast.icn`` and
+``tests/posix/sockpeek.icn``.
 
 .. _sec-motivation:
 
@@ -45,21 +42,16 @@ Unicon's ``open()`` already constructed TCP and UDP handles.
 Multicast -- any-source (ASM) and source-specific (SSM)
 :cite:`RFC4607` -- is ordinary UDP plus membership and hop-limit
 options. Without those options, a Unicon program could not join
-``239.1.1.1``, restrict a join to one NIC, or send with a
-limited TTL. Those operations were not supported.
-
-The rest of the I/O API already has the pattern: ``open()``
-constructs, trailing strings configure (SSL ``key=``, window
-``WAttrib``), ``Attrib()`` reads and writes later. Socket
-options follow that pattern instead of adding
-``setsockopt()`` as a new global.
+a multicast group like ``239.1.1.1``, restrict a join to one NIC,
+or send with a limited TTL like ``ttl=3``. 
+These options were not supported.
 
 .. _sec-principles:
 
 3. Design principles
 ====================
 
-**Attributes are ``name=value``, like SSL.** Unknown names fail
+**Attributes are ``name=value``, like graphics windows.** Unknown names fail
 ``open()`` with error 1310 (``bad socket attribute``). Booleans
 are exactly ``yes`` or ``no``, matching ``verifyPeer``.
 
@@ -70,7 +62,7 @@ are exactly ``yes`` or ``no``, matching ``verifyPeer``.
          write("oops")
       else
          write("bogus: ", &errortext)
-      if open(":5110", "nua4", "reuseaddr=1") then
+      if open(":5110", "nua4", "reuseaddr=yes") then
          write("oops")
       else
          write("numeric boolean: ", &errortext)
@@ -88,12 +80,12 @@ interface and send out the first non-loopback IPv4 address
 (else loopback). Sending to ``255.255.255.255`` enables
 ``SO_BROADCAST``. Explicit attributes always override.
 
-**``source@group``, not ``group@source``.** The address form
+**``source@group``.** The address form
 matches VLC, ffmpeg, and RFC 4607 ``(S,G)`` order. Empty either
 side is invalid.
 
 **``ttl`` and ``iface``, not multicast-only names.** Hop limit
-and interface are used by unicast, multicast, and later raw
+and interface are used by unicast, multicast, and raw
 sockets :cite:`AlGharaibeh:UTR29`. ``ttl=`` sets both
 ``IP_TTL`` and ``IP_MULTICAST_TTL`` (or the IPv6 hop options).
 ``iface=`` accepts an IPv4 address, a numeric index, or a name
@@ -171,10 +163,7 @@ Output::
 
    hello-multicast
 
-``r.addr`` is the sender (host plus an ephemeral port). Alpine
-often does not deliver loopback multicast even when the join
-succeeds; the test suite treats a missing datagram as success
-there so CI stays portable.
+``r.addr`` is the sender (host plus an ephemeral port).
 
 A wildcard bind plus explicit joins is the other shape:
 
@@ -239,11 +228,11 @@ as success.
      - SSM source for a group bind (repeatable). Set-only.
    * - ``iface=``
      - IPv4 address, index, or name. Restricts join and
-       multicast send. Query returns a dotted IPv4 address or
-       an IPv6 ifindex.
+       multicast send. ``f["iface"]`` peeks a dotted IPv4
+       address or an IPv6 ifindex.
    * - ``ttl=``
-     - Unicast and multicast hop limits. Query returns the
-       multicast hop limit.
+     - Unicast and multicast hop limits. ``f["ttl"]`` peeks
+       the multicast hop limit.
    * - ``mcastloop=yes|no``
      - Whether the host receives its own multicasts. Kernel
        default is ``yes``.
@@ -256,23 +245,23 @@ as success.
    * - ``rcvbuf=`` / ``sndbuf=``
      - Buffer sizes in bytes.
 
-``proto`` and ``hdrincl`` are listed in the same table in the
-runtime; they belong to raw sockets :cite:`AlGharaibeh:UTR29`.
-
 .. _sec-attrib:
 
-7. ``Attrib()`` after ``open()``
-================================
+7. ``Attrib()`` and status peek
+===============================
 
 .. code-block:: unicon
 
    procedure main()
-      local f
+      local f, g
       f := open(":5110", "nua4") | stop(&errortext)
       Attrib(f, "ttl=4")
-      write("ttl=", Attrib(f, "ttl"))
-      write("mcastloop=", Attrib(f, "mcastloop"))
-      write(Attrib(f, "join") | "join: not queryable")
+      write("ttl=", f["ttl"])
+      write("mcastloop=", f["mcastloop"])
+      if g := f["groups"] then
+         every write(!g)
+      else
+         write("groups: unpopulated")
       close(f)
    end
 
@@ -280,14 +269,65 @@ Output::
 
    ttl=4
    mcastloop=yes
-   join: not queryable
+   groups: unpopulated
 
 Assignments in one call are applied together, preserving
-``iface`` then ``join`` order. Bare names produce
-``yes`` / ``no``, an integer, or (for IPv4 ``iface``) a dotted
-address. ``join``, ``leave``, ``source``, and ``proto`` cannot
-be queried (``Attrib(f, "join")`` fails; ``&errortext`` is
-empty). Membership changes still use assignment form:
+``iface`` then ``join`` order. Status is peeked with
+``f["name"]``. Unknown names raise
+1310. An unpopulated field fails. Boolean fields that answered
+succeed with ``"yes"`` or ``&null``.
+``key(f)`` generates every answerable field. ``f["*"]``
+snapshots those fields under one lock. Peeking a closed handle
+is error 174. ``key(f)`` that has not yet produced a name also
+raises 174 if the handle is already closed.
+
+TCP, UDP, multicast, and raw sockets share one peek table
+(``sock_peek``). ``join``, ``leave``, and ``source`` are verbs,
+not peek fields. ``proto`` is stored at ``socket()`` time on
+raw sockets :cite:`AlGharaibeh:UTR29`. ``f["groups"]`` is a
+list of joined groups (SSM as ``source@group``); a single group
+is still a list of length 1.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``ttl``
+     - Hop limit (integer), typically ``1`` .. ``255``
+   * - ``iface``
+     - Dotted IPv4 address (``127.0.0.1``) or IPv6 ifindex (``1``)
+   * - ``groups``
+     - List of joined groups, e.g. ``239.1.1.1``; SSM as
+       ``192.0.2.1@239.1.1.1``. Unpopulated before any ``join=``
+   * - ``mcastloop``
+     - ``"yes"`` or ``&null``
+   * - ``reuseaddr`` / ``reuseport``
+     - ``"yes"`` or ``&null`` (``reuseport`` may be unpopulated)
+   * - ``broadcast``
+     - ``"yes"`` or ``&null``
+   * - ``rcvbuf`` / ``sndbuf``
+     - Buffer sizes in bytes (integers)
+   * - ``proto``
+     - IP protocol number: ``1`` (ICMP), ``2`` (IGMP), ``89``
+       (OSPF); typical on raw sockets
+   * - ``hdrincl``
+     - ``"yes"`` or ``&null``; typical on raw sockets
+
+.. code-block:: unicon
+
+   f := open(":5110", "nua4") | stop(&errortext)
+   Attrib(f, "ttl=4")
+   Attrib(f, "iface=127.0.0.1", "join=239.1.1.1")
+   Attrib(f, "iface=127.0.0.1", "join=239.1.1.2")
+   write("ttl=", f["ttl"])
+   every g := !f["groups"] do
+      write("joined ", g)
+   every k := key(f) do
+      write("field ", k)
+   close(f)
+
+Membership changes still use assignment form:
 
 .. code-block:: unicon
 
@@ -374,8 +414,10 @@ attributes, implicit ASM/SSM joins, ``Attrib()`` join/leave,
 listener-cache isolation, IPv4 all-iface join, IPv6 SSM with
 an explicit interface, and the broadcast shortcut.
 
-**Membership query.** ``Attrib(f, "join")`` fails. The kernel
-does not offer a portable list of current groups.
+**Membership query.** ``f["groups"]`` is a list of groups joined
+through ``open()`` or ``Attrib()`` ``join=`` / ``source=``.
+The kernel still has no portable membership dump; this is
+runtime-tracked state.
 
 **IPv6 all-interface join.** IPv4 walks every NIC; IPv6 does
 not. Callers who need every IPv6 interface must join per
@@ -418,6 +460,9 @@ next receiver. It checks:
 - IPv6 SSM membership via ``@``, ``source=``, and
   ``join=group,source`` (delivery not required)
 - cache-hit alias vs independent attr open
+
+``tests/posix/sockpeek.icn`` checks ``f["ttl"]``,
+``f["groups"]`` as a list after two joins, and ``key(f)``.
 
 Expected output is ``tests/posix/stand/mcast.std``:
 

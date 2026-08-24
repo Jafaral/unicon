@@ -7,9 +7,10 @@
    sockets, but hashing, HMAC, signing, and symmetric encryption
    were not available as language primitives. This report describes
    the facilities that close that gap: cryptographic operations
-   reached through the same open(), read(), write(), close(), and
-   Attrib() interface already used for files, sockets, and SSH
-   sessions. Mode letter e is reused as a modifier; op= selects
+   reached through the same open(), read(), write(), and close()
+   interface already used for files and sockets, with ``[ ]`` for
+   status and Attrib() for idle-window mutation.
+   Mode letter ``e`` is reused as a modifier; ``op=`` selects
    the operation; keys and certificates are loaded as file-typed
    handles and passed as attributes. Encrypted TCP is unchanged;
    encrypted UDP uses DTLS. The implementation is the OpenSSL EVP
@@ -31,15 +32,13 @@ compose with encrypted sockets. It is formatted as a Unicon
 Technical Report :cite:`Jeffery:UTR15`. The language-facing
 reference lives in *Programming with Unicon* (Chapter 6) and the
 language reference (``open`` modes ``e`` / ``er`` / ``eh`` /
-``re`` / ``we``, and ``ne`` / ``nue``). Automated tests live
-under ``tests/crypto/``.
+``re`` / ``we``, and ``ne`` / ``nue``, subscript peek, ``key()``).
+Automated tests live under ``tests/crypto/``.
 
 The feature is optional in the same sense as TLS. A build with
 OpenSSL reports ``secure sockets layer encryption`` in
 ``&features`` (the ``_SSL`` flag). Without the library, the
-crypto paths are compiled out. There is no separate
-``--disable-crypto`` switch; ``--disable-ssl`` turns off both
-encrypted sockets and these facilities.
+crypto paths are compiled out. 
 
 .. _sec-motivation:
 
@@ -48,13 +47,11 @@ encrypted sockets and these facilities.
 
 Unicon already links OpenSSL :cite:`OpenSSL` for mode ``n`` with
 ``e`` -- encrypted TCP. Programs that needed a SHA-256 digest, an
-HMAC, a signature, or a file encrypted at rest had to leave the
-language. The facilities here expose those primitives without a
+HMAC, a signature, or a file encrypted at rest had to use external
+tools. The facilities here expose those primitives without a
 second API: hashing a stream is opening a handle and writing to
 it; reading an encrypted file is opening the file with a
-transform on the way through; loading a key once and signing many
-messages is the same pattern as opening an SSH session once and
-deriving channels :cite:`AlGharaibeh:UTR26`.
+transform on the way through.
 
 No new external dependency is introduced. The implementation uses
 OpenSSL's EVP interface, which the encrypted-socket support
@@ -103,9 +100,7 @@ costs nothing. ``read()`` finalizes and resets, so the next
 **``Attrib()`` reconfigures only in the idle window** -- before
 the first ``write()``, or after a ``read()`` and before the next
 ``write()``. Changing ``op=``, ``alg=``, ``cipher=``, or
-``iv=`` mid-operation fails. Handles are accepted by ``open()``
-only, not by ``Attrib()``: ``Attrib()`` already treats a file
-argument as a retarget.
+``iv=`` mid-operation fails. Handles are accepted by ``open()``.
 
 .. _sec-modes:
 
@@ -150,7 +145,7 @@ that also carry ``Fs_Encrypt``.
 
 ``e`` / ``er`` are the **data-pipe** shape: write payload in,
 read the result out. ``eh`` is separate because its target is an
-algorithm name, never material. ``re`` / ``we`` are the
+algorithm name, not material. ``re`` / ``we`` are the
 **file-transform** shape: the target is the data file, so key
 material arrives via ``key=`` or a handle attribute.
 
@@ -242,14 +237,16 @@ alignments in :ref:`section 6.3 <sec-attrs-shared>`.
    * - ``ca=`` / ``caDir=`` / ``caStore=``
      - Trust store
    * - ``ciphers=`` / ``ciphers1.3=``
-     - TLS 1.2 (and earlier) list, and TLS 1.3 suites
+     - TLS 1.2 list (e.g. ``HIGH``, ``ECDHE-RSA-AES256-GCM-SHA384``)
+       and TLS 1.3 suites (e.g. ``TLS_AES_256_GCM_SHA384``)
    * - ``minProto=`` / ``maxProto=``
-     - Protocol version bounds, e.g. ``TLS1.2``
+     - Protocol version bounds, e.g. ``TLS1.2``, ``TLS1.3``
    * - ``verifyPeer=``
      - ``yes`` / ``no``; ``no`` is the same as mode ``-``
 
 Socket attributes (``reuseaddr``, ``ttl``, ``iface``, ``join``,
 ``proto``, ...) are applied separately and are unaffected.
+Live-session status is :ref:`section 6.4 <sec-peek>`.
 
 .. _sec-attrs-crypto:
 
@@ -263,13 +260,17 @@ Socket attributes (``reuseaddr``, ``ttl``, ``iface``, ``join``,
      - Meaning
      - Used with
    * - ``op=``
-     - Operation name
+     - Operation: ``hash``, ``hmac``, ``sign``, ``verify``,
+       ``encrypt``, ``decrypt``
      - All data-pipe and file-transform ops
    * - ``alg=``
-     - Digest / signature algorithm (default ``sha256``)
+     - Digest name passed to OpenSSL (default ``sha256``;
+       also ``sha512``, ``sha1``, ``sha3-256``, ``blake2b512``).
+       Peek ``h["alg"]`` reports the library name (``SHA256``)
      - ``hash``, ``hmac``, ``sign``, ``verify``
    * - ``cipher=``
-     - Symmetric cipher (default ``aes-256-gcm``)
+     - Symmetric cipher (default ``aes-256-gcm``; also
+       ``aes-128-gcm``, ``aes-256-cbc``, ``chacha20-poly1305``)
      - ``encrypt``, ``decrypt``
    * - ``iv=``
      - Explicit IV; omit for automatic IV
@@ -286,14 +287,11 @@ Socket attributes (``reuseaddr``, ``ttl``, ``iface``, ``join``,
    * - ``keypass=``
      - Passphrase for an encrypted key file
      - Material load
-   * - ``state`` / ``state=``
-     - Digest checkpoint; not available with OpenSSL 3
-     - ``hash``, ``hmac``
 
 ``key=`` on a crypto handle is typed by content and by the
 operation: PEM / DER private keys for ``sign`` and TLS; raw
 bytes for ``encrypt``, ``decrypt``, and ``hmac``. A role
-mismatch fails rather than guessing.
+mismatch fails.
 
 Without ``iv=``, ``encrypt`` generates a fresh random IV per
 operation and prepends it to the ciphertext; ``decrypt`` reads
@@ -301,17 +299,7 @@ that prefix. Supplying ``iv=`` opts out -- useful for a wire
 format that does not prepend an IV, or for test vectors -- and
 hands uniqueness back to the caller. The default cipher is AEAD;
 the runtime appends the authentication tag after the ciphertext.
-
-``Attrib(h, "type")`` reports the material role (``symkey``,
-``key``, ``cert``, ...). ``Attrib(h, "state")`` is the designed
-checkpoint for resuming a hash across a process break: it
-snapshots in-progress digest state without finalizing or
-resetting. The blob is **opaque and not portable** (OpenSSL
-version and provider), must be restored into the same
-algorithm, and for ``hmac`` is key-equivalent secret material
-(length-extension). Ordinary streaming does not need it.
-OpenSSL 3 removed the MD_CTX export APIs, so the operation
-currently fails with 1316.
+Status peeks are :ref:`section 6.4 <sec-peek>`.
 
 .. _sec-attrs-shared:
 
@@ -320,14 +308,195 @@ currently fails with 1316.
 
 ``key=`` is a private-key path on TLS, crypto, and SSH.
 ``keypass=`` is the shared name for a key-file passphrase. SSH
-``password=`` is the remote login password and is not accepted
-on TLS. Crypto still accepts ``password=`` as an alias for
-``keypass=``.
 
 ``verifyPeer=yes|no`` and mode ``-`` mean the same thing on TLS
 and SSH. An explicit ``verifyPeer=`` overrides the mode flag.
 Trust stores stay distinct: TLS uses ``ca=`` (X.509);
 SSH uses ``hostkeyfile=`` (OpenSSH ``known_hosts``).
+
+.. _sec-peek:
+
+6.4 Status peek (``[ ]`` and ``key()``)
+---------------------------------------
+
+``h["name"]`` / ``conn["name"]`` is a non-destructive get.
+``Attrib()`` only assigns in the idle window (``op=``, ``alg=``,
+``sig=``, ...). Unknown names raise
+1302 on a crypto handle and 1326 on a TLS socket. An unpopulated
+field fails. A boolean field that *did* answer succeeds:
+``"yes"`` for true, ``&null`` for false , which
+would make things like ``if \h["expired"]`` succeed on a valid certificate.
+``key(h)`` generates every *answerable* field, including false
+booleans, so any ``k`` from ``key(h)`` makes ``h[k]`` succeed.
+Dump with ``image(h[k])`` so ``&null`` is visible.
+
+``h["*"]`` returns a table of those same fields captured under
+one lock. No status field is named ``*``. Peeking a closed handle
+is error 174. ``key(h)`` that has not yet produced a name also
+raises 174 if the handle is already closed. After the first
+suspend, ``close()`` makes the generator fail instead of raising,
+so a walk does not turn a mid-generation close into an error.
+
+``h["type"]`` is a role label (``key``, ``cert``, ``key,cert``),
+not a list. ``h["san"]`` and ``conn["san"]`` are lists of
+SAN strings (``DNS:host``, ``IP:1.2.3.4``). ``conn["certchain"]``
+is a list of PEM strings. A single item is still a list of
+length 1. ``h["op"]`` is always populated on an operation handle.
+
+**Material** (mode ``e`` / ``er``, no ``op=``).
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``type``
+     - ``key``, ``pubkey``, ``cert``, ``symkey``, or a
+       comma-joined combination after a merge (``key,cert``)
+   * - ``alg``
+     - Public-key algorithm: ``rsaEncryption``,
+       ``id-ecPublicKey``, ``ED25519``, ``dsaEncryption``
+   * - ``keysize``
+     - Size in bits (integer), e.g. ``2048``, ``256``
+   * - ``subject`` / ``issuer``
+     - Certificate DN, OpenSSL oneline
+       (``/C=US/O=Example/CN=host``)
+   * - ``san``
+     - List of Subject Alternative Names (``DNS:localhost``,
+       ``IP:192.0.2.1``, ``email:user@host``); unpopulated if
+       the cert has no SAN extension
+   * - ``notbefore`` / ``notafter``
+     - Validity timestamps (``2024-01-01T00:00:00Z``)
+   * - ``expired``
+     - ``"yes"`` or ``&null``
+   * - ``fingerprint``
+     - SHA-256 of the cert or public key (hex)
+
+Certificate names fail on a key-only handle.
+
+**Hash** (``eh``, or ``op=hash``).
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``op``
+     - ``hash``
+   * - ``alg``
+     - Digest name: ``SHA256`` (default), ``SHA512``, ``SHA1``,
+       ``SHA3-256``. ``alg=`` at open uses the lowercase OpenSSL
+       spelling (``sha256``)
+   * - ``hash``
+     - Current digest / MAC / signature bytes without
+       finalizing (``EVP_MD_CTX_copy_ex``). Unpopulated until
+       the first ``write()``. Not populated on ``verify``.
+   * - ``bytecount``
+     - Bytes written so far (integer)
+   * - ``blocksize`` / ``digestsize``
+     - Algorithm sizes (integers); SHA-256 is 64 / 32
+
+**HMAC, sign, verify.**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``op``
+     - ``hmac``, ``sign``, or ``verify``
+   * - ``hash``
+     - Running HMAC or signature bytes (same copy-and-finalize
+       peek). Unpopulated on ``verify`` -- use ``verified``.
+   * - ``alg``
+     - Digest used for HMAC or for the signature: ``SHA256``,
+       ``SHA512``, ``SHA1``
+   * - ``bytecount``
+     - Bytes written (integer)
+   * - ``verified``
+     - ``"yes"`` or ``&null`` after a verify; unpopulated before
+
+**Encrypt / decrypt.**
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``op``
+     - ``encrypt`` or ``decrypt``
+   * - ``cipher``
+     - Symmetric cipher: ``AES-256-GCM`` (default),
+       ``AES-128-GCM``, ``AES-256-CBC``, ``ChaCha20-Poly1305``.
+       ``cipher=`` at open uses ``aes-256-gcm``, etc.
+   * - ``iv``
+     - IV that was set or generated (bytes)
+   * - ``bytecount``
+     - Bytes processed (integer)
+
+**TLS socket** (after handshake). These are not ``open()``
+attributes.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+     - Value
+   * - ``cipher``
+     - Negotiated suite: ``TLS_AES_256_GCM_SHA384``,
+       ``TLS_AES_128_GCM_SHA256``, ``TLS_CHACHA20_POLY1305_SHA256``
+       (TLS 1.3) or ``ECDHE-RSA-AES256-GCM-SHA384`` (TLS 1.2)
+   * - ``version``
+     - ``TLSv1.3``, ``TLSv1.2``
+   * - ``alpn``
+     - Selected protocol: ``h2``, ``http/1.1``; unpopulated if none
+   * - ``peercert``
+     - Peer certificate as PEM
+   * - ``certchain``
+     - List of PEMs
+   * - ``subject`` / ``issuer``
+     - Peer DN, e.g. ``/CN=host.example``
+   * - ``san``
+     - Peer SANs as a list (``DNS:host.example``)
+   * - ``notbefore`` / ``notafter`` / ``expired``
+     - Peer validity; ``expired`` is ``"yes"`` or ``&null``
+   * - ``certverified``
+     - ``"yes"`` or ``&null``. Always populated: with
+       ``verifyPeer=yes`` it is ``"yes"`` (otherwise ``open()``
+       failed). With ``verifyPeer=no`` it reports what strict
+       verification would have said.
+   * - ``verifyresult``
+     - ``ok``, ``expired``, ``self-signed``, ``untrusted-CA``,
+       ``hostname-mismatch``, or ``revoked``. Always populated.
+   * - ``hostnamematch``
+     - ``"yes"`` or ``&null``: did CN/SAN match the requested
+       host, independent of chain trust. Always populated when
+       a peer certificate and hostname are available.
+
+Handshake failure means ``open()`` failed; there is no handle to
+subscript. Distinguish expired / untrusted CA / hostname
+mismatch / no shared cipher / protocol version via
+``&errornumber`` 1320--1325.
+
+.. code-block:: unicon
+
+   cert := open("client.crt", "e") | stop(&errortext)
+   write("material ", cert["type"], " ", cert["subject"])
+   every name := !cert["san"] do
+      write("  SAN ", name)
+   every k := key(cert) do
+      write("  ", k)
+
+   h := open("sha256", "eh") | stop(&errortext)
+   write(h, "abc")
+   write("op=", h["op"], " peek hash *", *h["hash"])
+   close(h)
+
+   conn := open("host:443", "ne", "ca=unicon-ca.crt") | stop(&errortext)
+   write(conn["cipher"], " ", conn["version"])
+   every pem := !conn["certchain"] do
+      write(*pem, " byte PEM")
+   close(conn)
 
 .. _sec-handles:
 
@@ -349,7 +518,7 @@ single role.
    ek := open("enc.key", "e", "keypass=" || pw)
    c  := open("bundle.pem", "e", "type=cert")
 
-A raw key is still a file value; ``Attrib(h, "type")`` reports the
+A raw key is still a file value; ``h["type"]`` reports the
 role:
 
 .. code-block:: unicon
@@ -359,7 +528,7 @@ role:
       k := open("sixteen-byte-key-material-here!!", "er") |
          stop(&errortext)
       write(type(k))
-      write(Attrib(k, "type"))
+      write(k["type"])
       close(k)
    end
 
@@ -378,7 +547,7 @@ Material split across files can be merged:
 A handle is a file value (``type(h)`` is ``"file"``) carrying
 ``Fs_Crypto``, the same way a window or socket is a file that
 does not support every file operation. The underlying
-``CryptoFile`` is malloc'd, like ``SSHfile``, so pointers stay
+``CryptoFile`` is malloc'd so pointers stay
 stable across garbage collection and are freed by ``close()``.
 
 Consumers ask a handle for the roles they need. An encrypted
@@ -386,18 +555,7 @@ socket wants a cert and a private key: one merged handle
 satisfies both, or two handles each contribute what they have.
 ``op=sign`` wants a private key; ``op=hmac`` wants symmetric
 bytes. A missing role, or two handles supplying the same role,
-fails at ``open()`` rather than later at ``write()``.
-
-Handles appear only among ``open()`` attributes, not
-``Attrib()``. Binding material is an open-time concern;
-``Attrib()`` already uses a file argument to retarget which
-socket the following names apply to.
-
-``open(k, "e", "op=sign")`` derives an operation from a
-material handle. A graphics-style ``clone()`` would give that
-verb a single meaning, but would be a second mechanism next to
-the handle attributes that TLS and ``re`` / ``we`` need
-anyway.
+fails at ``open()``.
 
 .. _sec-examples:
 
@@ -729,6 +887,13 @@ handles, both work.
    keyh  := open("client.key", "e")
    conn  := open("host:443", "ne", certh, keyh)
 
+After a handshake, ``conn["cipher"]`` peeks the negotiated
+suite and ``conn["certchain"]`` is a list of peer certificates
+as PEM strings; see :ref:`section 6.4 <sec-peek>`
+(``tests/crypto/tlspeek.icn``).
+``certh["type"]`` / ``keyh["type"]`` are material-handle peeks,
+not session fields.
+
 Encrypted UDP (DTLS) uses ``"nue"`` / ``"naue"``. The runtime
 selects a DTLS context when the socket is datagram.
 
@@ -763,8 +928,9 @@ plaintext chunks. On ``re`` with ``op=hash``, the first
 
 ``Attrib()`` during the idle window may change ``op=``,
 ``alg=``, ``cipher=``, ``iv=``, and ``sig=``. A change while a
-digest or cipher is in flight fails (1316). ``Attrib(h, "type")``
-is a query. Handles are not valid ``Attrib()`` values.
+digest or cipher is in flight fails (1316). Status gets are
+:ref:`section 6.4 <sec-peek>`. Handles are not valid
+``Attrib()`` values.
 
 Framing is owned by the runtime: IV prepended, tag appended,
 both fixed-length per cipher. The same layout is used for
@@ -846,12 +1012,6 @@ DTLS context selection and handshake, ``keypass=`` /
 ``verifyPeer=`` alignment with SSH, and the error numbers in
 :ref:`section 10 <sec-errors>`.
 
-**Digest checkpoint.** ``Attrib(h, "state")`` / ``state=`` is
-part of the design for resuming a hash across a process break
-(:ref:`section 6.2 <sec-attrs-crypto>`). OpenSSL 3 removed the
-MD_CTX export APIs, so the operation fails with 1316. Ordinary
-streaming does not need it.
-
 **Separate configure switch.** Crypto cannot be compiled out
 while leaving TLS sockets on. A ``Unicon_Crypto`` / ``NoCrypto``
 guard driven by ``--disable-crypto`` is the obvious next step if
@@ -878,9 +1038,9 @@ concern: ``hash``, ``hmac``, ``sha512``, ``sign``, ``encrypt``,
 ``iv``, ``freshiv``, ``tamper``, ``filehash``, ``filecrypt``,
 ``filekey``, ``filekeyattr``, ``filetamper``, ``opswitch``,
 ``midattrib``, ``badalg``, ``badkey``, ``badrole``,
-``badstate``, ``badverify``, plus TLS / DTLS
+``badverify``, plus TLS / DTLS
 (``tlsplain``, ``tlsverify``, ``tlsauth``, ``tlsproto``,
-``tlscipher``, ``tlshandle``, ``dtls``, ``dtlsecho``).
+``tlscipher``, ``tlshandle``, ``tlspeek``, ``dtls``, ``dtlsecho``).
 ``tests/crypto/Makefile`` skips the suite when OpenSSL is
 absent, and skips the threaded TLS echo tests when concurrency
 is absent. Expected output is ``tests/crypto/stand/*.std``.
