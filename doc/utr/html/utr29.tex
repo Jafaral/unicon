@@ -6,6 +6,10 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{fancyvrb}
+\IfFileExists{fvextra.sty}{%
+  \usepackage{fvextra}%
+  \fvset{breaklines=true,breakanywhere=true}%
+}{}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -52,7 +56,7 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr29-sec-intro}
 
-This report describes raw IP sockets in Unicon: how a handle is opened, how datagrams are sent and received, how protocol bytes are built and decoded, and what remains out of scope. It is formatted as a Unicon Technical Report [1]. Socket attributes (\texttt{ttl}, \texttt{iface}, \texttt{join}, and the rest) are the multicast facility [10]; this report adds mode \texttt{nr} and the packet library on top of that. The language-facing reference lives in \emph{Programming with Unicon} [7] (Chapter 5, "Raw Sockets" and "PacketSpec and package net"; Chapter 14, \texttt{uping} and \texttt{uigmp}) and the language reference (\texttt{open} mode \texttt{nr}, attributes \texttt{proto} and \texttt{hdrincl}, subscript peek). Automated plumbing and peek tests live in \texttt{tests/posix/raw\_\allowbreak{}sock.icn}.
+This report describes raw IP sockets in Unicon: how a handle is opened, how datagrams are sent and received, how protocol bytes are built and decoded, and what remains out of scope. It is formatted as a Unicon Technical Report [1]. Socket attributes (\texttt{ttl}, \texttt{iface}, \texttt{join}, and the rest) are the multicast facility [10]; this report adds mode \texttt{nr} and the packet library on top of that. The language-facing reference lives in \emph{Programming with Unicon} [7] (Chapter 5, "Raw Sockets" and "PacketSpec and package net"; Chapter 14, \texttt{uping} and \texttt{uigmp}) and the language reference (\texttt{open} mode \texttt{nr}, attributes \texttt{proto} and \texttt{hdrincl}, subscript peek). Automated plumbing and peek tests live in \texttt{tests/\allowbreak{}posix/\allowbreak{}raw\_\allowbreak{}sock.\allowbreak{}icn}.
 
 
 Raw sockets are part of the POSIX network facility. A build without POSIX networking has no \texttt{n} modes at all. Opening \texttt{SOCK\_\allowbreak{}RAW} usually needs elevated privileges (root or administrator); that is an operating-system restriction, not a Unicon one.
@@ -77,7 +81,7 @@ The rest of Unicon networking already treats \texttt{open()} as the constructor 
 \textbf{The runtime does not build protocol payloads.} Writes send whatever bytes the caller supplies. Receives return whatever the kernel delivered, often including an IPv4 header on Linux. \texttt{import~net} and \texttt{PacketSpec} (or hand-assembled strings) fill that gap.
 
 
-\textbf{Datagram I/O matches UDP.} Raw sockets are not connected. \texttt{writes()} uses \texttt{sendto(2)} with the destination saved at \texttt{open()}. Incoming packets use \texttt{receive()}, which returns a record with \texttt{addr}, \texttt{msg}, \texttt{saddr}, \texttt{daddr}, and (for IPv4 raw datagrams that include a header) \texttt{ttl} and \texttt{proto}. Those extra fields are also available as \texttt{r.ttl} / \texttt{r.saddr}. Use \texttt{receive()}, not \texttt{read()} / \texttt{reads()}.
+\textbf{Datagram I/O matches UDP.} Raw sockets are not connected. \texttt{writes()} uses \texttt{sendto(2)} with the destination saved at \texttt{open()}. Incoming packets use \texttt{receive()}, which returns a record with \texttt{addr}, \texttt{msg}, \texttt{saddr}, \texttt{daddr}, and (for IPv4 raw datagrams that include a header) \texttt{ttl} and \texttt{proto}. Those extra fields are also available as \texttt{r.\allowbreak{}ttl} / \texttt{r.\allowbreak{}saddr}. Use \texttt{receive()}, not \texttt{read()} / \texttt{reads()}.
 
 
 \textbf{Two layers for callers.} Session wrappers (\texttt{Ping}, \texttt{Igmp}) hide mode letters for the common cases. PacketSpec classes are there when the program must craft or classify bytes itself.
@@ -95,7 +99,7 @@ The first argument is a bare host or address, not \texttt{host:port}. Raw destin
 
 \texttt{proto=} takes a symbolic name or an integer 0--255:
 
-\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Name & Protocol \\
 \hline
@@ -153,14 +157,14 @@ raw-icmp: Operation not permitted
 \end{Verbatim}
 
 
-The last line is the unprivileged case. With privileges it prints \texttt{raw-icmp:~ok} (or the test suite's \texttt{plumbing-ok}).
+The last line is the unprivileged case. With privileges it prints \texttt{raw-\allowbreak{}icmp:~ok} (or the test suite's \texttt{plumbing-\allowbreak{}ok}).
 
 \section{5. Attributes and status peek}
 \label{utr29-sec-attrs}
 
 Trailing \texttt{open()} arguments are the same \texttt{name=value} socket attributes used for TCP and UDP [10]. Booleans are exactly \texttt{yes} or \texttt{no}. \texttt{ttl} and \texttt{iface} were named for this sharing: hop limit and interface are not multicast-only knobs.
 
-\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Attribute & Role on a raw socket \\
 \hline
@@ -178,13 +182,13 @@ Attribute & Role on a raw socket \\
 \texttt{ttl=} & Unicast and multicast hop limits (\texttt{IP\_\allowbreak{}TTL} / \\
 \texttt{rcvbuf=} / \texttt{sndbuf=} & Socket buffer sizes in bytes. \\
 \texttt{broadcast=} / \texttt{mcastloop=} & Same meaning as UDP. \\
-\texttt{join=} / \texttt{leave=} / \texttt{source=} / \texttt{iface=} & Multicast membership, including SSM \texttt{source@group} \\
+\texttt{join=} / \texttt{leave=} / \texttt{source=} / \texttt{iface=} & Multicast membership, including SSM \texttt{source@\allowbreak{}group} \\
 \end{longtable}
 
 
 \texttt{Attrib(f,\allowbreak{}~"ttl=4")} sets hop limits after \texttt{open()}. Status uses the same \texttt{[~]} / \texttt{key()} get as UDP [10]: unknown names raise 1310, unpopulated fields fail. Boolean peek fields that answered succeed with \texttt{"yes"} or \texttt{\&null} (never \texttt{"no"}); that is output only -- \texttt{open()} and \texttt{Attrib()} still take \texttt{yes} or \texttt{no}. Peeking a closed handle is error 174. \texttt{key(f)} that has not yet produced a name also raises 174 if the handle is already closed; after the first suspend, \texttt{close()} makes the generator fail instead of raising. Raw sockets add \texttt{proto} (fixed at \texttt{socket()}) and \texttt{hdrincl}.
 
-\begin{longtable}{>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Name & Peek value \\
 \hline
@@ -200,8 +204,8 @@ Name & Peek value \\
 \texttt{proto} & IP protocol number from \texttt{proto=}: \texttt{1} (\texttt{icmp}), \\
 \texttt{hdrincl} & \texttt{"yes"} or \texttt{\&null} (not \texttt{"no"}) \\
 \texttt{ttl} & Hop limit (integer), e.g. \texttt{64} \\
-\texttt{iface} & Outbound / join interface, e.g. \texttt{127.0.0.1} \\
-\texttt{groups} & List of joined groups, e.g. \texttt{239.1.1.1}; unpopulated \\
+\texttt{iface} & Outbound / join interface, e.g. \texttt{127.\allowbreak{}0.\allowbreak{}0.\allowbreak{}1} \\
+\texttt{groups} & List of joined groups, e.g. \texttt{239.\allowbreak{}1.\allowbreak{}1.\allowbreak{}1}; unpopulated \\
 \texttt{mcastloop} / \texttt{reuseaddr} / \texttt{reuseport} / & \texttt{"yes"} or \texttt{\&null} (not \texttt{"no"}) \\
 \texttt{rcvbuf} / \texttt{sndbuf} & Buffer sizes in bytes (integers) \\
 \end{longtable}
@@ -227,7 +231,7 @@ write(r.addr, "  ", *r.msg, " bytes")
 \texttt{writes()} calls \texttt{sock\_\allowbreak{}write()}, which for \texttt{SOCK\_\allowbreak{}RAW} (and UDP) does \texttt{sendto} to the \texttt{addrinfo} saved at \texttt{open()}. There is no \texttt{connect(2)}. Changing the destination means opening another handle (or, with \texttt{hdrincl=yes}, putting the destination in a supplied IP header).
 
 
-\texttt{receive()} peeks with \texttt{MSG\_\allowbreak{}PEEK} into a 2K buffer, then consumes with \texttt{recvfrom}. If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a \texttt{posix\_\allowbreak{}message}: \texttt{addr} is the peer (often \texttt{a.b.c.d:0} for raw IPv4), \texttt{msg} is the byte string. \texttt{saddr} / \texttt{daddr} use the usual IP-header names: on an IPv4 raw receive they are the header source and destination; on UDP, \texttt{saddr} is the numeric peer address and \texttt{daddr} is unpopulated. When the receive buffer starts with an IPv4 header, \texttt{ttl} and \texttt{proto} are that header's hop limit and protocol; otherwise those fields are null.
+\texttt{receive()} peeks with \texttt{MSG\_\allowbreak{}PEEK} into a 2K buffer, then consumes with \texttt{recvfrom}. If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a \texttt{posix\_\allowbreak{}message}: \texttt{addr} is the peer (often \texttt{a.\allowbreak{}b.\allowbreak{}c.\allowbreak{}d:0} for raw IPv4), \texttt{msg} is the byte string. \texttt{saddr} / \texttt{daddr} use the usual IP-header names: on an IPv4 raw receive they are the header source and destination; on UDP, \texttt{saddr} is the numeric peer address and \texttt{daddr} is unpopulated. When the receive buffer starts with an IPv4 header, \texttt{ttl} and \texttt{proto} are that header's hop limit and protocol; otherwise those fields are null.
 
 
 On many IPv4 stacks a raw receive buffer starts with the IP header, then the protocol message. Linux ICMP is the usual example. Strip it before decoding ICMP or IGMP (\hyperref[utr29-sec-packetspec]{section 7}). IPv6 raw sockets typically deliver the upper layer only; there is no IPv6 header-strip helper yet.
@@ -241,7 +245,7 @@ As with UDP, \texttt{read()} / \texttt{reads()} are the wrong verbs for datagram
 \section{7. PacketSpec}
 \label{utr29-sec-packetspec}
 
-Module \texttt{packetspec} (package \texttt{net}, \texttt{uni/lib/packetspec.icn}) is a small declarative engine for fixed binary layouts. Protocol classes inherit \texttt{PacketSpec} and override \texttt{define()}.
+Module \texttt{packetspec} (package \texttt{net}, \texttt{uni/\allowbreak{}lib/\allowbreak{}packetspec.\allowbreak{}icn}) is a small declarative engine for fixed binary layouts. Protocol classes inherit \texttt{PacketSpec} and override \texttt{define()}.
 
 
 Layer-1 helpers pack and unpack network-order integers (\texttt{u8} / \texttt{u16} / \texttt{u32} / \texttt{u64} and the matching \texttt{get\_\allowbreak{}u*} readers) and IPv4 addresses (\texttt{ipv4} / \texttt{to\_\allowbreak{}ipv4} / \texttt{get\_\allowbreak{}ipv4}). \texttt{inet\_\allowbreak{}cksum()} is RFC 1071 [14].
@@ -264,7 +268,7 @@ end
 \texttt{field(name,\allowbreak{}~size,\allowbreak{}~defval)} is a network-order integer. \texttt{bytes\_\allowbreak{}field} is opaque fixed-width bytes. \texttt{ipv4\_\allowbreak{}field} accepts a dotted-quad, integer, or four raw bytes on build and returns a dotted-quad on decode. \texttt{checksum\_\allowbreak{}field} is a 16-bit placeholder filled at \texttt{build()} time over the header plus payload. Pass \texttt{exclude\_\allowbreak{}off} / \texttt{exclude\_\allowbreak{}len} (1-based) to omit a range from the sum --- OSPF Authentication and PIM Register are the documented cases; those layouts are not in the library yet.
 
 
-\texttt{require(name)} marks a field that \texttt{build()} must see via \texttt{set()} or the optional extra table. \texttt{relax()} / \texttt{build(...,\allowbreak{}~lax)} skip that check for incomplete test packets. \texttt{strict()} and \texttt{clear()} turn checking back on.
+\texttt{require(name)} marks a field that \texttt{build()} must see via \texttt{set()} or the optional extra table. \texttt{relax()} / \texttt{build(.\allowbreak{}.\allowbreak{}.\allowbreak{},\allowbreak{}~lax)} skip that check for incomplete test packets. \texttt{strict()} and \texttt{clear()} turn checking back on.
 
 \subsection{7.2 Build, decode, describe}
 \label{utr29-sec-ps-build}
@@ -306,7 +310,7 @@ type=8 id=1 seq=2
 \section{8. ICMP echo}
 \label{utr29-sec-icmp}
 
-\texttt{uni/lib/icmp.icn} adds echo request (type 8) and echo reply (type 0) [11] on top of \texttt{PacketSpec}:
+\texttt{uni/\allowbreak{}lib/\allowbreak{}icmp.\allowbreak{}icn} adds echo request (type 8) and echo reply (type 0) [11] on top of \texttt{PacketSpec}:
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 PacketSpec
@@ -363,7 +367,7 @@ Other ICMP types (destination unreachable, time exceeded, and so on) are not in 
 \section{9. IGMP}
 \label{utr29-sec-igmp}
 
-\texttt{uni/lib/igmp.icn} covers IGMPv2 (RFC 2236) and IGMPv3 (RFC 3376):
+\texttt{uni/\allowbreak{}lib/\allowbreak{}igmp.\allowbreak{}icn} covers IGMPv2 (RFC 2236) and IGMPv3 (RFC 3376):
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 PacketSpec
@@ -377,7 +381,7 @@ Igmp                     session wrapper
 IGMPv2 messages are an eight-octet header. Report and leave \texttt{require()} a group. IGMPv3 queries add flags, QQIC, and a source list. IGMPv3 reports carry group records: ASM join/leave and SSM source filters (\texttt{join\_\allowbreak{}sources}, \texttt{allow}, \texttt{block}).
 
 
-\texttt{Igmp()} opens \texttt{proto=igmp} bound at \texttt{0.0.0.0}. \texttt{recv(ms)} waits, then returns a table with \texttt{kind}, \texttt{addr}, \texttt{msg}, \texttt{len}, and decoded fields when recognized. \texttt{kind} is one of \texttt{v3\_\allowbreak{}report}, \texttt{v3\_\allowbreak{}query}, \texttt{v2\_\allowbreak{}query}, \texttt{v2\_\allowbreak{}report}, \texttt{v2\_\allowbreak{}leave}, or \texttt{unknown}.
+\texttt{Igmp()} opens \texttt{proto=igmp} bound at \texttt{0.\allowbreak{}0.\allowbreak{}0.\allowbreak{}0}. \texttt{recv(ms)} waits, then returns a table with \texttt{kind}, \texttt{addr}, \texttt{msg}, \texttt{len}, and decoded fields when recognized. \texttt{kind} is one of \texttt{v3\_\allowbreak{}report}, \texttt{v3\_\allowbreak{}query}, \texttt{v2\_\allowbreak{}query}, \texttt{v2\_\allowbreak{}report}, \texttt{v2\_\allowbreak{}leave}, or \texttt{unknown}.
 
 
 PacketSpec classes work without a raw socket:
@@ -441,7 +445,7 @@ Exported constants (\texttt{IGMP\_\allowbreak{}MEMBERSHIP\_\allowbreak{}QUERY}, 
 \section{10. Sample programs}
 \label{utr29-sec-progs}
 
-\texttt{uni/progs/uping} and \texttt{uni/progs/uigmp} are teaching clients, not replacements for \texttt{ping(8)} or \texttt{tcpdump(1)}. They need \texttt{SOCK\_\allowbreak{}RAW} privileges:
+\texttt{uni/\allowbreak{}progs/\allowbreak{}uping} and \texttt{uni/\allowbreak{}progs/\allowbreak{}uigmp} are teaching clients, not replacements for \texttt{ping(8)} or \texttt{tcpdump(1)}. They need \texttt{SOCK\_\allowbreak{}RAW} privileges:
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 unicon uping
@@ -453,7 +457,7 @@ sudo ./uigmp -v         # also show open()/Igmp API demos
 \end{Verbatim}
 
 
-Default mode uses the session wrappers. \texttt{-v} / \texttt{-d} also runs the lower-level \texttt{open(...,\allowbreak{}~"nr",\allowbreak{}~...)} plus PacketSpec path and prints \texttt{describe()} output.
+Default mode uses the session wrappers. \texttt{-\allowbreak{}v} / \texttt{-\allowbreak{}d} also runs the lower-level \texttt{open(.\allowbreak{}.\allowbreak{}.\allowbreak{},\allowbreak{}~"nr",\allowbreak{}~.\allowbreak{}.\allowbreak{}.\allowbreak{})} plus PacketSpec path and prints \texttt{describe()} output.
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 sudo ./uping 192.0.2.1
@@ -494,10 +498,10 @@ listening on IGMP
 The work is in the existing POSIX socket code, not a new file type.
 
 
-\textbf{Mode letter.} \texttt{src/runtime/fsys.r}: after \texttt{n} has set \texttt{Fs\_\allowbreak{}Socket}, \texttt{r} / \texttt{R} sets \texttt{sock\_\allowbreak{}type~=~SOCK\_\allowbreak{}T\_\allowbreak{}RAW} and does not set the ordinary read bit. Without \texttt{Fs\_\allowbreak{}Socket}, \texttt{r} remains \texttt{Fs\_\allowbreak{}Read}. \texttt{e} (crypto raw-key material) is a later check on the same letter; \texttt{"nr"} is a socket, \texttt{"er"} is a crypto handle.
+\textbf{Mode letter.} \texttt{src/\allowbreak{}runtime/\allowbreak{}fsys.\allowbreak{}r}: after \texttt{n} has set \texttt{Fs\_\allowbreak{}Socket}, \texttt{r} / \texttt{R} sets \texttt{sock\_\allowbreak{}type~=~SOCK\_\allowbreak{}T\_\allowbreak{}RAW} and does not set the ordinary read bit. Without \texttt{Fs\_\allowbreak{}Socket}, \texttt{r} remains \texttt{Fs\_\allowbreak{}Read}. \texttt{e} (crypto raw-key material) is a later check on the same letter; \texttt{"nr"} is a socket, \texttt{"er"} is a crypto handle.
 
 
-\textbf{Create.} \texttt{src/runtime/rposix.r}: \texttt{sock\_\allowbreak{}connect} (and the listen/bind path) require \texttt{proto=} before \texttt{socket()}. \texttt{uni\_\allowbreak{}getaddrinfo} allows a missing port for \texttt{SOCK\_\allowbreak{}T\_\allowbreak{}RAW}. The real protocol number is passed as the third argument to \texttt{socket()}; \texttt{getaddrinfo} is told protocol 0 so it does not override it.
+\textbf{Create.} \texttt{src/\allowbreak{}runtime/\allowbreak{}rposix.\allowbreak{}r}: \texttt{sock\_\allowbreak{}connect} (and the listen/bind path) require \texttt{proto=} before \texttt{socket()}. \texttt{uni\_\allowbreak{}getaddrinfo} allows a missing port for \texttt{SOCK\_\allowbreak{}T\_\allowbreak{}RAW}. The real protocol number is passed as the third argument to \texttt{socket()}; \texttt{getaddrinfo} is told protocol 0 so it does not override it.
 
 
 \textbf{I/O.} UDP and raw share \texttt{saddrs[]}: the \texttt{addrinfo} from \texttt{open()} is kept until \texttt{sock\_\allowbreak{}close()}. \texttt{sock\_\allowbreak{}write} \texttt{sendto}s there. \texttt{sock\_\allowbreak{}recv} accepts \texttt{SOCK\_\allowbreak{}DGRAM} and \texttt{SOCK\_\allowbreak{}RAW}. \texttt{proto=} is skipped in \texttt{setsockopt} (already consumed). \texttt{hdrincl=} sets \texttt{IP\_\allowbreak{}HDRINCL}.
@@ -526,7 +530,7 @@ The language surface described here is implemented: \texttt{"nr"}, required \tex
 \textbf{\texttt{read()} on raw handles.} UDP clears the read bit so \texttt{read()} fails. Raw currently keeps \texttt{Fs\_\allowbreak{}Read} because it shares the TCP-like status assignment. The documented API is still \texttt{receive()}. Aligning the status bits with UDP would make misuse fail earlier.
 
 
-\textbf{Privileged tests.} \texttt{tests/posix/raw\_\allowbreak{}sock.icn} checks plumbing without sending packets. A live ICMP echo test would need root in CI and a reachable responder; it is not in the suite.
+\textbf{Privileged tests.} \texttt{tests/\allowbreak{}posix/\allowbreak{}raw\_\allowbreak{}sock.\allowbreak{}icn} checks plumbing without sending packets. A live ICMP echo test would need root in CI and a reachable responder; it is not in the suite.
 
 
 \textbf{Windows.} Opening \texttt{SOCK\_\allowbreak{}RAW} is possible with administrator rights, but Windows historically restricts which protocols a raw socket may use. Treat \texttt{uping} / \texttt{uigmp} as UNIX-first tools.
@@ -537,7 +541,7 @@ The language surface described here is implemented: \texttt{"nr"}, required \tex
 \section{Appendix: test coverage}
 \label{utr29-sec-coverage}
 
-\texttt{tests/posix/raw\_\allowbreak{}sock.icn} does not require \texttt{SOCK\_\allowbreak{}RAW} success. It checks that:
+\texttt{tests/\allowbreak{}posix/\allowbreak{}raw\_\allowbreak{}sock.\allowbreak{}icn} does not require \texttt{SOCK\_\allowbreak{}RAW} success. It checks that:
 
 \begin{itemize}
 \item 
@@ -547,7 +551,7 @@ missing, empty, and unknown \texttt{proto=} fail with 1310
 
 \item 
 
-\texttt{proto=icmp}, \texttt{gre}, \texttt{ospf}, and numeric \texttt{89} reach \texttt{socket()} (success or a privilege denial both print \texttt{plumbing-ok})
+\texttt{proto=icmp}, \texttt{gre}, \texttt{ospf}, and numeric \texttt{89} reach \texttt{socket()} (success or a privilege denial both print \texttt{plumbing-\allowbreak{}ok})
 
 
 \item 
@@ -562,12 +566,12 @@ without a preceding \texttt{n}, mode \texttt{"r"} still opens a file for reading
 
 \item 
 
-when \texttt{SOCK\_\allowbreak{}RAW} is allowed, \texttt{f["proto"]} is 1 after \texttt{proto=icmp} and \texttt{key(f)} yields populated names (privilege denial still prints \texttt{raw-peek:ok} / \texttt{raw-key:ok} so the \texttt{.std} stays portable)
+when \texttt{SOCK\_\allowbreak{}RAW} is allowed, \texttt{f["proto"]} is 1 after \texttt{proto=icmp} and \texttt{key(f)} yields populated names (privilege denial still prints \texttt{raw-\allowbreak{}peek:ok} / \texttt{raw-\allowbreak{}key:ok} so the \texttt{.\allowbreak{}std} stays portable)
 
 
 \end{itemize}
 
-Expected output is \texttt{tests/posix/stand/raw\_\allowbreak{}sock.std}:
+Expected output is \texttt{tests/\allowbreak{}posix/\allowbreak{}stand/\allowbreak{}raw\_\allowbreak{}sock.\allowbreak{}std}:
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 missing-proto: bad socket attribute
@@ -584,7 +588,7 @@ raw-key:ok
 \end{Verbatim}
 
 
-On an unprivileged account the \texttt{raw-*} lines still print \texttt{plumbing-ok}: the test treats both a successful \texttt{socket()} and a privilege denial as passing plumbing. The posix suite picks up every \texttt{*.icn} in that directory.
+On an unprivileged account the \texttt{raw-\allowbreak{}*} lines still print \texttt{plumbing-\allowbreak{}ok}: the test treats both a successful \texttt{socket()} and a privilege denial as passing plumbing. The posix suite picks up every \texttt{*.\allowbreak{}icn} in that directory.
 
 \section{References}
 \label{utr29-references}
