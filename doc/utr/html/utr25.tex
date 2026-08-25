@@ -102,12 +102,17 @@ Defined in \texttt{src/h/rmacros.h}:
 StrLen(q)         /* byte length, masked to exclude tag/count bits */
 SetStrLen(q,n)    /* sets byte length; see section 2.3 for why this clears
                      rather than preserves the other fields */
+MakeStr(s,n,dp)   /* StrLoc(*dp) = s; SetStrLen(*dp, n) -- preferred
+                     constructor for a fresh string descriptor */
 IsUniQual(d)      /* tests the UTF-8 tag */
 SetUniQual(d)     /* sets the UTF-8 tag */
 CpCount(q)        /* reads the cached codepoint count, or the sentinel
                      value 0 if none is cached */
 SetCpCount(q,n)   /* sets the cached codepoint count */
 \end{Verbatim}
+
+
+\texttt{MakeStr} is the preferred way to fill a new string descriptor: it sets the pointer and then the length in one step, so call sites share one order. \texttt{StrLoc} and \texttt{SetStrLen} update different words of the descriptor, so swapping those two alone does not affect the tag; the ordering that matters for Unicode is still \texttt{SetStrLen} / \texttt{MakeStr}, then \texttt{SetUniQual}, then \texttt{SetCpCount} (\hyperref[utr25-sec-strlen]{section 2.3}). \texttt{AsgnCStr} is the C-string specialization of the same pattern.
 
 
 Three shared helpers implement UTF-8 decoding logic used throughout the runtime:
@@ -134,7 +139,7 @@ All three treat a malformed lead byte as a one-byte unit and continue, rather th
 \texttt{SetStrLen} performs a full overwrite of the descriptor's length word, rather than clearing only the length bits and preserving whatever tag and count bits were already present. This is a deliberate choice, not an oversight: the large majority of call sites that assign a string length are populating a freshly declared descriptor -- a local variable on the stack, an uninitialized table slot -- whose prior content is unrelated garbage rather than a meaningful previous value. Preserving that content would leak it into the tag and count fields of what is meant to be a clean, newly constructed string. A full overwrite (with the incoming length itself masked, so that an oversized value cannot bleed into the neighboring count field) produces a deterministic, untagged result in every case, which is what nearly every call site actually requires.
 
 
-The consequence is that any code that needs to both set a length and retain or apply tagging must do so explicitly, in order: \texttt{SetStrLen}, then \texttt{SetUniQual}, then \texttt{SetCpCount} if applicable. Reversing this order silently loses the tag, since \texttt{SetStrLen} clears it. This ordering requirement is not enforced by the type system and must be checked by hand at any call site that does both. Concatenation (\hyperref[utr25-sec-concat]{section 5}) is the clearest illustration of where getting this wrong produces a real, silent defect: an implementation that computes a combined length via \texttt{SetStrLen} and only afterward decides whether to tag the result is correct; one that sets the tag first, relying on an earlier whole-descriptor copy to have carried it, is not, because the subsequent \texttt{SetStrLen} call clears whatever the copy carried.
+The consequence is that any code that needs to both set a length and retain or apply tagging must do so explicitly, in order: \texttt{SetStrLen} (or \texttt{MakeStr}, which ends in \texttt{SetStrLen}), then \texttt{SetUniQual}, then \texttt{SetCpCount} if applicable. Reversing this order silently loses the tag, since \texttt{SetStrLen} clears it. This ordering requirement is not enforced by the type system and must be checked by hand at any call site that does both. Concatenation (\hyperref[utr25-sec-concat]{section 5}) is the clearest illustration of where getting this wrong produces a real, silent defect: an implementation that computes a combined length via \texttt{SetStrLen} and only afterward decides whether to tag the result is correct; one that sets the tag first, relying on an earlier whole-descriptor copy to have carried it, is not, because the subsequent \texttt{SetStrLen} call clears whatever the copy carried.
 
 \section{3. Promotion: how a string becomes tagged}
 \label{utr25-sec-promo}
