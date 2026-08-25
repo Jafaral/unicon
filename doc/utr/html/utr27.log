@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -411,6 +411,13 @@ Overfull \hbox (73.57346pt too wide) in alignment at lines 137--144
  []
 
 
+Overfull \hbox (8.30922pt too wide) in paragraph at lines 147--148
+\T1/cmtt/m/n/12 alg=\T1/cmr/m/n/12 . Al-go-rithm and ci-pher names are OpenSSL'
+s own (\T1/cmtt/m/n/12 sha256\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 aes-256-gcm\T1/cm
+r/m/n/12 )
+ []
+
+
 Overfull \hbox (19.78664pt too wide) in paragraph at lines 155--156
 \T1/cmr/m/n/12 val-ues and un-known names fail (TLS at-tribute er-rors use 1302
 ; crypto state/name
@@ -641,18 +648,13 @@ Underfull \hbox (badness 4779) in paragraph at lines 849--850
 .
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 855--856
-[]\T1/cmr/m/n/12 Unicode Con-sor-tium. "The Uni-code Stan-dard".
- []
-
 [18]
-Underfull \hbox (badness 10000) in paragraph at lines 861--862
+Underfull \hbox (badness 10000) in paragraph at lines 864--865
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 867--868
+Underfull \hbox (badness 1072) in paragraph at lines 870--871
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
@@ -665,10 +667,10 @@ Package rerunfilecheck Info: File `utr27.out' has not changed.
 (rerunfilecheck)             Checksum: EF7CFE255922ED09517620DE98A78C56;3686.
  ) 
 Here is how much of TeX's memory you used:
- 9822 strings out of 476182
- 150878 string characters out of 5795595
+ 9824 strings out of 476182
+ 150939 string characters out of 5795595
  1936975 words of memory out of 5000000
- 31647 multiletter control sequences out of 15000+600000
+ 31648 multiletter control sequences out of 15000+600000
  568164 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,6n,79p,1108b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -683,10 +685,10 @@ ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx2074.600pk>
-Output written on utr27.pdf (21 pages, 172139 bytes).
+Output written on utr27.pdf (21 pages, 172224 bytes).
 PDF statistics:
- 694 PDF objects out of 1000 (max. 8388607)
- 257 compressed objects within 3 object streams
- 72 named destinations out of 1000 (max. 500000)
+ 697 PDF objects out of 1000 (max. 8388607)
+ 260 compressed objects within 3 object streams
+ 73 named destinations out of 1000 (max. 500000)
  193 words of extra memory for PDF output out of 10000 (max. 10000000)
 

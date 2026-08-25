@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:51
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -696,17 +696,12 @@ Underfull \hbox (badness 4779) in paragraph at lines 676--677
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 682--683
-[]\T1/cmr/m/n/12 Unicode Con-sor-tium. "The Uni-code Stan-dard".
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 688--689
+Underfull \hbox (badness 10000) in paragraph at lines 691--692
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 694--695
+Underfull \hbox (badness 1072) in paragraph at lines 697--698
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
@@ -723,10 +718,10 @@ Package rerunfilecheck Info: File `utr26.out' has not changed.
 (rerunfilecheck)             Checksum: 630B6D1DE9794AC9418B2CB673088EFF;8037.
  ) 
 Here is how much of TeX's memory you used:
- 9880 strings out of 476182
- 151936 string characters out of 5795595
+ 9882 strings out of 476182
+ 151997 string characters out of 5795595
  1933975 words of memory out of 5000000
- 31688 multiletter control sequences out of 15000+600000
+ 31689 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,6n,79p,1086b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -742,10 +737,10 @@ ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr26.pdf (22 pages, 191658 bytes).
+Output written on utr26.pdf (22 pages, 191754 bytes).
 PDF statistics:
- 820 PDF objects out of 1000 (max. 8388607)
- 345 compressed objects within 4 object streams
- 88 named destinations out of 1000 (max. 500000)
+ 821 PDF objects out of 1000 (max. 8388607)
+ 346 compressed objects within 4 object streams
+ 89 named destinations out of 1000 (max. 500000)
  345 words of extra memory for PDF output out of 10000 (max. 10000000)
 
