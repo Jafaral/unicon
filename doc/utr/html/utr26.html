@@ -227,7 +227,7 @@ libssh2
 libssh
 </strong>
  
-[<a class="cite" href="#cite-libssh">2</a>], for server-side optionality later and for the callback API that preserves stdout/stderr arrival order (
+[<a class="cite" href="#cite-libssh">5</a>], for server-side optionality later and for the callback API that preserves stdout/stderr arrival order (
 <a href="utr26.html#sec-receive">section 8.3</a>
 ).
 </p>
@@ -263,7 +263,7 @@ open
 The Messaging facility (HTTP/POP/SMTP, 
 <code>rmsg.r</code>
 , libtp) 
-[<a class="cite" href="#cite-jeffery-utr13">3</a>] is not a fit. Messaging's transport-discipline abstraction has the same 1:1 single-stream limitation as SSL -- no channel-multiplexing concept -- so moving into that world would not solve the multiplexed-channel requirement, only relocate it. SSH's request/channel model (
+[<a class="cite" href="#cite-jeffery-utr13">6</a>] is not a fit. Messaging's transport-discipline abstraction has the same 1:1 single-stream limitation as SSL -- no channel-multiplexing concept -- so moving into that world would not solve the multiplexed-channel requirement, only relocate it. SSH's request/channel model (
 <code>exec</code>
  / 
 <code>shell</code>
@@ -275,11 +275,15 @@ The Messaging facility (HTTP/POP/SMTP,
 <code>POST</code>
  / 
 <code>RETR</code>
-). Instead, SSH uses the 
+). SSH does not route through 
+<code>ssh://</code>
+ URIs or 
+<code>Mopen()</code>
+. It uses the 
 <code>h</code>
  mode character and plain 
 <code>user@host</code>
- string form, independent of the Messaging/URI subsystem.
+ string parsing, independent of the Messaging/URI subsystem.
 </p>
 <h2 id="sec-arch">
 3. Architectural grounding
@@ -311,7 +315,7 @@ not
 <code>SSHfile</code>
  is allocated with 
 <code>malloc</code>
- so pointers to it are stable across garbage collection, and is freed by the close hook. A malloc'd block is required once the session must hold a list of child channels whose addresses survive compaction (
+ so pointers to it are stable across garbage collection, and is freed by the close hook, never by the collector. A malloc'd block is required once the session must hold a list of child channels whose addresses survive compaction (
 <a href="utr26.html#sec-close">section 10.2</a>
 ).
 </p>
@@ -381,9 +385,13 @@ All stream I/O funnels through one dispatch point:
 ).
 </p>
 <p>
-The close hook in 
+Close is 
+<strong>
+explicit, not GC-driven
+</strong>
+. The close hook in 
 <code>fsys.r</code>
- frees SSL resources directly. SSH files follow the same convention -- leaking a channel or session means not calling 
+ frees SSL resources directly; there is no finalizer during garbage collection. SSH files follow the same convention -- leaking a channel or session means not calling 
 <code>close()</code>
 , the same as any other file.
 </p>
@@ -506,7 +514,7 @@ A session opened with
  is contradictory and fails with a bad-attribute error.
 </p>
 <pre><code class="language-unicon">s := open(&quot;jafar@&quot; || host, &quot;h&quot;, &quot;key=&quot; || keypath)
-write(s, &quot;ls -l\n&quot;)
+write(s, &quot;show version\n&quot;)
 while line := reads(s) do write(line)
 close(s)
 
@@ -532,13 +540,21 @@ The first argument is
 <code>[addr]:port</code>
 . A bare IPv6 literal is not misparsed: an unbracketed host is split on 
 <code>:</code>
- only when there is a single colon.
+ only when there is a single colon. There is no 
+<code>port=</code>
+ attribute.
 </p>
 <p>
 <code>user@host</code>
  wins over a 
 <code>user=</code>
  attribute. If neither is given, libssh's default user (the local login name) is used.
+</p>
+<p>
+<code>ssh://user@host</code>
+ URI syntax is not used (
+<a href="utr26.html#sec-messaging">section 2.3</a>
+).
 </p>
 <h3 id="sec-default">
 4.3 Default channel: shell, not bare session
@@ -574,7 +590,7 @@ A shell channel has no clean command boundaries: prompt text, echoed input, and 
 <code>cmd=</code>
 , which has clean stdout and a real exit status:
 </p>
-<pre><code class="language-unicon">c := open(s, &quot;hc&quot;, &quot;cmd=ls -l&quot;)
+<pre><code class="language-unicon">c := open(s, &quot;hc&quot;, &quot;cmd=show version&quot;)
 </code></pre>
 <h2 id="sec-attrs">
 5. Attributes and authentication
@@ -584,9 +600,15 @@ Trailing
 <code>open()</code>
  arguments are 
 <code>name=value</code>
- strings. Empty values and unknown names fail (error 1331). Every attribute must contain 
+ strings. Empty values and unknown names fail (error 1331). Boolean-style attributes without a value are not accepted -- every attribute must contain 
 <code>=</code>
-.
+. SFTP is selected by mode character 
+<code>s</code>
+ after 
+<code>h</code>
+ (
+<code>&quot;hs&quot;</code>
+), not by a valueless attribute.
 </p>
 <table>
 <thead>
@@ -645,6 +667,10 @@ Same name as TLS/crypto; distinct from SSH
 </td>
 <td>
 Remote login password
+</td>
+<td>
+Not a TLS attribute; crypto still accepts it as an alias for 
+<code>keypass=</code>
 </td>
 </tr>
 <tr>
@@ -738,7 +764,11 @@ Default from the local tty, else 80x24
 <code>keypass=</code>
  is the shared name for a key-file passphrase on TLS, crypto, and SSH. SSH 
 <code>password=</code>
- remains the remote login password.
+ remains the remote login password and is not accepted on TLS. Crypto still accepts 
+<code>password=</code>
+ as an alias for 
+<code>keypass=</code>
+.
 </p>
 <p>
 The 
@@ -848,9 +878,13 @@ Like every other
 <code>h</code>
 , 
 <code>c</code>
- is still create+write. Trailing 
+ is still create+write and 
+<code>s</code>
+ is still ignored (or Messaging short-request after 
+<code>m</code>
+). Trailing 
 <code>&quot;name=value&quot;</code>
- arguments are attributes, the same as SSL uses for 
+ arguments are attributes, not modes -- the same slot SSL uses for 
 <code>key=</code>
  and friends.
 </p>
@@ -875,6 +909,8 @@ Mode characters combine.
 <code>b</code>
  set transfer intent (
 <code>&quot;hsw&quot;</code>
+, or 
+<code>open(..., &quot;hs&quot;, ..., &quot;w&quot;)</code>
 ).
 </p>
 <table>
@@ -975,7 +1011,7 @@ Extra exec channel on that session
 </tr>
 <tr>
 <td>
-<code>open(s, &quot;hsw&quot;, &quot;path=...&quot;)</code>
+<code>open(s, &quot;hs&quot;, &quot;path=...&quot;, &quot;w&quot;)</code>
 </td>
 <td>
 mode 
@@ -988,7 +1024,7 @@ SFTP file or directory
 </tr>
 <tr>
 <td>
-<code>open(host, &quot;hsw&quot;, &quot;path=...&quot;)</code>
+<code>open(host, &quot;hs&quot;, &quot;path=...&quot;, &quot;w&quot;)</code>
 </td>
 <td>
 mode 
@@ -1226,9 +1262,7 @@ fail
 </strong>
 , they do not 
 <code>runerr</code>
-. This matches the general 
-<code>open()</code>
- pattern: set 
+. This matches the SSL connect path: set 
 <code>&amp;errortext</code>
 , tear down what was allocated, and fail, so callers write 
 <code>if s := open(...) then ... else ...</code>
@@ -1395,11 +1429,17 @@ SFTP regular files use
 <p>
 Status on SSH files is a non-destructive peek through 
 <code>[ ]</code>
-. Unknown names raise 1331. An unpopulated field fails. Boolean fields that answered succeed with 
+, not 
+<code>Attrib()</code>
+. 
+<code>Attrib()</code>
+ has no SSH setters. Unknown names raise 1331. An unpopulated field fails. Boolean fields that answered succeed with 
 <code>&quot;yes&quot;</code>
  or 
 <code>&amp;null</code>
-. 
+ (never 
+<code>&quot;no&quot;</code>
+). 
 <code>key(c)</code>
  generates every answerable field, including false booleans. 
 <code>c[&quot;*&quot;]</code>
@@ -1411,7 +1451,9 @@ Status on SSH files is a non-destructive peek through
 <code>file(user@host)</code>
 . 
 <code>key(c)</code>
- that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, Similar to messaging: 
+ that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, 
+<code>close()</code>
+ makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error. The same split as messaging: 
 <code>!</code>
  generates content, 
 <code>key()</code>
@@ -2261,43 +2303,52 @@ References
 <li id="cite-jeffery-utr15" value="1">
 Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
 </li>
-<li id="cite-libssh" value="2">
+<li id="cite-algharaibeh-utr26" value="2">
+Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
+</li>
+<li id="cite-unicode-standard" value="3">
+Unicode Consortium. &quot;The Unicode Standard&quot;. https://www.unicode.org/versions/latest/. 2026.
+</li>
+<li id="cite-unicon-utf8lib" value="4">
+Unicon Project. &quot;UTF-8 class library&quot;. uni/lib/utf8.icn.
+</li>
+<li id="cite-libssh" value="5">
 The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
 </li>
-<li id="cite-jeffery-utr13" value="3">
+<li id="cite-jeffery-utr13" value="6">
 Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
 </li>
-<li id="cite-openssl" value="4">
+<li id="cite-openssl" value="7">
 The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
 </li>
-<li id="cite-rfc2104" value="5">
+<li id="cite-rfc2104" value="8">
 H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
 </li>
-<li id="cite-rfc1112" value="6">
+<li id="cite-rfc1112" value="9">
 S. Deering. &quot;Host Extensions for IP Multicasting&quot;. RFC 1112. 1989.
 </li>
-<li id="cite-jeffery-pwu" value="7">
+<li id="cite-jeffery-pwu" value="10">
 Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. &quot;Programming with Unicon&quot;. doc/book/. 2026.
 </li>
-<li id="cite-rfc4607" value="8">
-H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
-</li>
-<li id="cite-algharaibeh-utr29" value="9">
+<li id="cite-algharaibeh-utr29" value="11">
 Jafar Al-Gharaibeh. &quot;Raw Sockets and Packet Layouts in Unicon&quot;. doc/utr/utr29.rst. 2026.
 </li>
-<li id="cite-algharaibeh-utr28" value="10">
+<li id="cite-rfc4607" value="12">
+H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
+</li>
+<li id="cite-algharaibeh-utr28" value="13">
 Jafar Al-Gharaibeh. &quot;Multicast and Socket Attributes in Unicon&quot;. doc/utr/utr28.rst. 2026.
 </li>
-<li id="cite-rfc792" value="11">
+<li id="cite-rfc792" value="14">
 J. Postel. &quot;Internet Control Message Protocol&quot;. RFC 792. 1981.
 </li>
-<li id="cite-rfc2236" value="12">
+<li id="cite-rfc2236" value="15">
 W. Fenner. &quot;Internet Group Management Protocol, Version 2&quot;. RFC 2236. 1997.
 </li>
-<li id="cite-rfc3376" value="13">
+<li id="cite-rfc3376" value="16">
 B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;Internet Group Management Protocol, Version 3&quot;. RFC 3376. 2002.
 </li>
-<li id="cite-rfc1071" value="14">
+<li id="cite-rfc1071" value="17">
 R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
 </li>
 </ol></div>

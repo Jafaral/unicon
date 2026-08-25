@@ -24,7 +24,7 @@
 \vskip 5.5em
 {\bfseries Abstract}\par
 \begin{quote}
-Unicon has long used OpenSSL for encrypted network sockets, but hashing, HMAC, signing, and symmetric encryption were not available as language primitives. This report describes the facilities that close that gap: cryptographic operations reached through the same open(), read(), write(), and close() interface already used for files and sockets, with ``[ ]`` for status and Attrib() for idle-window mutation. Mode letter ``e`` is reused as a modifier; ``op=`` selects the operation; keys and certificates are loaded as file-typed handles and passed as attributes. Encrypted TCP is unchanged; encrypted UDP uses DTLS. The implementation is the OpenSSL EVP interface already linked for TLS.
+Unicon has long used OpenSSL for encrypted network sockets, but hashing, HMAC, signing, and symmetric encryption were not available as language primitives. This report describes the facilities that close that gap: cryptographic operations reached through the same open(), read(), write(), and close() interface already used for files and sockets, with ``[ ]`` for status and Attrib() for idle-window mutation. Mode letter e is reused as a modifier; op= selects the operation; keys and certificates are loaded as file-typed handles and passed as attributes. Encrypted TCP is unchanged; encrypted UDP uses DTLS. The implementation is the OpenSSL EVP interface already linked for TLS.
 \end{quote}
 \begin{quote}
 {\bfseries Keywords:} Unicon, cryptography, OpenSSL, TLS, DTLS, hash, HMAC, sign, encrypt, runtime, technical report.
@@ -48,12 +48,12 @@ Moscow, ID, 83844, USA
 This report describes the cryptographic facilities in the Unicon runtime: how a handle is opened, how payload flows through \texttt{write()} / \texttt{read()}, how key and certificate material is loaded and reused, and how the same letters and attributes compose with encrypted sockets. It is formatted as a Unicon Technical Report [1]. The language-facing reference lives in \emph{Programming with Unicon} (Chapter 6) and the language reference (\texttt{open} modes \texttt{e} / \texttt{er} / \texttt{eh} / \texttt{re} / \texttt{we}, and \texttt{ne} / \texttt{nue}, subscript peek, \texttt{key()}). Automated tests live under \texttt{tests/crypto/}.
 
 
-The feature is optional in the same sense as TLS. A build with OpenSSL reports \texttt{secure~sockets~layer~encryption} in \texttt{\&features} (the \texttt{\_SSL} flag). Without the library, the crypto paths are compiled out.
+The feature is optional in the same sense as TLS. A build with OpenSSL reports \texttt{secure~sockets~layer~encryption} in \texttt{\&features} (the \texttt{\_SSL} flag). Without the library, the crypto paths are compiled out. There is no separate \texttt{--disable-crypto} switch; \texttt{--disable-ssl} turns off both encrypted sockets and these facilities.
 
 \section{2. Motivation}
 \label{utr27-sec-motivation}
 
-Unicon already links OpenSSL [4] for mode \texttt{n} with \texttt{e} -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to use external tools. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through.
+Unicon already links OpenSSL [7] for mode \texttt{n} with \texttt{e} -- encrypted TCP. Programs that needed a SHA-256 digest, an HMAC, a signature, or a file encrypted at rest had to leave the language. The facilities here expose those primitives without a second API: hashing a stream is opening a handle and writing to it; reading an encrypted file is opening the file with a transform on the way through; loading a key once and signing many messages is the same pattern as opening an SSH session once and deriving channels [2].
 
 
 No new external dependency is introduced. The implementation uses OpenSSL's EVP interface, which the encrypted-socket support already requires.
@@ -79,7 +79,7 @@ No new external dependency is introduced. The implementation uses OpenSSL's EVP 
 \textbf{Initialization is lazy.} \texttt{open()} does not create the underlying EVP context until the first \texttt{write()} (or the first transforming \texttt{read()} on a file). A handle that is never used costs nothing. \texttt{read()} finalizes and resets, so the next \texttt{write()} initializes again.
 
 
-\textbf{\texttt{Attrib()} reconfigures only in the idle window} -- before the first \texttt{write()}, or after a \texttt{read()} and before the next \texttt{write()}. Changing \texttt{op=}, \texttt{alg=}, \texttt{cipher=}, or \texttt{iv=} mid-operation fails. Handles are accepted by \texttt{open()}.
+\textbf{\texttt{Attrib()} reconfigures only in the idle window} -- before the first \texttt{write()}, or after a \texttt{read()} and before the next \texttt{write()}. Changing \texttt{op=}, \texttt{alg=}, \texttt{cipher=}, or \texttt{iv=} mid-operation fails. Handles are accepted by \texttt{open()} only, not by \texttt{Attrib()}: \texttt{Attrib()} already treats a file argument as a retarget.
 
 \section{4. Modes}
 \label{utr27-sec-modes}
@@ -109,7 +109,7 @@ Mode & Meaning & Target \\
 \end{longtable}
 
 
-\texttt{e} / \texttt{er} are the \textbf{data-pipe} shape: write payload in, read the result out. \texttt{eh} is separate because its target is an algorithm name, not material. \texttt{re} / \texttt{we} are the \textbf{file-transform} shape: the target is the data file, so key material arrives via \texttt{key=} or a handle attribute.
+\texttt{e} / \texttt{er} are the \textbf{data-pipe} shape: write payload in, read the result out. \texttt{eh} is separate because its target is an algorithm name, never material. \texttt{re} / \texttt{we} are the \textbf{file-transform} shape: the target is the data file, so key material arrives via \texttt{key=} or a handle attribute.
 
 
 \texttt{h} alone remains SSH. \texttt{r} alone remains read. The new meanings apply only when \texttt{e} was seen first.
@@ -144,7 +144,7 @@ Mode \texttt{-} skips peer verification on TLS (\texttt{ne-}) and SSH (\texttt{h
 \end{longtable}
 
 
-HMAC is the construction of RFC 2104 [5] over the digest named by \texttt{alg=}. Algorithm and cipher names are OpenSSL's own (\texttt{sha256}, \texttt{aes-256-gcm}) and are passed through rather than mapped to a Unicon-defined set.
+HMAC is the construction of RFC 2104 [8] over the digest named by \texttt{alg=}. Algorithm and cipher names are OpenSSL's own (\texttt{sha256}, \texttt{aes-256-gcm}) and are passed through rather than mapped to a Unicon-defined set.
 
 
 Defaults are \texttt{alg=sha256} and \texttt{cipher=aes-256-gcm}.
@@ -210,7 +210,7 @@ Attribute & Meaning & Used with \\
 \end{longtable}
 
 
-\texttt{key=} on a crypto handle is typed by content and by the operation: PEM / DER private keys for \texttt{sign} and TLS; raw bytes for \texttt{encrypt}, \texttt{decrypt}, and \texttt{hmac}. A role mismatch fails.
+\texttt{key=} on a crypto handle is typed by content and by the operation: PEM / DER private keys for \texttt{sign} and TLS; raw bytes for \texttt{encrypt}, \texttt{decrypt}, and \texttt{hmac}. A role mismatch fails rather than guessing.
 
 
 Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation and prepends it to the ciphertext; \texttt{decrypt} reads that prefix. Supplying \texttt{iv=} opts out -- useful for a wire format that does not prepend an IV, or for test vectors -- and hands uniqueness back to the caller. The default cipher is AEAD; the runtime appends the authentication tag after the ciphertext. Status peeks are \hyperref[utr27-sec-peek]{section 6.4}.
@@ -218,7 +218,7 @@ Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation
 \subsection{6.3 Shared names with SSH}
 \label{utr27-sec-attrs-shared}
 
-\texttt{key=} is a private-key path on TLS, crypto, and SSH. \texttt{keypass=} is the shared name for a key-file passphrase. SSH
+\texttt{key=} is a private-key path on TLS, crypto, and SSH. \texttt{keypass=} is the shared name for a key-file passphrase. SSH \texttt{password=} is the remote login password and is not accepted on TLS. Crypto still accepts \texttt{password=} as an alias for \texttt{keypass=}.
 
 
 \texttt{verifyPeer=yes|no} and mode \texttt{-} mean the same thing on TLS and SSH. An explicit \texttt{verifyPeer=} overrides the mode flag. Trust stores stay distinct: TLS uses \texttt{ca=} (X.509); SSH uses \texttt{hostkeyfile=} (OpenSSH \texttt{known\_hosts}).
@@ -226,7 +226,7 @@ Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation
 \subsection{6.4 Status peek (\texttt{[~]} and \texttt{key()})}
 \label{utr27-sec-peek}
 
-\texttt{h["name"]} / \texttt{conn["name"]} is a non-destructive get. \texttt{Attrib()} only assigns in the idle window (\texttt{op=}, \texttt{alg=}, \texttt{sig=}, ...). Unknown names raise 1302 on a crypto handle and 1326 on a TLS socket. An unpopulated field fails. A boolean field that \emph{did} answer succeeds: \texttt{"yes"} for true, \texttt{\&null} for false , which would make things like \texttt{if~\textbackslash{}h["expired"]} succeed on a valid certificate. \texttt{key(h)} generates every \emph{answerable} field, including false booleans, so any \texttt{k} from \texttt{key(h)} makes \texttt{h[k]} succeed. Dump with \texttt{image(h[k])} so \texttt{\&null} is visible.
+\texttt{h["name"]} / \texttt{conn["name"]} is a non-destructive get. \texttt{Attrib()} only assigns in the idle window (\texttt{op=}, \texttt{alg=}, \texttt{sig=}, ...); a bare name is not a query. Unknown names raise 1302 on a crypto handle and 1326 on a TLS socket. An unpopulated field fails. A boolean field that \emph{did} answer succeeds: \texttt{"yes"} for true, \texttt{\&null} for false -- never \texttt{"no"}, which would make \texttt{if~h["expired"]} succeed on a valid certificate. \texttt{key(h)} generates every \emph{answerable} field, including false booleans, so any \texttt{k} from \texttt{key(h)} makes \texttt{h[k]} succeed. Dump with \texttt{image(h[k])} so \texttt{\&null} is visible.
 
 
 \texttt{h["*"]} returns a table of those same fields captured under one lock. No status field is named \texttt{*}. Peeking a closed handle is error 174. \texttt{key(h)} that has not yet produced a name also raises 174 if the handle is already closed. After the first suspend, \texttt{close()} makes the generator fail instead of raising, so a walk does not turn a mid-generation close into an error.
@@ -361,7 +361,7 @@ Name & Value \\
 \end{longtable}
 
 
-Handshake failure means \texttt{open()} failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via \texttt{\&errornumber} 1320--1325.
+Handshake failure means \texttt{open()} failed; there is no handle to subscript. Distinguish expired / untrusted CA / hostname mismatch / no shared cipher / protocol version via \texttt{\&errornumber} 1320--1325. \texttt{alert} and \texttt{handshakestate} are not peek fields.
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 cert := open("client.crt", "e") | stop(&errortext)
@@ -428,10 +428,16 @@ Attrib(idh, "key=client.key")
 \end{Verbatim}
 
 
-A handle is a file value (\texttt{type(h)} is \texttt{"file"}) carrying \texttt{Fs\_Crypto}, the same way a window or socket is a file that does not support every file operation. The underlying \texttt{CryptoFile} is malloc'd so pointers stay stable across garbage collection and are freed by \texttt{close()}.
+A handle is a file value (\texttt{type(h)} is \texttt{"file"}) carrying \texttt{Fs\_Crypto}, the same way a window or socket is a file that does not support every file operation. The underlying \texttt{CryptoFile} is malloc'd, like \texttt{SSHfile}, so pointers stay stable across garbage collection and are freed by \texttt{close()}.
 
 
-Consumers ask a handle for the roles they need. An encrypted socket wants a cert and a private key: one merged handle satisfies both, or two handles each contribute what they have. \texttt{op=sign} wants a private key; \texttt{op=hmac} wants symmetric bytes. A missing role, or two handles supplying the same role, fails at \texttt{open()}.
+Consumers ask a handle for the roles they need. An encrypted socket wants a cert and a private key: one merged handle satisfies both, or two handles each contribute what they have. \texttt{op=sign} wants a private key; \texttt{op=hmac} wants symmetric bytes. A missing role, or two handles supplying the same role, fails at \texttt{open()} rather than later at \texttt{write()}.
+
+
+Handles appear only among \texttt{open()} attributes, not \texttt{Attrib()}. Binding material is an open-time concern; \texttt{Attrib()} already uses a file argument to retarget which socket the following names apply to.
+
+
+\texttt{open(k,~"e",~"op=sign")} derives an operation from a material handle. A graphics-style \texttt{clone()} would give that verb a single meaning, but would be a second mechanism next to the handle attributes that TLS and \texttt{re} / \texttt{we} need anyway.
 
 \section{8. Examples}
 \label{utr27-sec-examples}
@@ -842,43 +848,52 @@ Automated tests live under \texttt{tests/crypto/}, one program per concern: \tex
 \bibitem[1]{cite-jeffery-utr15}
 Clinton Jeffery. "How to Write a Unicon Technical Report". doc/utr/utr15.tex. 2013.
 
-\bibitem[2]{cite-libssh}
+\bibitem[2]{cite-algharaibeh-utr26}
+Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
+
+\bibitem[3]{cite-unicode-standard}
+Unicode Consortium. "The Unicode Standard". https://www.unicode.org/versions/latest/. 2026.
+
+\bibitem[4]{cite-unicon-utf8lib}
+Unicon Project. "UTF-8 class library". uni/lib/utf8.icn.
+
+\bibitem[5]{cite-libssh}
 The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
 
-\bibitem[3]{cite-jeffery-utr13}
+\bibitem[6]{cite-jeffery-utr13}
 Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
 
-\bibitem[4]{cite-openssl}
+\bibitem[7]{cite-openssl}
 The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
 
-\bibitem[5]{cite-rfc2104}
+\bibitem[8]{cite-rfc2104}
 H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
 
-\bibitem[6]{cite-rfc1112}
+\bibitem[9]{cite-rfc1112}
 S. Deering. "Host Extensions for IP Multicasting". RFC 1112. 1989.
 
-\bibitem[7]{cite-jeffery-pwu}
+\bibitem[10]{cite-jeffery-pwu}
 Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. "Programming with Unicon". doc/book/. 2026.
 
-\bibitem[8]{cite-rfc4607}
-H. Holbrook and B. Cain. "Source-Specific Multicast for IP". RFC 4607. 2006.
-
-\bibitem[9]{cite-algharaibeh-utr29}
+\bibitem[11]{cite-algharaibeh-utr29}
 Jafar Al-Gharaibeh. "Raw Sockets and Packet Layouts in Unicon". doc/utr/utr29.rst. 2026.
 
-\bibitem[10]{cite-algharaibeh-utr28}
+\bibitem[12]{cite-rfc4607}
+H. Holbrook and B. Cain. "Source-Specific Multicast for IP". RFC 4607. 2006.
+
+\bibitem[13]{cite-algharaibeh-utr28}
 Jafar Al-Gharaibeh. "Multicast and Socket Attributes in Unicon". doc/utr/utr28.rst. 2026.
 
-\bibitem[11]{cite-rfc792}
+\bibitem[14]{cite-rfc792}
 J. Postel. "Internet Control Message Protocol". RFC 792. 1981.
 
-\bibitem[12]{cite-rfc2236}
+\bibitem[15]{cite-rfc2236}
 W. Fenner. "Internet Group Management Protocol, Version 2". RFC 2236. 1997.
 
-\bibitem[13]{cite-rfc3376}
+\bibitem[16]{cite-rfc3376}
 B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Internet Group Management Protocol, Version 3". RFC 3376. 2002.
 
-\bibitem[14]{cite-rfc1071}
+\bibitem[17]{cite-rfc1071}
 R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
 
 \end{thebibliography}

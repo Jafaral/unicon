@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 02:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -400,71 +400,71 @@ dow (\T1/cmtt/m/n/12 write("hello")
  []
 
 [3] [4]
-Overfull \hbox (224.0365pt too wide) in alignment at lines 154--158
+Overfull \hbox (276.72906pt too wide) in alignment at lines 157--161
  [] [] [] 
  []
 
 
-Overfull \hbox (224.0365pt too wide) in alignment at lines 158--162
+Overfull \hbox (276.72906pt too wide) in alignment at lines 161--165
  [] [] [] 
  []
 
 
-Overfull \hbox (224.0365pt too wide) in alignment at lines 162--164
+Overfull \hbox (276.72906pt too wide) in alignment at lines 165--167
  [] [] [] 
  []
 
 
-Overfull \hbox (224.0365pt too wide) in alignment at lines 164--166
+Overfull \hbox (276.72906pt too wide) in alignment at lines 167--169
  [] [] [] 
  []
 
 
-Overfull \hbox (224.0365pt too wide) in alignment at lines 166--177
+Overfull \hbox (276.72906pt too wide) in alignment at lines 169--180
  [] [] [] 
  []
 
 [5]
-Overfull \hbox (110.7726pt too wide) in paragraph at lines 199--200
+Overfull \hbox (110.7726pt too wide) in paragraph at lines 202--203
 \T1/cmr/m/n/12 nec-tion fail-ures fail with \T1/cmtt/m/n/12 &errortext \T1/cmr/
 m/n/12 set; the usual form is \T1/cmtt/m/n/12 s := open(...) | stop(&errortext)
 \T1/cmr/m/n/12 .
  []
 
 
-Overfull \hbox (179.01144pt too wide) in alignment at lines 209--213
+Overfull \hbox (203.70541pt too wide) in alignment at lines 212--216
  [] [] [] 
  []
 
 
-Overfull \hbox (179.01144pt too wide) in alignment at lines 213--217
+Overfull \hbox (203.70541pt too wide) in alignment at lines 216--220
  [] [] [] 
  []
 
 
-Overfull \hbox (179.01144pt too wide) in alignment at lines 217--219
+Overfull \hbox (203.70541pt too wide) in alignment at lines 220--222
  [] [] [] 
  []
 
 
-Overfull \hbox (179.01144pt too wide) in alignment at lines 219--221
+Overfull \hbox (203.70541pt too wide) in alignment at lines 222--224
  [] [] [] 
  []
 
 
-Overfull \hbox (179.01144pt too wide) in alignment at lines 221--231
+Overfull \hbox (203.70541pt too wide) in alignment at lines 224--234
  [] [] [] 
  []
 
 [6]
-Overfull \hbox (86.80824pt too wide) in paragraph at lines 239--240
+Overfull \hbox (86.80824pt too wide) in paragraph at lines 242--243
 \T1/cmr/m/n/12 With no \T1/cmtt/m/n/12 cmd=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ope
 n(..., "h") \T1/cmr/m/n/12 re-quests a re-mote PTY and shell. \T1/cmtt/m/n/12 n
 et::ssh_interactive(s)
  []
 
 
-Overfull \hbox (4.5259pt too wide) in paragraph at lines 253--254
+Overfull \hbox (4.5259pt too wide) in paragraph at lines 256--257
 []\T1/cmtt/m/n/12 term=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 cols=\T1/cmr/m/n/12 , a
 nd \T1/cmtt/m/n/12 rows= \T1/cmr/m/n/12 over-ride the PTY. Mode \T1/cmtt/m/n/12
  "h-" \T1/cmr/m/n/12 skips \T1/cmtt/m/n/12 known_hosts
@@ -473,231 +473,244 @@ nd \T1/cmtt/m/n/12 rows= \T1/cmr/m/n/12 over-ride the PTY. Mode \T1/cmtt/m/n/12
 [7]
 
 LaTeX Warning: Hyper reference `utr29-sec-io' on page 8 undefined on input line
- 295.
+ 298.
 
 
-Overfull \hbox (51.70839pt too wide) in paragraph at lines 300--301
+Overfull \hbox (51.70839pt too wide) in paragraph at lines 303--304
 \T1/cmtt/m/n/12 channel=no \T1/cmr/m/n/12 opens an au-then-ti-cated trans-port.
  Later \T1/cmtt/m/n/12 open(s, "hc") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 open(s, "
 hs")
  []
 
 [8] [9]
-Overfull \hbox (192.49837pt too wide) in alignment at lines 377--381
+Overfull \hbox (192.49837pt too wide) in alignment at lines 380--384
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 381--385
+Overfull \hbox (192.49837pt too wide) in alignment at lines 384--388
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 385--387
+Overfull \hbox (192.49837pt too wide) in alignment at lines 388--390
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 387--389
+Overfull \hbox (192.49837pt too wide) in alignment at lines 390--392
  [] [] [] 
  []
 
 
-Overfull \hbox (192.49837pt too wide) in alignment at lines 389--396
+Overfull \hbox (192.49837pt too wide) in alignment at lines 392--399
  [] [] [] 
  []
 
-LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 401.
 [10]
-Overfull \hbox (70.33496pt too wide) in alignment at lines 429--433
+LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 404.
+
+Overfull \hbox (3.36835pt too wide) in paragraph at lines 424--425
+\T1/cmr/m/n/12 174; \T1/cmtt/m/n/12 close() \T1/cmr/m/n/12 keeps the orig-i-nal
+ name so \T1/cmtt/m/n/12 image(c) \T1/cmr/m/n/12 re-mains \T1/cmtt/m/n/12 file(
+user@host)\T1/cmr/m/n/12 .
+ []
+
+
+Overfull \hbox (70.33496pt too wide) in alignment at lines 432--436
  [] [] 
  []
 
 
-Overfull \hbox (70.33496pt too wide) in alignment at lines 433--437
+Overfull \hbox (70.33496pt too wide) in alignment at lines 436--440
  [] [] 
  []
 
 
-Overfull \hbox (70.33496pt too wide) in alignment at lines 437--439
+Overfull \hbox (70.33496pt too wide) in alignment at lines 440--442
  [] [] 
  []
 
 
-Overfull \hbox (70.33496pt too wide) in alignment at lines 439--441
+Overfull \hbox (70.33496pt too wide) in alignment at lines 442--444
  [] [] 
  []
 
 
-Overfull \hbox (70.33496pt too wide) in alignment at lines 441--447
+Overfull \hbox (70.33496pt too wide) in alignment at lines 444--450
  [] [] 
  []
 
-[11]
-Overfull \hbox (34.05081pt too wide) in paragraph at lines 506--507
+[11] [12]
+Overfull \hbox (34.05081pt too wide) in paragraph at lines 509--510
 []\T1/cmtt/m/n/12 receive(c) \T1/cmr/m/n/12 on an SSH chan-nel yields the next 
 queued event as a \T1/cmtt/m/n/12 posix_message
  []
 
-[12]
-Overfull \hbox (58.7057pt too wide) in paragraph at lines 524--525
+
+Overfull \hbox (58.7057pt too wide) in paragraph at lines 527--528
 \T1/cmr/m/n/12 Preserving cross-stream or-der re-quires lib-ssh's \T1/cmr/bx/n/
 12 call-back API \T1/cmr/m/n/12 (\T1/cmtt/m/n/12 ssh_channel_callbacks\T1/cmr/m
 /n/12 ,
  []
 
 
-Overfull \hbox (61.97722pt too wide) in paragraph at lines 524--525
+Overfull \hbox (61.97722pt too wide) in paragraph at lines 527--528
 \T1/cmr/m/n/12 with a \T1/cmtt/m/n/12 channel_data_function \T1/cmr/m/n/12 re-c
 eiv-ing an \T1/cmtt/m/n/12 is_stderr \T1/cmr/m/n/12 flag) -- not \T1/cmtt/m/n/1
 2 ssh_channel_poll()
  []
 
 
-Overfull \hbox (0.54901pt too wide) in paragraph at lines 527--528
+Overfull \hbox (0.54901pt too wide) in paragraph at lines 530--531
 \T1/cmr/m/n/12 block-ing lib-ssh calls made while the thread is un-reg-is-tered
  (\T1/cmtt/m/n/12 DEC_NARTHREADS\T1/cmr/m/n/12 ),
  []
 
 
-Overfull \hbox (67.53218pt too wide) in paragraph at lines 527--528
+Overfull \hbox (67.53218pt too wide) in paragraph at lines 530--531
 \T1/cmr/m/n/12 where Uni-con al-lo-ca-tion is not al-lowed. \T1/cmtt/m/n/12 ssh
 _pump() \T1/cmr/m/n/12 drives \T1/cmtt/m/n/12 ssh_channel_poll_timeout()
  []
 
 [13]
-Overfull \hbox (5.95744pt too wide) in paragraph at lines 547--548
+Overfull \hbox (5.95744pt too wide) in paragraph at lines 550--551
 []\T1/cmr/m/n/12 On Win-dows, \T1/cmtt/m/n/12 select(&input) \T1/cmr/m/n/12 and
  \T1/cmtt/m/n/12 Attrib(f, "tty=raw") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 "tty=san
 e"
  []
 
-[14]
-Overfull \hbox (62.82pt too wide) in paragraph at lines 576--577
+[14] [15]
+Overfull \hbox (62.82pt too wide) in paragraph at lines 579--580
 []\T1/cmr/m/n/12 The SFTP sub-sys-tem is cre-ated lazily, once, on the ses-sion
  owner (\T1/cmtt/m/n/12 ssh_owner_sftp()\T1/cmr/m/n/12 )
  []
 
-[15]
-Overfull \hbox (55.184pt too wide) in paragraph at lines 602--603
+
+Overfull \hbox (55.184pt too wide) in paragraph at lines 605--606
 \T1/cmr/m/n/12 one en-try name per call. SFTP does the same: \T1/cmtt/m/n/12 op
 en(s, "hs", "path=/tmp/configs")
  []
 
 
-Overfull \hbox (24.25352pt too wide) in paragraph at lines 602--603
+Overfull \hbox (24.25352pt too wide) in paragraph at lines 605--606
 \T1/cmr/m/n/12 checks the re-mote path with one \T1/cmtt/m/n/12 sftp_stat()\T1/
 cmr/m/n/12 ; if it is a di-rec-tory, \T1/cmtt/m/n/12 sftp_opendir()
  []
 
-
-Overfull \hbox (35.36137pt too wide) in paragraph at lines 617--618
+[16]
+Overfull \hbox (35.36137pt too wide) in paragraph at lines 620--621
 []\T1/cmtt/m/n/12 stat(s, path) \T1/cmr/m/n/12 -- a sin-gle \T1/cmtt/m/n/12 sft
 p_stat \T1/cmr/m/n/12 re-quest, with-out pay-ing for \T1/cmtt/m/n/12 sftp_open(
 )
  []
 
-[16]
-Overfull \hbox (11.3737pt too wide) in paragraph at lines 625--626
+
+Overfull \hbox (11.3737pt too wide) in paragraph at lines 628--629
 []\T1/cmtt/m/n/12 sftp2rec() \T1/cmr/m/n/12 pop-u-lates the same \T1/cmtt/m/n/1
 2 posix_stat \T1/cmr/m/n/12 record as \T1/cmtt/m/n/12 stat2rec()\T1/cmr/m/n/12 
 . SFTP's
  []
 
 
-Overfull \hbox (14.31728pt too wide) in paragraph at lines 630--631
+Overfull \hbox (14.31728pt too wide) in paragraph at lines 633--634
 \T1/cmtt/m/n/12 aclocal.m4 \T1/cmr/m/n/12 probes for \T1/cmtt/m/n/12 <libssh/li
 bssh.h> \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 ssh_new\T1/cmr/m/n/12 , set-ting \T1
 /cmtt/m/n/12 HAVE_LIBSSH\T1/cmr/m/n/12 .
  []
 
 
-Overfull \hbox (68.38759pt too wide) in paragraph at lines 633--634
+Overfull \hbox (68.38759pt too wide) in paragraph at lines 636--637
 []\T1/cmtt/m/n/12 &features \T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shel
 l \T1/cmr/m/n/12 when the li-brary was found. \T1/cmtt/m/n/12 tests/posix/Makef
 ile
  []
 
 
-Overfull \hbox (22.85622pt too wide) in paragraph at lines 633--634
+Overfull \hbox (22.85622pt too wide) in paragraph at lines 636--637
 \T1/cmr/m/n/12 README in-stall notes list \T1/cmtt/m/n/12 libssh-dev \T1/cmr/m/
 n/12 / \T1/cmtt/m/n/12 libssh-devel \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 brew insta
 ll libssh
  []
 
-
-Overfull \hbox (29.49626pt too wide) in paragraph at lines 636--637
+[17]
+Overfull \hbox (29.49626pt too wide) in paragraph at lines 639--640
 []\T1/cmr/m/n/12 Guards are \T1/cmtt/m/n/12 #if HAVE_LIBSSH \T1/cmr/m/n/12 thro
 ugh-out \T1/cmtt/m/n/12 rstructs.h\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 rmacros.h\T1
 /cmr/m/n/12 , \T1/cmtt/m/n/12 feature.h\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (87.17656pt too wide) in paragraph at lines 644--645
+Overfull \hbox (87.17656pt too wide) in paragraph at lines 647--648
 \T1/cmr/m/n/12 readi-ness is im-ple-mented; the I/O calls them-selves still blo
 ck. A \T1/cmtt/m/n/12 ssh_set_blocking(sess, 0)
  []
 
-[17]
-Overfull \hbox (45.3694pt too wide) in paragraph at lines 656--657
+
+Overfull \hbox (45.3694pt too wide) in paragraph at lines 659--660
 []\T1/cmr/bx/n/12 Trust-on-first-use. \T1/cmr/m/n/12 Ver-i-fi-ca-tion is check-
 only (\T1/cmtt/m/n/12 ssh_session_is_known_server\T1/cmr/m/n/12 ).
  []
 
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 659.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 662.
 
-Overfull \hbox (23.60867pt too wide) in paragraph at lines 664--665
+Overfull \hbox (23.60867pt too wide) in paragraph at lines 667--668
 \T1/cmtt/m/n/12 tests/posix/ssh.icn \T1/cmr/m/n/12 is de-ter-min-is-tic with-ou
 t a server: it checks that \T1/cmtt/m/n/12 &features
  []
 
 
-Overfull \hbox (0.90874pt too wide) in paragraph at lines 664--665
+Overfull \hbox (0.90874pt too wide) in paragraph at lines 667--668
 \T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shell\T1/cmr/m/n/12 , and that b
 ad at-tributes, \T1/cmtt/m/n/12 channel=maybe\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 c
 hannel=no
  []
 
 
-Overfull \hbox (55.93286pt too wide) in paragraph at lines 664--665
+Overfull \hbox (55.93286pt too wide) in paragraph at lines 667--668
 \T1/cmtt/m/n/12 UNICON_SSH_TESTHOST \T1/cmr/m/n/12 is set (host or \T1/cmtt/m/n
 /12 user@host\T1/cmr/m/n/12 ), with op-tional \T1/cmtt/m/n/12 UNICON_SSH_TESTPO
 RT\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (4.60919pt too wide) in paragraph at lines 664--665
+Overfull \hbox (4.60919pt too wide) in paragraph at lines 667--668
 \T1/cmtt/m/n/12 UNICON_SSH_TESTKEY\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_K
 NOWNHOSTS\T1/cmr/m/n/12 , and \T1/cmtt/m/n/12 UNICON_SSH_SFTPPATH\T1/cmr/m/n/12
  .
  []
 
 
-Overfull \hbox (36.46408pt too wide) in paragraph at lines 664--665
+Overfull \hbox (36.46408pt too wide) in paragraph at lines 667--668
 \T1/cmr/m/n/12 partial-line \T1/cmtt/m/n/12 reads() \T1/cmr/m/n/12 of a \T1/cmt
 t/m/n/12 printf \T1/cmr/m/n/12 with no new-line, and SFTP write/read/stat/remov
 e
  []
 
-
-Underfull \hbox (badness 4779) in paragraph at lines 673--674
+[18]
+Underfull \hbox (badness 4779) in paragraph at lines 676--677
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
-[18]
-Underfull \hbox (badness 10000) in paragraph at lines 676--677
+
+Underfull \hbox (badness 10000) in paragraph at lines 682--683
+[]\T1/cmr/m/n/12 Unicode Con-sor-tium. "The Uni-code Stan-dard".
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 688--689
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 682--683
+Underfull \hbox (badness 1072) in paragraph at lines 694--695
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
-[19] (./utr26.aux)
+[19] [20] (./utr26.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -710,13 +723,13 @@ Package rerunfilecheck Info: File `utr26.out' has not changed.
 (rerunfilecheck)             Checksum: 630B6D1DE9794AC9418B2CB673088EFF;8037.
  ) 
 Here is how much of TeX's memory you used:
- 9873 strings out of 476182
- 151784 string characters out of 5795595
+ 9880 strings out of 476182
+ 151936 string characters out of 5795595
  1933975 words of memory out of 5000000
- 31685 multiletter control sequences out of 15000+600000
+ 31688 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,872b,650s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,1086b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
 0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.
 600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm120
@@ -729,10 +742,10 @@ ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr26.pdf (21 pages, 189081 bytes).
+Output written on utr26.pdf (22 pages, 191658 bytes).
 PDF statistics:
- 808 PDF objects out of 1000 (max. 8388607)
- 337 compressed objects within 4 object streams
- 84 named destinations out of 1000 (max. 500000)
+ 820 PDF objects out of 1000 (max. 8388607)
+ 345 compressed objects within 4 object streams
+ 88 named destinations out of 1000 (max. 500000)
  345 words of extra memory for PDF output out of 10000 (max. 10000000)
 

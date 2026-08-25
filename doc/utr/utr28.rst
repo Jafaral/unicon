@@ -33,6 +33,11 @@ trailing attributes, ``Attrib``, subscript peek, ``key()``).
 Automated tests live in ``tests/posix/mcast.icn`` and
 ``tests/posix/sockpeek.icn``.
 
+The work is part of POSIX networking, not an optional library.
+A later report covers raw sockets :cite:`AlGharaibeh:UTR29`,
+which reuse these attributes (``ttl``, ``iface``, ``join``) on
+mode ``nr``.
+
 .. _sec-motivation:
 
 2. Motivation
@@ -42,16 +47,21 @@ Unicon's ``open()`` already constructed TCP and UDP handles.
 Multicast -- any-source (ASM) and source-specific (SSM)
 :cite:`RFC4607` -- is ordinary UDP plus membership and hop-limit
 options. Without those options, a Unicon program could not join
-a multicast group like ``239.1.1.1``, restrict a join to one NIC,
-or send with a limited TTL like ``ttl=3``. 
-These options were not supported.
+``239.1.1.1``, restrict a join to one NIC, or send with a
+limited TTL. Those operations were not supported.
+
+The rest of the I/O API already has the pattern: ``open()``
+constructs, trailing strings configure (SSL ``key=``, window
+``WAttrib``), ``Attrib()`` mutates later, and ``f["name"]``
+peeks status. Socket options follow that pattern instead of adding
+``setsockopt()`` as a new global.
 
 .. _sec-principles:
 
 3. Design principles
 ====================
 
-**Attributes are ``name=value``, like graphics windows.** Unknown names fail
+**Attributes are ``name=value``, like SSL.** Unknown names fail
 ``open()`` with error 1310 (``bad socket attribute``). Booleans
 are exactly ``yes`` or ``no``, matching ``verifyPeer``.
 
@@ -62,7 +72,7 @@ are exactly ``yes`` or ``no``, matching ``verifyPeer``.
          write("oops")
       else
          write("bogus: ", &errortext)
-      if open(":5110", "nua4", "reuseaddr=yes") then
+      if open(":5110", "nua4", "reuseaddr=1") then
          write("oops")
       else
          write("numeric boolean: ", &errortext)
@@ -80,12 +90,12 @@ interface and send out the first non-loopback IPv4 address
 (else loopback). Sending to ``255.255.255.255`` enables
 ``SO_BROADCAST``. Explicit attributes always override.
 
-**``source@group``.** The address form
+**``source@group``, not ``group@source``.** The address form
 matches VLC, ffmpeg, and RFC 4607 ``(S,G)`` order. Empty either
 side is invalid.
 
 **``ttl`` and ``iface``, not multicast-only names.** Hop limit
-and interface are used by unicast, multicast, and raw
+and interface are used by unicast, multicast, and later raw
 sockets :cite:`AlGharaibeh:UTR29`. ``ttl=`` sets both
 ``IP_TTL`` and ``IP_MULTICAST_TTL`` (or the IPv6 hop options).
 ``iface=`` accepts an IPv4 address, a numeric index, or a name
@@ -163,7 +173,10 @@ Output::
 
    hello-multicast
 
-``r.addr`` is the sender (host plus an ephemeral port).
+``r.addr`` is the sender (host plus an ephemeral port). Alpine
+often does not deliver loopback multicast even when the join
+succeeds; the test suite treats a missing datagram as success
+there so CI stays portable.
 
 A wildcard bind plus explicit joins is the other shape:
 
@@ -245,6 +258,9 @@ as success.
    * - ``rcvbuf=`` / ``sndbuf=``
      - Buffer sizes in bytes.
 
+``proto`` and ``hdrincl`` are listed in the same table in the
+runtime; they belong to raw sockets :cite:`AlGharaibeh:UTR29`.
+
 .. _sec-attrib:
 
 7. ``Attrib()`` and status peek
@@ -273,13 +289,15 @@ Output::
 
 Assignments in one call are applied together, preserving
 ``iface`` then ``join`` order. Status is peeked with
-``f["name"]``. Unknown names raise
+``f["name"]``; ``Attrib()`` only assigns. Unknown names raise
 1310. An unpopulated field fails. Boolean fields that answered
-succeed with ``"yes"`` or ``&null``.
+succeed with ``"yes"`` or ``&null`` (never ``"no"``).
 ``key(f)`` generates every answerable field. ``f["*"]``
 snapshots those fields under one lock. Peeking a closed handle
 is error 174. ``key(f)`` that has not yet produced a name also
-raises 174 if the handle is already closed.
+raises 174 if the handle is already closed. After the first
+suspend, ``close()`` makes the generator fail instead of raising,
+so a walk does not turn a mid-generation close into an error.
 
 TCP, UDP, multicast, and raw sockets share one peek table
 (``sock_peek``). ``join``, ``leave``, and ``source`` are verbs,
