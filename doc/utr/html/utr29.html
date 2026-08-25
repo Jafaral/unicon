@@ -117,8 +117,8 @@ Programming with Unicon
 </p>
 <p>
 Raw sockets are part of the POSIX network facility. A build without POSIX networking has no 
-<code>nr</code>
- mode at all. Opening 
+<code>n</code>
+ modes at all. Opening 
 <code>SOCK_RAW</code>
  usually needs elevated privileges (root or administrator); that is an operating-system restriction, not a Unicon one.
 </p>
@@ -421,7 +421,7 @@ Trailing
 [<a class="cite" href="#cite-algharaibeh-utr28">10</a>]. Booleans are exactly 
 <code>yes</code>
  or 
-<code>&amp;null</code>
+<code>no</code>
 . 
 <code>ttl</code>
  and 
@@ -869,10 +869,6 @@ Ping                  session wrapper
 <code>addr</code>
 . Round-trip time uses 
 <code>gettimeofday()</code>
-, not 
-<code>&amp;time</code>
-, because CPU time barely advances while blocked in 
-<code>select()</code>
 .
 </p>
 <pre><code class="language-unicon">import net

@@ -36,7 +36,7 @@ and ``hdrincl``, subscript peek). Automated plumbing and peek tests live in
 ``tests/posix/raw_sock.icn``.
 
 Raw sockets are part of the POSIX network facility.
-A build without POSIX networking has no ``nr`` mode at all.
+A build without POSIX networking has no ``n`` modes at all.
 Opening ``SOCK_RAW`` usually needs elevated
 privileges (root or administrator); that is an operating-system
 restriction, not a Unicon one.
@@ -182,7 +182,7 @@ prints ``raw-icmp: ok`` (or the test suite's ``plumbing-ok``).
 
 Trailing ``open()`` arguments are the same ``name=value``
 socket attributes used for TCP and UDP :cite:`AlGharaibeh:UTR28`.
-Booleans are exactly ``yes`` or ``&null``. ``ttl`` and ``iface``
+Booleans are exactly ``yes`` or ``no``. ``ttl`` and ``iface``
 were named for this sharing: hop limit and interface are not
 multicast-only knobs.
 
@@ -404,8 +404,7 @@ default wait. ``echo()`` sends a request (56 zero bytes unless a
 payload is given), waits with ``select()``, and succeeds with a
 decode table plus ``rtt`` (milliseconds, real), ``rtt_us``,
 ``ttl`` (from the IPv4 header), and ``addr``. Round-trip time
-uses ``gettimeofday()``, not ``&time``, because CPU time barely
-advances while blocked in ``select()``.
+uses ``gettimeofday()``.
 
 .. code-block:: unicon
 

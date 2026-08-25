@@ -48,7 +48,7 @@ Moscow, ID, 83844, USA
 This report describes raw IP sockets in Unicon: how a handle is opened, how datagrams are sent and received, how protocol bytes are built and decoded, and what remains out of scope. It is formatted as a Unicon Technical Report [1]. Socket attributes (\texttt{ttl}, \texttt{iface}, \texttt{join}, and the rest) are the multicast facility [10]; this report adds mode \texttt{nr} and the packet library on top of that. The language-facing reference lives in \emph{Programming with Unicon} [7] (Chapter 5, "Raw Sockets" and "PacketSpec and package net"; Chapter 14, \texttt{uping} and \texttt{uigmp}) and the language reference (\texttt{open} mode \texttt{nr}, attributes \texttt{proto} and \texttt{hdrincl}, subscript peek). Automated plumbing and peek tests live in \texttt{tests/posix/raw\_sock.icn}.
 
 
-Raw sockets are part of the POSIX network facility. A build without POSIX networking has no \texttt{nr} mode at all. Opening \texttt{SOCK\_RAW} usually needs elevated privileges (root or administrator); that is an operating-system restriction, not a Unicon one.
+Raw sockets are part of the POSIX network facility. A build without POSIX networking has no \texttt{n} modes at all. Opening \texttt{SOCK\_RAW} usually needs elevated privileges (root or administrator); that is an operating-system restriction, not a Unicon one.
 
 \section{2. Motivation}
 \label{utr29-sec-motivation}
@@ -151,7 +151,7 @@ The last line is the unprivileged case. With privileges it prints \texttt{raw-ic
 \section{5. Attributes and status peek}
 \label{utr29-sec-attrs}
 
-Trailing \texttt{open()} arguments are the same \texttt{name=value} socket attributes used for TCP and UDP [10]. Booleans are exactly \texttt{yes} or \texttt{\&null}. \texttt{ttl} and \texttt{iface} were named for this sharing: hop limit and interface are not multicast-only knobs.
+Trailing \texttt{open()} arguments are the same \texttt{name=value} socket attributes used for TCP and UDP [10]. Booleans are exactly \texttt{yes} or \texttt{no}. \texttt{ttl} and \texttt{iface} were named for this sharing: hop limit and interface are not multicast-only knobs.
 
 \begin{longtable}{ll}
 \hline
@@ -310,7 +310,7 @@ Ping                  session wrapper
 \end{Verbatim}
 
 
-\texttt{Ping(host)} opens \texttt{proto=icmp} with TTL 64 and a 2000 ms default wait. \texttt{echo()} sends a request (56 zero bytes unless a payload is given), waits with \texttt{select()}, and succeeds with a decode table plus \texttt{rtt} (milliseconds, real), \texttt{rtt\_us}, \texttt{ttl} (from the IPv4 header), and \texttt{addr}. Round-trip time uses \texttt{gettimeofday()}, not \texttt{\&time}, because CPU time barely advances while blocked in \texttt{select()}.
+\texttt{Ping(host)} opens \texttt{proto=icmp} with TTL 64 and a 2000 ms default wait. \texttt{echo()} sends a request (56 zero bytes unless a payload is given), waits with \texttt{select()}, and succeeds with a decode table plus \texttt{rtt} (milliseconds, real), \texttt{rtt\_us}, \texttt{ttl} (from the IPv4 header), and \texttt{addr}. Round-trip time uses \texttt{gettimeofday()}.
 
 \begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
 import net
