@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 03:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 07:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -260,55 +260,88 @@ Package: longtable 2023-11-01 v4.19 Multi-page Table package (DPC)
 \c@LT@chunks=\count284
 \LT@p@ftn=\toks20
 )
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty
+Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
+\col@sep=\dimen161
+\ar@mcellbox=\box57
+\extrarowheight=\dimen162
+\NC@list=\toks21
+\extratabsurround=\skip55
+\backup@length=\skip56
+\ar@cellbox=\box58
+)
 (/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
-\multirow@colwidth=\skip55
+\multirow@colwidth=\skip57
 \multirow@cntb=\count285
-\multirow@dima=\skip56
-\bigstrutjot=\dimen161
+\multirow@dima=\skip58
+\bigstrutjot=\dimen163
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 12.
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen164
+\captionmargin=\dimen165
+\caption@leftmargin=\dimen166
+\caption@rightmargin=\dimen167
+\caption@width=\dimen168
+\caption@indent=\dimen169
+\caption@parindent=\dimen170
+\caption@hangindent=\dimen171
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count286
+\c@continuedfloat=\count287
+Package caption Info: hyperref package is loaded.
+Package caption Info: longtable package is loaded.
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty
+Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
+))
+Package hyperref Info: Option `colorlinks' set `true' on input line 19.
 
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count286
-\l__pdf_internal_box=\box57
+\l__color_backend_stack_int=\count288
+\l__pdf_internal_box=\box59
 )
 (./utr27.aux)
 \openout1 = `utr27.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count287
-\scratchdimen=\dimen162
-\scratchbox=\box58
-\nofMPsegments=\count288
-\nofMParguments=\count289
-\everyMPshowfont=\toks21
-\MPscratchCnt=\count290
-\MPscratchDim=\dimen163
-\MPnumerator=\count291
-\makeMPintoPDFobject=\count292
-\everyMPtoPDFconversion=\toks22
+\scratchcounter=\count289
+\scratchdimen=\dimen172
+\scratchbox=\box60
+\nofMPsegments=\count290
+\nofMParguments=\count291
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count292
+\MPscratchDim=\dimen173
+\MPnumerator=\count293
+\makeMPintoPDFobject=\count294
+\everyMPtoPDFconversion=\toks23
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -318,64 +351,41 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 13.
+Package hyperref Info: Link coloring ON on input line 20.
 
 (./utr27.out) (./utr27.out)
 \@outlinefile=\write4
 \openout4 = `utr27.out'.
 
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 3
-5.
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
+2.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 35.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 42.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 35.
+(Font)              <14.4> on input line 42.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 35.
+(Font)              <7> on input line 42.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 64.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 71.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.71 
+l.78 
       [1]
-Overfull \hbox (15.23016pt too wide) in paragraph at lines 87--88
+Overfull \hbox (15.23016pt too wide) in paragraph at lines 94--95
 \T1/cmtt/m/n/12 open()\T1/cmr/m/n/12 's mode string is scanned char-ac-ter by c
 har-ac-ter in \T1/cmtt/m/n/12 src/runtime/fsys.r\T1/cmr/m/n/12 .
- []
-
-
-Overfull \hbox (173.74466pt too wide) in alignment at lines 89--93
- [] [] [] 
- []
-
-
-Overfull \hbox (173.74466pt too wide) in alignment at lines 93--97
- [] [] [] 
- []
-
-
-Overfull \hbox (173.74466pt too wide) in alignment at lines 97--99
- [] [] [] 
- []
-
-
-Overfull \hbox (173.74466pt too wide) in alignment at lines 99--101
- [] [] [] 
- []
-
-
-Overfull \hbox (173.74466pt too wide) in alignment at lines 101--109
- [] [] [] 
  []
 
 
@@ -383,237 +393,55 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.113 
-       [2]
-Overfull \hbox (73.57346pt too wide) in alignment at lines 125--129
- [] [] [] [] 
- []
-
-
-Overfull \hbox (73.57346pt too wide) in alignment at lines 129--133
- [] [] [] [] 
- []
-
-
-Overfull \hbox (73.57346pt too wide) in alignment at lines 133--135
- [] [] [] [] 
- []
-
-
-Overfull \hbox (73.57346pt too wide) in alignment at lines 135--137
- [] [] [] [] 
- []
-
-
-Overfull \hbox (73.57346pt too wide) in alignment at lines 137--144
- [] [] [] [] 
- []
-
-
-Overfull \hbox (19.78664pt too wide) in paragraph at lines 155--156
+l.116 \end{longtable}
+                      [2] [3]
+Overfull \hbox (19.78664pt too wide) in paragraph at lines 162--163
 \T1/cmr/m/n/12 val-ues and un-known names fail (TLS at-tribute er-rors use 1302
 ; crypto state/name
  []
 
-
-Overfull \hbox (61.7302pt too wide) in alignment at lines 162--166
- [] [] 
- []
-
-
-Overfull \hbox (61.7302pt too wide) in alignment at lines 166--170
- [] [] 
- []
-
-
-Overfull \hbox (61.7302pt too wide) in alignment at lines 170--172
- [] [] 
- []
-
-
-Overfull \hbox (61.7302pt too wide) in alignment at lines 172--174
- [] [] 
- []
-
-
-Overfull \hbox (61.7302pt too wide) in alignment at lines 174--182
- [] [] 
- []
-
-[3]
-Overfull \hbox (161.93645pt too wide) in alignment at lines 189--193
- [] [] [] 
- []
-
-
-Overfull \hbox (161.93645pt too wide) in alignment at lines 193--197
- [] [] [] 
- []
-
-
-Overfull \hbox (161.93645pt too wide) in alignment at lines 197--199
- [] [] [] 
- []
-
-
-Overfull \hbox (161.93645pt too wide) in alignment at lines 199--201
- [] [] [] 
- []
-
-
-Overfull \hbox (161.93645pt too wide) in alignment at lines 201--210
- [] [] [] 
- []
-
-[4]
-Overfull \hbox (36.65514pt too wide) in paragraph at lines 235--236
+[4] [5]
+Overfull \hbox (36.65514pt too wide) in paragraph at lines 242--243
 \T1/cmtt/m/n/12 conn["san"] \T1/cmr/m/n/12 are lists of SAN strings (\T1/cmtt/m
 /n/12 DNS:host\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 IP:1.2.3.4\T1/cmr/m/n/12 ). \T1/
 cmtt/m/n/12 conn["certchain"]
  []
 
-
-Overfull \hbox (20.49448pt too wide) in alignment at lines 240--244
- [] [] 
- []
-
-
-Overfull \hbox (20.49448pt too wide) in alignment at lines 244--248
- [] [] 
- []
-
-
-Overfull \hbox (20.49448pt too wide) in alignment at lines 248--250
- [] [] 
- []
-
-
-Overfull \hbox (20.49448pt too wide) in alignment at lines 250--252
- [] [] 
- []
-
-
-Overfull \hbox (20.49448pt too wide) in alignment at lines 252--261
- [] [] 
- []
-
-[5]
-Overfull \hbox (15.79425pt too wide) in alignment at lines 269--273
- [] [] 
- []
-
-
-Overfull \hbox (15.79425pt too wide) in alignment at lines 273--277
- [] [] 
- []
-
-
-Overfull \hbox (15.79425pt too wide) in alignment at lines 277--279
- [] [] 
- []
-
-
-Overfull \hbox (15.79425pt too wide) in alignment at lines 279--281
- [] [] 
- []
-
-
-Overfull \hbox (15.79425pt too wide) in alignment at lines 281--287
- [] [] 
- []
-
-
-Overfull \hbox (85.04117pt too wide) in alignment at lines 337--341
- [] [] 
- []
-
-
-Overfull \hbox (85.04117pt too wide) in alignment at lines 341--345
- [] [] 
- []
-
-
-Overfull \hbox (85.04117pt too wide) in alignment at lines 345--347
- [] [] 
- []
-
-
-Overfull \hbox (85.04117pt too wide) in alignment at lines 347--349
- [] [] 
- []
-
-
-Overfull \hbox (85.04117pt too wide) in alignment at lines 349--361
- [] [] 
- []
-
-[6] [7] [8] [9] [10] [11] [12] [13] [14] [15]
-Overfull \hbox (73.32443pt too wide) in paragraph at lines 756--757
+[6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16]
+Overfull \hbox (73.32443pt too wide) in paragraph at lines 763--764
 []\T1/cmr/m/n/12 After a hand-shake, \T1/cmtt/m/n/12 conn["cipher"] \T1/cmr/m/n
 /12 peeks the ne-go-ti-ated suite and \T1/cmtt/m/n/12 conn["certchain"]
  []
 
 
-Overfull \hbox (58.01056pt too wide) in paragraph at lines 756--757
+Overfull \hbox (58.01056pt too wide) in paragraph at lines 763--764
 \T1/cmr/m/n/12 is a list of peer cer-tifi-cates as PEM strings; see [][]sec-tio
 n 6.4[][] (\T1/cmtt/m/n/12 tests/crypto/tlspeek.icn\T1/cmr/m/n/12 ).
  []
 
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 761.
-[16]
-Overfull \hbox (168.8444pt too wide) in alignment at lines 783--787
- [] [] [] 
- []
-
-
-Overfull \hbox (168.8444pt too wide) in alignment at lines 787--791
- [] [] [] 
- []
-
-
-Overfull \hbox (168.8444pt too wide) in alignment at lines 791--793
- [] [] [] 
- []
-
-
-Overfull \hbox (168.8444pt too wide) in alignment at lines 793--795
- [] [] [] 
- []
-
-
-Overfull \hbox (168.8444pt too wide) in alignment at lines 795--804
- [] [] [] 
- []
-
-
-Overfull \hbox (57.18253pt too wide) in paragraph at lines 809--810
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 768.
+[17]
+Overfull \hbox (57.18253pt too wide) in paragraph at lines 816--817
 \T1/cmr/m/n/12 Crypto com-piles un-der \T1/cmtt/m/n/12 HAVE_LIBSSL\T1/cmr/m/n/1
 2 , the same guard as TLS. \T1/cmtt/m/n/12 configure --disable-ssl
  []
 
-
-Overfull \hbox (53.76334pt too wide) in paragraph at lines 812--813
+[18]
+Overfull \hbox (53.76334pt too wide) in paragraph at lines 819--820
 []\T1/cmtt/m/n/12 &features \T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure sock
 ets layer encryption\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 tests/crypto/Makefile
  []
 
 
-Overfull \hbox (32.17708pt too wide) in paragraph at lines 815--816
-\T1/cmtt/m/n/12 fsys.r\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 fmisc.r\T1/cmr/m/n/12 , 
-\T1/cmtt/m/n/12 rposix.r\T1/cmr/m/n/12 , and \T1/cmtt/m/n/12 rcrypto.ri\T1/cmr/
-m/n/12 . TLS helpers (\T1/cmtt/m/n/12 create_ssl_context\T1/cmr/m/n/12 ,
+Overfull \hbox (90.31334pt too wide) in paragraph at lines 822--823
+\T1/cmtt/m/n/12 context\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 is_ssl_attr\T1/cmr/m/n/
+12 ) and the \T1/cmtt/m/n/12 CryptoFile \T1/cmr/m/n/12 im-ple-men-ta-tion share
+ \T1/cmtt/m/n/12 src/runtime/rcrypto.ri\T1/cmr/m/n/12 . 
  []
 
 
-Overfull \hbox (40.96428pt too wide) in paragraph at lines 815--816
-\T1/cmtt/m/n/12 is_ssl_attr\T1/cmr/m/n/12 ) and the \T1/cmtt/m/n/12 CryptoFile 
-\T1/cmr/m/n/12 im-ple-men-ta-tion share \T1/cmtt/m/n/12 src/runtime/rcrypto.ri\
-T1/cmr/m/n/12 . 
- []
-
-[17]
-Overfull \hbox (1.95982pt too wide) in paragraph at lines 837--838
+Overfull \hbox (1.95982pt too wide) in paragraph at lines 844--845
 \T1/cmtt/m/n/12 filekey\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 filekeyattr\T1/cmr/m/n/
 12 , \T1/cmtt/m/n/12 filetamper\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 opswitch\T1/cmr
 /m/n/12 , \T1/cmtt/m/n/12 midattrib\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 badalg\T1/c
@@ -621,7 +449,7 @@ mr/m/n/12 , \T1/cmtt/m/n/12 badkey\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (60.74083pt too wide) in paragraph at lines 837--838
+Overfull \hbox (60.74083pt too wide) in paragraph at lines 844--845
 \T1/cmtt/m/n/12 tlsproto\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 tlscipher\T1/cmr/m/n/1
 2 , \T1/cmtt/m/n/12 tlshandle\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 tlspeek\T1/cmr/m/
 n/12 , \T1/cmtt/m/n/12 dtls\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 dtlsecho\T1/cmr/m/n
@@ -629,28 +457,28 @@ n/12 , \T1/cmtt/m/n/12 dtls\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 dtlsecho\T1/cmr/m/n
  []
 
 
-Overfull \hbox (31.01056pt too wide) in paragraph at lines 837--838
+Overfull \hbox (31.01056pt too wide) in paragraph at lines 844--845
 \T1/cmr/m/n/12 tests when con-cur-rency is ab-sent. Ex-pected out-put is \T1/cm
 tt/m/n/12 tests/crypto/stand/*.std\T1/cmr/m/n/12 . 
  []
 
-
-Underfull \hbox (badness 4779) in paragraph at lines 843--844
+[19]
+Underfull \hbox (badness 4779) in paragraph at lines 850--851
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 846--847
+Underfull \hbox (badness 10000) in paragraph at lines 853--854
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 852--853
+Underfull \hbox (badness 1072) in paragraph at lines 859--860
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
-[18] [19] (./utr27.aux)
+[20] [21] (./utr27.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -659,13 +487,13 @@ Package rerunfilecheck Info: File `utr27.out' has not changed.
 (rerunfilecheck)             Checksum: EF7CFE255922ED09517620DE98A78C56;3686.
  ) 
 Here is how much of TeX's memory you used:
- 9816 strings out of 476182
- 150733 string characters out of 5795595
- 1935975 words of memory out of 5000000
- 31644 multiletter control sequences out of 15000+600000
+ 11240 strings out of 476182
+ 178082 string characters out of 5795595
+ 1939975 words of memory out of 5000000
+ 33055 multiletter control sequences out of 15000+600000
  568164 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1108b,652s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,1108b,653s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
 0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.
 600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti120
@@ -677,10 +505,10 @@ ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx2074.600pk>
-Output written on utr27.pdf (21 pages, 170901 bytes).
+Output written on utr27.pdf (23 pages, 171837 bytes).
 PDF statistics:
- 692 PDF objects out of 1000 (max. 8388607)
- 254 compressed objects within 3 object streams
- 69 named destinations out of 1000 (max. 500000)
+ 700 PDF objects out of 1000 (max. 8388607)
+ 260 compressed objects within 3 object streams
+ 71 named destinations out of 1000 (max. 500000)
  193 words of extra memory for PDF output out of 10000 (max. 10000000)
 

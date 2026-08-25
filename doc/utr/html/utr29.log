@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 03:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.25)  25 AUG 2026 07:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -260,55 +260,88 @@ Package: longtable 2023-11-01 v4.19 Multi-page Table package (DPC)
 \c@LT@chunks=\count284
 \LT@p@ftn=\toks20
 )
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty
+Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
+\col@sep=\dimen161
+\ar@mcellbox=\box57
+\extrarowheight=\dimen162
+\NC@list=\toks21
+\extratabsurround=\skip55
+\backup@length=\skip56
+\ar@cellbox=\box58
+)
 (/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
-\multirow@colwidth=\skip55
+\multirow@colwidth=\skip57
 \multirow@cntb=\count285
-\multirow@dima=\skip56
-\bigstrutjot=\dimen161
+\multirow@dima=\skip58
+\bigstrutjot=\dimen163
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 12.
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen164
+\captionmargin=\dimen165
+\caption@leftmargin=\dimen166
+\caption@rightmargin=\dimen167
+\caption@width=\dimen168
+\caption@indent=\dimen169
+\caption@parindent=\dimen170
+\caption@hangindent=\dimen171
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count286
+\c@continuedfloat=\count287
+Package caption Info: hyperref package is loaded.
+Package caption Info: longtable package is loaded.
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty
+Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
+))
+Package hyperref Info: Option `colorlinks' set `true' on input line 19.
 
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count286
-\l__pdf_internal_box=\box57
+\l__color_backend_stack_int=\count288
+\l__pdf_internal_box=\box59
 )
 (./utr29.aux)
 \openout1 = `utr29.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 13.
-LaTeX Font Info:    ... okay on input line 13.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count287
-\scratchdimen=\dimen162
-\scratchbox=\box58
-\nofMPsegments=\count288
-\nofMParguments=\count289
-\everyMPshowfont=\toks21
-\MPscratchCnt=\count290
-\MPscratchDim=\dimen163
-\MPnumerator=\count291
-\makeMPintoPDFobject=\count292
-\everyMPtoPDFconversion=\toks22
+\scratchcounter=\count289
+\scratchdimen=\dimen172
+\scratchbox=\box60
+\nofMPsegments=\count290
+\nofMParguments=\count291
+\everyMPshowfont=\toks22
+\MPscratchCnt=\count292
+\MPscratchDim=\dimen173
+\MPnumerator=\count293
+\makeMPintoPDFobject=\count294
+\everyMPtoPDFconversion=\toks23
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -318,42 +351,44 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 13.
+Package hyperref Info: Link coloring ON on input line 20.
 
 (./utr29.out) (./utr29.out)
 \@outlinefile=\write4
 \openout4 = `utr29.out'.
 
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
 
-Overfull \hbox (54.22887pt too wide) in paragraph at lines 27--28
+Overfull \hbox (54.22887pt too wide) in paragraph at lines 34--35
 \T1/cmr/m/n/12 SOCK_RAW, proto= se-lects the IP pro-to-col num-ber, and writes(
 )/receive()
  []
 
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 3
-5.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
+2.
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 35.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 42.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 35.
+(Font)              <14.4> on input line 42.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 35.
+(Font)              <7> on input line 42.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 64.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 71.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.68 
+l.75 
       [1]
-Overfull \hbox (10.26404pt too wide) in paragraph at lines 73--74
+Overfull \hbox (10.26404pt too wide) in paragraph at lines 80--81
 []\T1/cmr/bx/n/12 Datagram I/O matches UDP. \T1/cmr/m/n/12 Raw sock-ets are not
  con-nected. \T1/cmtt/m/n/12 writes()
  []
@@ -363,144 +398,74 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.113 \end{longtable}
+l.120 \end{longtable}
                       [2]
-Overfull \hbox (12.89268pt too wide) in paragraph at lines 149--150
+Overfull \hbox (12.89268pt too wide) in paragraph at lines 156--157
 []\T1/cmr/m/n/12 The last line is the un-priv-i-leged case. With priv-i-leges i
 t prints \T1/cmtt/m/n/12 raw-icmp: ok
  []
 
-[3]
-Overfull \hbox (112.47752pt too wide) in alignment at lines 156--160
- [] [] 
- []
-
-
-Overfull \hbox (112.47752pt too wide) in alignment at lines 160--164
- [] [] 
- []
-
-
-Overfull \hbox (112.47752pt too wide) in alignment at lines 164--166
- [] [] 
- []
-
-
-Overfull \hbox (112.47752pt too wide) in alignment at lines 166--168
- [] [] 
- []
-
-
-Overfull \hbox (112.47752pt too wide) in alignment at lines 168--175
- [] [] 
- []
-
-
-Overfull \hbox (100.94283pt too wide) in alignment at lines 180--184
- [] [] 
- []
-
-
-Overfull \hbox (100.94283pt too wide) in alignment at lines 184--188
- [] [] 
- []
-
-
-Overfull \hbox (100.94283pt too wide) in alignment at lines 188--190
- [] [] 
- []
-
-
-Overfull \hbox (100.94283pt too wide) in alignment at lines 190--192
- [] [] 
- []
-
-
-Overfull \hbox (100.94283pt too wide) in alignment at lines 192--200
- [] [] 
- []
-
-[4]
-Overfull \hbox (6.93239pt too wide) in paragraph at lines 220--221
+[3] [4]
+Overfull \hbox (6.93239pt too wide) in paragraph at lines 227--228
 []\T1/cmtt/m/n/12 writes() \T1/cmr/m/n/12 calls \T1/cmtt/m/n/12 sock_write()\T1
 /cmr/m/n/12 , which for \T1/cmtt/m/n/12 SOCK_RAW \T1/cmr/m/n/12 (and UDP) does 
 \T1/cmtt/m/n/12 sendto
  []
 
 
-Overfull \hbox (7.49402pt too wide) in paragraph at lines 237--238
+Overfull \hbox (7.49402pt too wide) in paragraph at lines 244--245
 \T1/cmr/m/n/12 declar-a-tive en-gine for fixed bi-nary lay-outs. Pro-to-col cla
 sses in-herit \T1/cmtt/m/n/12 PacketSpec
  []
 
 [5] [6]
-Overfull \hbox (0.30559pt too wide) in paragraph at lines 292--293
+Overfull \hbox (0.30559pt too wide) in paragraph at lines 299--300
 []\T1/cmtt/m/n/12 set() \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 set_payload() \T1/cm
 r/m/n/12 are chain-able. \T1/cmtt/m/n/12 build(extra, payload, lax)
  []
 
-[7] [8]
-Overfull \hbox (22.05788pt too wide) in paragraph at lines 370--371
-\T1/cmr/m/n/12 ports carry group records: ASM join/leave and SSM source fil-ter
-s (\T1/cmtt/m/n/12 join_sources\T1/cmr/m/n/12 ,
- []
-
-[9]
-Overfull \hbox (26.43155pt too wide) in paragraph at lines 432--433
+[7] [8] [9]
+Overfull \hbox (26.43155pt too wide) in paragraph at lines 439--440
 []\T1/cmr/m/n/12 Exported con-stants (\T1/cmtt/m/n/12 IGMP_MEMBERSHIP_QUERY\T1/
 cmr/m/n/12 , \T1/cmtt/m/n/12 IGMP_V3_MEMBERSHIP_REPORT\T1/cmr/m/n/12 ,
  []
 
 
-Overfull \hbox (19.9777pt too wide) in paragraph at lines 432--433
+Overfull \hbox (19.9777pt too wide) in paragraph at lines 439--440
 \T1/cmtt/m/n/12 IGMP_CHANGE_TO_EXCLUDE_MODE\T1/cmr/m/n/12 , and the rest) are i
 ni-tial-ized on first \T1/cmtt/m/n/12 IgmpPacket
  []
 
 [10] [11]
-Overfull \hbox (21.12782pt too wide) in paragraph at lines 496--497
-\T1/cmr/m/n/12 un-til \T1/cmtt/m/n/12 sock_close()\T1/cmr/m/n/12 . \T1/cmtt/m/n
-/12 sock_write sendto\T1/cmr/m/n/12 s there. \T1/cmtt/m/n/12 sock_recv \T1/cmr/
-m/n/12 ac-cepts \T1/cmtt/m/n/12 SOCK_DGRAM
- []
-
-
-Overfull \hbox (12.56091pt too wide) in paragraph at lines 496--497
-\T1/cmr/m/n/12 and \T1/cmtt/m/n/12 SOCK_RAW\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 pro
-to= \T1/cmr/m/n/12 is skipped in \T1/cmtt/m/n/12 setsockopt \T1/cmr/m/n/12 (al-
-ready con-sumed). \T1/cmtt/m/n/12 hdrincl=
- []
-
-
-Overfull \hbox (6.84897pt too wide) in paragraph at lines 507--508
+Overfull \hbox (6.84897pt too wide) in paragraph at lines 514--515
 \T1/cmtt/m/n/12 hdrincl=\T1/cmr/m/n/12 , data-gram \T1/cmtt/m/n/12 writes \T1/c
 mr/m/n/12 / \T1/cmtt/m/n/12 receive\T1/cmr/m/n/12 , Pack-et-Spec, ICMP echo, IG
 MPv2/v3,
  []
 
 [12]
-Overfull \hbox (4.97978pt too wide) in paragraph at lines 545--546
+Overfull \hbox (4.97978pt too wide) in paragraph at lines 565--566
 \T1/cmtt/m/n/12 key(f) \T1/cmr/m/n/12 yields pop-u-lated names (priv-i-lege de-
 nial still prints \T1/cmtt/m/n/12 raw-peek:ok
  []
 
-
-Underfull \hbox (badness 4779) in paragraph at lines 571--572
+[13]
+Underfull \hbox (badness 4779) in paragraph at lines 593--594
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
-[13]
-Underfull \hbox (badness 10000) in paragraph at lines 574--575
+
+Underfull \hbox (badness 10000) in paragraph at lines 596--597
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 580--581
+Underfull \hbox (badness 1072) in paragraph at lines 602--603
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
-[14] (./utr29.aux)
+[14] [15] (./utr29.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -509,13 +474,13 @@ Package rerunfilecheck Info: File `utr29.out' has not changed.
 (rerunfilecheck)             Checksum: 0D6B070CC34CAE1098921B700123C951;2555.
  ) 
 Here is how much of TeX's memory you used:
- 9778 strings out of 476182
- 150310 string characters out of 5795595
- 1933975 words of memory out of 5000000
- 31625 multiletter control sequences out of 15000+600000
+ 11201 strings out of 476182
+ 177652 string characters out of 5795595
+ 1935975 words of memory out of 5000000
+ 33036 multiletter control sequences out of 15000+600000
  568188 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,839b,654s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,852b,653s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.60
 0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.
 600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti120
@@ -527,10 +492,10 @@ ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
 ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx2074.600pk>
-Output written on utr29.pdf (16 pages, 161287 bytes).
+Output written on utr29.pdf (17 pages, 161686 bytes).
 PDF statistics:
- 624 PDF objects out of 1000 (max. 8388607)
- 195 compressed objects within 2 object streams
- 50 named destinations out of 1000 (max. 500000)
+ 628 PDF objects out of 1000 (max. 8388607)
+ 198 compressed objects within 2 object streams
+ 51 named destinations out of 1000 (max. 500000)
  137 words of extra memory for PDF output out of 10000 (max. 10000000)
 

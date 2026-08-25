@@ -487,7 +487,9 @@ Assignments in one call are applied together, preserving
 </p>
 <ol start="1310">
 <li>
+<p>
 An unpopulated field fails. Boolean fields that answered
+</p>
 </li>
 </ol>
 <p>
@@ -685,21 +687,27 @@ Rules:
 </p>
 <ul>
 <li>
+<p>
 Cache hit, no socket attributes: another 
 <code>File</code>
  for the same fd (owner refcount). Closing one alias leaves the others until the last handle is closed.
+</p>
 </li>
 <li>
+<p>
 Cache hit with attributes: release the pin and create an independent socket (
 <code>reuseaddr</code>
  makes the second bind succeed). 
 <code>leave=</code>
  on that socket does not drop the cached alias's membership.
+</p>
 </li>
 <li>
+<p>
 Changing options on a shared handle: 
 <code>Attrib()</code>
  on one of the aliases.
+</p>
 </li>
 </ul>
 <p>
@@ -898,31 +906,42 @@ Appendix: test coverage
 </p>
 <ul>
 <li>
+<p>
 unknown attributes and numeric booleans fail with 1310
+</p>
 </li>
 <li>
+<p>
 explicit 
 <code>join=</code>
  plus 
 <code>iface=127.0.0.1</code>
+</p>
 </li>
 <li>
+<p>
 implicit join by binding the group address
+</p>
 </li>
 <li>
+<p>
 SSM via 
 <code>source@group</code>
  and via 
 <code>source=</code>
+</p>
 </li>
 <li>
+<p>
 broadcast open of 
 <code>255.255.255.255</code>
  (never 
 <code>EACCES</code>
 )
+</p>
 </li>
 <li>
+<p>
 <code>Attrib()</code>
  
 <code>ttl=</code>
@@ -930,8 +949,10 @@ broadcast open of
 <code>join=</code>
 , 
 <code>leave=</code>
+</p>
 </li>
 <li>
+<p>
 IPv6 SSM membership via 
 <code>@</code>
 , 
@@ -939,9 +960,12 @@ IPv6 SSM membership via
 , and 
 <code>join=group,source</code>
  (delivery not required)
+</p>
 </li>
 <li>
+<p>
 cache-hit alias vs independent attr open
+</p>
 </li>
 </ul>
 <p>
