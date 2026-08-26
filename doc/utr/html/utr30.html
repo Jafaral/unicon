@@ -352,7 +352,11 @@ The namespace file leads when it is the scope of the call.
 <strong>
 <code>spawn(ns, ce, ...)</code>
 </strong>
- -- optional leading file, then the existing block/string/stack sizes. 
+ -- optional leading file, then the existing block/string/stack sizes. The argument after 
+<code>ns</code>
+ must be a co-expression (
+<code>spawn(ns, create ...)</code>
+). A procedure is not launched. 
 <code>spawn()</code>
  holds the namespace object, stores it on the co-expression, and starts the OS thread. The trampoline joins before any Icon code runs on that thread, then releases the hold, so 
 <code>close(ns)</code>

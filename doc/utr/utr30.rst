@@ -170,7 +170,9 @@ unchanged: a child that already joined does not need extra
 namespace awareness.
 
 **``spawn(ns, ce, ...)``** -- optional leading file, then the
-existing block/string/stack sizes. ``spawn()`` holds the
+existing block/string/stack sizes. The argument after
+``ns`` must be a co-expression (``spawn(ns, create ...)``).
+A procedure is not launched. ``spawn()`` holds the
 namespace object, stores it on the co-expression, and starts
 the OS thread. The trampoline joins before any Icon code
 runs on that thread, then releases the hold, so

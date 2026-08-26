@@ -3483,7 +3483,8 @@ come before those that do have an \texttt{i}'th field.
 \noindent
 \index{spawn()}\texttt{spawn(ce)} launches co-expression \texttt{ce} as an
 asynchronous thread that will execute concurrently with the current
-co-expression. An optional leading network-namespace file
+co-expression. \texttt{ce} must be a co-expression; a procedure is
+not launched. An optional leading network-namespace file
 (\texttt{spawn(ns, ce, ...)}) joins that namespace on the new OS
 thread before any Icon code runs. The three optional integers specify
 the memory in bytes allocated for the thread's block and string
