@@ -2,8 +2,8 @@ This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloade
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**utr26.tex
-(./utr26.tex
+**utr30.tex
+(./utr30.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
@@ -365,8 +365,8 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count312
 \l__pdf_internal_box=\box64
 )
-(./utr26.aux)
-\openout1 = `utr26.aux'.
+(./utr30.aux)
+\openout1 = `utr30.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
 LaTeX Font Info:    ... okay on input line 24.
@@ -411,18 +411,21 @@ e
 ))
 Package hyperref Info: Link coloring ON on input line 24.
 
-(./utr26.out) (./utr26.out)
+(./utr30.out) (./utr30.out)
 \@outlinefile=\write4
-\openout4 = `utr26.out'.
+\openout4 = `utr30.out'.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
- [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Overfull \hbox (29.16873pt too wide) in paragraph at lines 38--39
+\T1/cmr/m/n/12 spawn(), and sys-tem() runs the child in-side that names-pace; n
+s["name"]
+ []
+
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
 6.
- (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
@@ -431,21 +434,26 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <14.4> on input line 46.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 46.
- [2]
+ [1
 
-LaTeX Warning: Hyper reference `utr27-sec-examples' on page 1 undefined on inpu
-t line 59.
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
+Overfull \hbox (2.8967pt too wide) in paragraph at lines 62--63
+[]\T1/cmr/m/n/12 The fea-ture is op-tional and Linux-only. A build with \T1/cmt
+t/m/n/12 unshare() \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 setns()
+ []
 
+LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 78.
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.81 
+l.79 
       [1]
-Overfull \hbox (6.80028pt too wide) in paragraph at lines 99--100
-[]\T1/cmr/m/n/12 Attributes are \T1/cmtt/m/n/12 "key=value" \T1/cmr/m/n/12 stri
-ngs passed as trail-ing ar-gu-ments to \T1/cmtt/m/n/12 open()\T1/cmr/m/n/12 ,
+Overfull \hbox (3.7178pt too wide) in paragraph at lines 81--82
+\T1/cmtt/m/n/12 NEWNET) \T1/cmr/m/n/12 re-quires \T1/cmtt/m/n/12 CAP_NET_ADMIN\
+T1/cmr/m/n/12 , or a suc-cess-ful un-priv-i-leged user-namespace
  []
 
 
@@ -453,166 +461,132 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.100 
-       [2]
-
-LaTeX Warning: Hyper reference `utr29-sec-io' on page 3 undefined on input line
- 102.
-
-
-Overfull \hbox (2.94435pt too wide) in paragraph at lines 102--103
-[]\T1/cmr/m/n/12 All stream I/O fun-nels through one dis-patch point: \T1/cmtt/
-m/n/12 u_read() \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 u_write()
+l.126 \end{longtable}
+                      [2]
+Overfull \hbox (10.36983pt too wide) in paragraph at lines 129--130
+\T1/cmr/m/n/12 ephemeral \T1/cmtt/m/n/12 open("r1", "j") \T1/cmr/m/n/12 calls y
+ield two in-de-pen-dent ob-jects. \T1/cmtt/m/n/12 persist=yes
  []
 
 
-Overfull \hbox (8.63461pt too wide) in paragraph at lines 102--103
-\T1/cmr/m/n/12 in \T1/cmtt/m/n/12 src/runtime/rposix.r\T1/cmr/m/n/12 , which al
--ready branch on \T1/cmtt/m/n/12 Fs_Socket \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 Fs_
-Encrypt\T1/cmr/m/n/12 .
+Overfull \hbox (37.66855pt too wide) in paragraph at lines 143--144
+[]\T1/cmtt/m/n/12 spawn(ns, ce, ...) \T1/cmr/m/n/12 -- op-tional lead-ing file,
+ then the ex-ist-ing block/string/stack
+ []
+
+[3]
+Overfull \hbox (9.02855pt too wide) in paragraph at lines 178--179
+\T1/cmr/m/n/12 names-pace for the rest of its life. Later \T1/cmtt/m/n/12 open(
+..., "j")\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 fork(ns)\T1/cmr/m/n/12 , \T1/cmtt/m/n
+/12 spawn(ns,
+ []
+
+[4] [5]
+Overfull \hbox (5.84503pt too wide) in paragraph at lines 233--234
+[]\T1/cmtt/m/n/12 Netns(name) \T1/cmr/m/n/12 prefers na-tive \T1/cmtt/m/n/12 op
+en(name, "j", "persist=yes") \T1/cmr/m/n/12 and keeps
+ []
+
+[6]
+Overfull \hbox (2.69247pt too wide) in paragraph at lines 271--272
+[]\T1/cmr/bx/n/12 Join. \T1/cmtt/m/n/12 src/runtime/fxposix.ri \T1/cmr/m/n/12 (
+\T1/cmtt/m/n/12 fork\T1/cmr/m/n/12 ), \T1/cmtt/m/n/12 src/runtime/fsys.r \T1/cm
+r/m/n/12 (\T1/cmtt/m/n/12 system\T1/cmr/m/n/12 ),
  []
 
 
-Overfull \hbox (6.89339pt too wide) in paragraph at lines 108--109
-[]\T1/cmtt/m/n/12 receive() \T1/cmr/m/n/12 al-ready re-turns a general-purpose 
-\T1/cmtt/m/n/12 posix_message \T1/cmr/m/n/12 record (\T1/cmtt/m/n/12 addr\T1/cm
-r/m/n/12 ,
+Overfull \hbox (14.44801pt too wide) in paragraph at lines 271--272
+\T1/cmr/m/n/12 and \T1/cmtt/m/n/12 src/runtime/rcoexpr.r \T1/cmr/m/n/12 (\T1/cm
+tt/m/n/12 nctramp \T1/cmr/m/n/12 for \T1/cmtt/m/n/12 spawn\T1/cmr/m/n/12 ) call
+ \T1/cmtt/m/n/12 netns_join()\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 spawn()
  []
 
 
-Overfull \hbox (21.49815pt too wide) in paragraph at lines 111--112
-\T1/cmr/m/n/12 iom that many func-tions take an op-tional lead-ing file or win-
-dow (\T1/cmtt/m/n/12 write("hello")
+Overfull \hbox (16.40356pt too wide) in paragraph at lines 283--284
+\T1/cmtt/m/n/12 join \T1/cmr/m/n/12 opens with \T1/cmtt/m/n/12 O_CLOEXEC\T1/cmr
+/m/n/12 . Cre-ate and boot-strap pipes use \T1/cmtt/m/n/12 pipe2(O_CLOEXEC)\T1/
+cmr/m/n/12 . 
  []
 
-[3] [4] [5] [6]
-Overfull \hbox (0.37935pt too wide) in paragraph at lines 256--257
-\T1/cmr/m/n/12 With no \T1/cmtt/m/n/12 cmd=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ope
-n(..., "h") \T1/cmr/m/n/12 re-quests a re-mote PTY and shell. \T1/cmtt/m/n/12 n
-et::ssh_
+
+Overfull \hbox (29.67253pt too wide) in paragraph at lines 288--289
+\T1/cmr/m/n/12 The lan-guage sur-face de-scribed here is im-ple-mented: mode \T
+1/cmtt/m/n/12 j\T1/cmr/m/n/12 , per-sist/bridge/userns
+ []
+
+
+Overfull \hbox (5.24187pt too wide) in paragraph at lines 300--301
+[]\T1/cmtt/m/n/12 Attrib() \T1/cmr/bx/n/12 writes \T1/cmr/m/n/12 for in-ter-fac
+e, ad-dress, and route state. Use \T1/cmtt/m/n/12 package net\T1/cmr/m/n/12 . 
  []
 
 [7]
-
-LaTeX Warning: Hyper reference `utr29-sec-io' on page 8 undefined on input line
- 312.
-
-
-Overfull \hbox (14.66743pt too wide) in paragraph at lines 317--318
-\T1/cmtt/m/n/12 channel=no \T1/cmr/m/n/12 opens an au-then-ti-cated trans-port.
- Later \T1/cmtt/m/n/12 open(s, "hc") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 open(s,
- []
-
-[8] [9] [10]
-LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 418.
- [11] [12] [13] [14]
-Overfull \hbox (5.95744pt too wide) in paragraph at lines 567--568
-[]\T1/cmr/m/n/12 On Win-dows, \T1/cmtt/m/n/12 select(&input) \T1/cmr/m/n/12 and
- \T1/cmtt/m/n/12 Attrib(f, "tty=raw") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 "tty=san
-e"
- []
-
-[15] [16] [17]
-Overfull \hbox (11.3737pt too wide) in paragraph at lines 657--658
-[]\T1/cmtt/m/n/12 sftp2rec() \T1/cmr/m/n/12 pop-u-lates the same \T1/cmtt/m/n/1
-2 posix_stat \T1/cmr/m/n/12 record as \T1/cmtt/m/n/12 stat2rec()\T1/cmr/m/n/12 
-. SFTP's
+Overfull \hbox (16.77145pt too wide) in paragraph at lines 318--319
+[]\T1/cmtt/m/n/12 ns["name"]\T1/cmr/m/n/12 , boolean \T1/cmtt/m/n/12 persist \T
+1/cmr/m/n/12 / \T1/cmtt/m/n/12 userns\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 refcount\
+T1/cmr/m/n/12 , \T1/cmtt/m/n/12 key(ns)\T1/cmr/m/n/12 , and \T1/cmtt/m/n/12 ns[
+"*"] 
  []
 
 
-Overfull \hbox (20.0597pt too wide) in paragraph at lines 668--669
-[]\T1/cmr/m/n/12 Guards are \T1/cmtt/m/n/12 #if HAVE_LIBSSH \T1/cmr/m/n/12 thro
-ugh-out \T1/cmtt/m/n/12 rstructs.h\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 rmacros.h\T1
-/cmr/m/n/12 , \T1/cmtt/m/n/12 feature.
- []
-
-[18]
-Overfull \hbox (0.49704pt too wide) in paragraph at lines 688--689
-[]\T1/cmr/bx/n/12 Trust-on-first-use. \T1/cmr/m/n/12 Ver-i-fi-ca-tion is check-
-only (\T1/cmtt/m/n/12 ssh_session_is_known_
- []
-
-LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 691.
-
-Overfull \hbox (23.60867pt too wide) in paragraph at lines 696--697
-\T1/cmtt/m/n/12 tests/posix/ssh.icn \T1/cmr/m/n/12 is de-ter-min-is-tic with-ou
-t a server: it checks that \T1/cmtt/m/n/12 &features
+Overfull \hbox (40.62544pt too wide) in paragraph at lines 343--344
+[]\T1/cmr/m/n/12 Without a work-ing userns or \T1/cmtt/m/n/12 CAP_NET_ADMIN \T1
+/cmr/m/n/12 it prints \T1/cmtt/m/n/12 This Program Requires .
  []
 
 
-Overfull \hbox (0.90874pt too wide) in paragraph at lines 696--697
-\T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shell\T1/cmr/m/n/12 , and that b
-ad at-tributes, \T1/cmtt/m/n/12 channel=maybe\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 c
-hannel=no
+Overfull \hbox (22.30774pt too wide) in paragraph at lines 346--347
+\T1/cmr/m/n/12 veth cre-ated in-side the first names-pace, peer move, ad-dresse
+s, and \T1/cmtt/m/n/12 ip netns exec
  []
 
 
-Overfull \hbox (7.21968pt too wide) in paragraph at lines 696--697
-\T1/cmtt/m/n/12 SSH_TESTPORT\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_TESTKEY
-\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_KNOWNHOSTS\T1/cmr/m/n/12 , and \T1/
-cmtt/m/n/12 UNICON_
- []
-
-
-Overfull \hbox (10.41057pt too wide) in paragraph at lines 696--697
-\T1/cmtt/m/n/12 SSH_SFTPPATH\T1/cmr/m/n/12 . The live path cov-ers exec std-out
-, \T1/cmtt/m/n/12 c["exitstatus"]\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 receive()
- []
-
-[19]
-Underfull \hbox (badness 4779) in paragraph at lines 705--706
+Underfull \hbox (badness 4779) in paragraph at lines 373--374
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 708--709
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 376--377
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 714--715
+Underfull \hbox (badness 1072) in paragraph at lines 382--383
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
-[20] [21] (./utr26.aux)
+[9] [10] (./utr30.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-Package rerunfilecheck Info: File `utr26.out' has not changed.
-(rerunfilecheck)             Checksum: 630B6D1DE9794AC9418B2CB673088EFF;8037.
+Package rerunfilecheck Info: File `utr30.out' has not changed.
+(rerunfilecheck)             Checksum: 7AD22C6B0EB4114DB7770EFC69E714E0;1759.
  ) 
 Here is how much of TeX's memory you used:
- 12329 strings out of 476182
- 199702 string characters out of 5795595
- 1936975 words of memory out of 5000000
- 34111 multiletter control sequences out of 15000+600000
- 568501 words of font info for 55 fonts, out of 8000000 for 9000
+ 12211 strings out of 476182
+ 197944 string characters out of 5795595
+ 1932975 words of memory out of 5000000
+ 34040 multiletter control sequences out of 15000+600000
+ 568188 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1037b,699s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
+ 75i,6n,79p,757b,695s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.60
 0pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1095.
-600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm120
-0.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1
-200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ect
-i1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
-cbx1728.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
-/ectt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
-ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
-n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
-pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
-appen/ec/ecbx2074.600pk>
-Output written on utr26.pdf (23 pages, 190378 bytes).
+600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt120
+0.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1
+200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecb
+x1728.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+ctt1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
+/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
+ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
+n/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
+pen/ec/ecbx2074.600pk>
+Output written on utr30.pdf (12 pages, 137244 bytes).
 PDF statistics:
- 820 PDF objects out of 1000 (max. 8388607)
- 346 compressed objects within 4 object streams
- 88 named destinations out of 1000 (max. 500000)
- 345 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 544 PDF objects out of 1000 (max. 8388607)
+ 161 compressed objects within 2 object streams
+ 42 named destinations out of 1000 (max. 500000)
+ 97 words of extra memory for PDF output out of 10000 (max. 10000000)
 

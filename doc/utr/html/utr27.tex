@@ -193,7 +193,7 @@ Attribute & Meaning \\
 \end{longtable}
 
 
-Socket attributes (\texttt{reuseaddr}, \texttt{ttl}, \texttt{iface}, \texttt{join}, \texttt{proto}, ...) are applied separately and are unaffected. Live-session status is \hyperref[utr27-sec-peek]{section 6.4}.
+Socket attributes (\texttt{reuseaddr}, \texttt{ttl}, \texttt{iface}, \texttt{join}, \texttt{proto}, ...) are applied separately and are unaffected. Live-session status is \hyperref[utr30-sec-peek]{section 6.4}.
 
 \subsection{6.2 Crypto attributes}
 \label{utr27-sec-attrs-crypto}
@@ -224,7 +224,7 @@ Attribute & Meaning & Used with \\
 \texttt{key=} on a crypto handle is typed by content and by the operation: PEM / DER private keys for \texttt{sign} and TLS; raw bytes for \texttt{encrypt}, \texttt{decrypt}, and \texttt{hmac}. A role mismatch fails.
 
 
-Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation and prepends it to the ciphertext; \texttt{decrypt} reads that prefix. Supplying \texttt{iv=} opts out -- useful for a wire format that does not prepend an IV, or for test vectors -- and hands uniqueness back to the caller. The default cipher is AEAD; the runtime appends the authentication tag after the ciphertext. Status peeks are \hyperref[utr27-sec-peek]{section 6.4}.
+Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation and prepends it to the ciphertext; \texttt{decrypt} reads that prefix. Supplying \texttt{iv=} opts out -- useful for a wire format that does not prepend an IV, or for test vectors -- and hands uniqueness back to the caller. The default cipher is AEAD; the runtime appends the authentication tag after the ciphertext. Status peeks are \hyperref[utr30-sec-peek]{section 6.4}.
 
 \subsection{6.3 Shared names with SSH}
 \label{utr27-sec-attrs-shared}
@@ -764,7 +764,7 @@ conn  := open("host:443", "ne", certh, keyh)
 \end{Verbatim}
 
 
-After a handshake, \texttt{conn["cipher"]} peeks the negotiated suite and \texttt{conn["certchain"]} is a list of peer certificates as PEM strings; see \hyperref[utr27-sec-peek]{section 6.4} (\texttt{tests/\allowbreak{}crypto/\allowbreak{}tlspeek.\allowbreak{}icn}). \texttt{certh["type"]} / \texttt{keyh["type"]} are material-handle peeks, not session fields.
+After a handshake, \texttt{conn["cipher"]} peeks the negotiated suite and \texttt{conn["certchain"]} is a list of peer certificates as PEM strings; see \hyperref[utr30-sec-peek]{section 6.4} (\texttt{tests/\allowbreak{}crypto/\allowbreak{}tlspeek.\allowbreak{}icn}). \texttt{certh["type"]} / \texttt{keyh["type"]} are material-handle peeks, not session fields.
 
 
 Encrypted UDP (DTLS) uses \texttt{"nue"} / \texttt{"naue"}. The runtime selects a DTLS context when the socket is datagram.
@@ -778,7 +778,7 @@ On a data-pipe handle, \texttt{write()} accumulates and \texttt{read()} finalize
 On \texttt{we}, writes encrypt to the file and \texttt{close()} flushes the AEAD tag. On \texttt{re} with \texttt{op=decrypt}, \texttt{reads()} yields plaintext chunks. On \texttt{re} with \texttt{op=hash}, the first \texttt{read()} returns the digest.
 
 
-\texttt{Attrib()} during the idle window may change \texttt{op=}, \texttt{alg=}, \texttt{cipher=}, \texttt{iv=}, and \texttt{sig=}. A change while a digest or cipher is in flight fails (1316). Status gets are \hyperref[utr27-sec-peek]{section 6.4}. Handles are not valid \texttt{Attrib()} values.
+\texttt{Attrib()} during the idle window may change \texttt{op=}, \texttt{alg=}, \texttt{cipher=}, \texttt{iv=}, and \texttt{sig=}. A change while a digest or cipher is in flight fails (1316). Status gets are \hyperref[utr30-sec-peek]{section 6.4}. Handles are not valid \texttt{Attrib()} values.
 
 
 Framing is owned by the runtime: IV prepended, tag appended, both fixed-length per cipher. The same layout is used for \texttt{e} / \texttt{er} output and for \texttt{we} files.
@@ -891,6 +891,12 @@ B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Intern
 
 \bibitem[14]{cite-rfc1071}
 R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
+
+\bibitem[15]{cite-namespaces7}
+"namespaces(7)". Linux man-pages. 2024.
+
+\bibitem[16]{cite-user-namespaces7}
+"user\textbackslash{}\_namespaces(7)". Linux man-pages. 2024.
 
 \end{thebibliography}
 \end{document}

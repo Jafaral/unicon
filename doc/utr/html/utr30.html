@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="basic"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network Namespaces in Unicon</title>
+<script>
+(function(){try{var t=localStorage.getItem('uscribe-theme');
+if(t==='basic'||t==='classic'||t==='dark')
+document.documentElement.setAttribute('data-theme',t);
+else t='basic';
+document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-'+t+'.css">');
+}catch(e){document.write('<link id="theme-css" rel="stylesheet" href="_static/theme-basic.css">');}})();
+</script>
+<noscript><link id="theme-css" rel="stylesheet" href="_static/theme-basic.css"></noscript>
+<link rel="stylesheet" href="_static/highlight.css">
+<script defer src="_static/search.js"></script>
+<script defer src="_static/highlight-unicon.js"></script>
+<script defer src="_static/theme-switcher.js"></script>
+</head><body>
+<div class="layout">
+<nav class="sidebar" aria-label="Report contents">
+<div class="book-title"><a href="index.html">Unicon Technical Reports</a></div>
+<label class="search-hint" for="theme-select">Theme</label>
+<select class="search-box" id="theme-select" aria-label="Color theme">
+<option value="basic">basic</option>
+<option value="classic">classic</option>
+<option value="dark">dark</option>
+</select>
+<p class="search-hint">Filter sections; Enter for full search</p>
+<input class="search-box" id="nav-search" type="search" 
+placeholder="Search..." aria-label="Filter section list">
+<ol id="nav-toc">
+<li class="toc-l1"><a href="#sec-intro">1. Introduction
+</a></li>
+<li class="toc-l1"><a href="#sec-motivation">2. Motivation
+</a></li>
+<li class="toc-l1"><a href="#sec-principles">3. Design principles
+</a></li>
+<li class="toc-l1"><a href="#sec-open">4. Opening and closing
+</a></li>
+<li class="toc-l1"><a href="#sec-exec">5. Joining a namespace
+</a></li>
+<li class="toc-l1"><a href="#sec-userns">6. Unprivileged bootstrap
+</a></li>
+<li class="toc-l1"><a href="#sec-peek">7. Status peek
+</a></li>
+<li class="toc-l1"><a href="#sec-pkg">8. Link helpers
+</a></li>
+<li class="toc-l1"><a href="#sec-impl">9. Runtime implementation
+</a></li>
+<li class="toc-l1"><a href="#sec-status">10. Status and remaining work
+</a></li>
+<li class="toc-l1"><a href="#sec-coverage">Appendix: test coverage
+</a></li>
+<li class="toc-l1"><a href="#references">References
+</a></li>
+</ol>
+<p class="search-hint"><a href="search.html">Search page</a></p>
+</nav>
+<div class="main">
+<header class="report-masthead">
+<h1 class="report-title">Network Namespaces in Unicon</h1>
+<p class="report-authors">Jafar Al-Gharaibeh</p>
+<p class="report-tr">Unicon Technical Report: 30</p>
+<p class="report-date">July 2026</p>
+<p class="report-pdf"><a href="utr30.pdf">pdf</a> | <a href="_sources/utr30.rst.txt">txt</a></p>
+<div class="report-abstract">
+<p class="report-abstract-label">Abstract</p>
+<p>Linux network namespaces isolate a process's network stack -- interfaces, addresses, and routes -- without a full container. This report describes native support in Unicon: open() mode &quot;j&quot; creates a namespace handle; an optional leading handle on fork(), spawn(), and system() runs the child inside that namespace; ns[&quot;name&quot;] / key(ns) peek status. Trailing persist=, bridge=, and userns= attributes cover ip(8) visibility, a pre-created bridge, and unprivileged bootstrap. Package net supplies link helpers (veth, bridge) on top of those handles.</p>
+<p class="report-keywords"><span class="report-keywords-label">Keywords:</span> Unicon, network namespaces, Linux, open, fork, spawn, system, runtime, technical report.</p>
+</div>
+</header>
+<h2 id="sec-intro">
+1. Introduction
+</h2>
+<p>
+This report describes Linux network namespaces 
+[<a class="cite" href="#cite-namespaces7">15</a>] in Unicon: how a handle is opened, how a child process or thread joins it, how status is peeked, and what remains out of scope. It is formatted as a Unicon Technical Report 
+[<a class="cite" href="#cite-jeffery-utr15">1</a>]. The language-facing reference lives in 
+<em>
+Programming with Unicon
+</em>
+ 
+[<a class="cite" href="#cite-jeffery-pwu">7</a>] (Chapter 5, &quot;Network Namespaces&quot;; Chapter 14, 
+<code>unettopo</code>
+) and the language reference (
+<code>open</code>
+ mode 
+<code>j</code>
+, optional leading namespace file on 
+<code>fork</code>
+ / 
+<code>spawn</code>
+ / 
+<code>system</code>
+, subscript peek, 
+<code>key()</code>
+). Automated tests live in 
+<code>tests/posix/netns.icn</code>
+ and 
+<code>tests/unicon/nettopo.icn</code>
+.
+</p>
+<p>
+The feature is optional and Linux-only. A build with 
+<code>unshare()</code>
+ / 
+<code>setns()</code>
+ and 
+<code>CLONE_NEWNET</code>
+ reports 
+<code>Network namespaces</code>
+ in 
+<code>&amp;features</code>
+ (the 
+<code>_NETNS</code>
+ flag). Other hosts omit the feature; mode 
+<code>j</code>
+ fails with error 1045.
+</p>
+<h2 id="sec-motivation">
+2. Motivation
+</h2>
+<p>
+Test topologies on Linux are often a handful of network namespaces, veth pairs, and optional bridges: isolated stacks wired together, cheap enough to create per test run. Unicon already treats 
+<code>open()</code>
+ as the constructor for files, sockets, TLS, SSH, and crypto handles. Namespace membership is the same kind of resource: create it, pass it, close it. Shelling out to 
+<code>ip netns</code>
+ works, but it cannot join the Unicon process itself, and it cannot put 
+<code>fork()</code>
+ / 
+<code>spawn()</code>
+ / 
+<code>system()</code>
+ children into a namespace without a second 
+<code>ip netns exec</code>
+ wrapper.
+</p>
+<h2 id="sec-principles">
+3. Design principles
+</h2>
+<p>
+<strong>
+One OS thread is in one network namespace for its lifetime.
+</strong>
+ Membership lives on the kernel 
+<code>nsproxy</code>
+. 
+<code>fork(ns)</code>
+ and 
+<code>system(ns, ...)</code>
+ join in the child process; 
+<code>spawn(ns, ...)</code>
+ joins on the new OS thread before any Icon code runs. The runtime never migrates a live thread between namespaces.
+</p>
+<p>
+<strong>
+Existing verbs, not new globals.
+</strong>
+ Mode 
+<code>j</code>
+ and trailing 
+<code>name=value</code>
+ attributes follow SSL and SSH. 
+<code>fork</code>
+, 
+<code>spawn</code>
+, and 
+<code>system</code>
+ take an optional leading namespace file, the same role a window plays in 
+<code>DrawPoint(w, x, y)</code>
+. Link configuration that 
+<code>ip(8)</code>
+ already expresses stays in 
+<code>package net</code>
+.
+</p>
+<p>
+<strong>
+Status is peeked; 
+<code>Attrib()</code>
+ does not set netns fields.
+</strong>
+ 
+<code>ns[&quot;name&quot;]</code>
+ and 
+<code>key(ns)</code>
+ match sockets, TLS, SSH, and crypto handles. Writes for interfaces, addresses, and routes are deferred; use 
+<code>package net</code>
+.
+</p>
+<p>
+<strong>
+Create needs privilege or a user namespace.
+</strong>
+ 
+<code>unshare(CLONE_NEWNET)</code>
+ requires 
+<code>CAP_NET_ADMIN</code>
+, or a successful unprivileged user-namespace bootstrap (
+<a href="utr30.html#sec-userns">section 6</a>
+).
+</p>
+<h2 id="sec-open">
+4. Opening and closing
+</h2>
+<p>
+Mode 
+<code>&quot;j&quot;</code>
+ creates a namespace named 
+<code>s1</code>
+. The result is a file handle, not a read/write stream. Other mode letters combined with 
+<code>j</code>
+ are error 209.
+</p>
+<pre><code class="language-unicon">procedure main()
+   local ns
+   ns := open(&quot;r1&quot;, &quot;j&quot;) | stop(&amp;errortext)
+   write(image(ns))
+   close(ns)
+end
+</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">netns(r1)
+</code></pre>
+<p>
+Implementation: a short-lived child calls 
+<code>unshare(CLONE_NEWNET)</code>
+, bind-mounts 
+<code>/proc/self/ns/net</code>
+ onto a private path under 
+<code>/tmp/unicon-netns-&lt;uid&gt;/</code>
+, brings 
+<code>lo</code>
+ up, and exits. The private mount pins the kernel namespace. 
+<code>Fs_NETNS</code>
+ (
+<code>040</code>
+ when the feature is built) marks the handle; state is a 
+<code>struct NetnsFile *</code>
+ on the file block.
+</p>
+<p>
+Trailing attributes are 
+<code>name=value</code>
+ strings. Booleans are exactly 
+<code>yes</code>
+ or 
+<code>no</code>
+. Unknown names or other boolean spellings are error 205.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Attribute
+</th>
+<th>
+Role
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>persist=yes|no</code>
+</td>
+<td>
+Also bind-mount at 
+<code>/var/run/netns/&lt;name&gt;</code>
+ so
+</td>
+</tr>
+<tr>
+<td>
+<code>bridge=yes|no</code>
+</td>
+<td>
+Best-effort 
+<code>bridge0</code>
+ inside the new namespace.
+</td>
+</tr>
+<tr>
+<td>
+<code>userns=yes|no</code>
+</td>
+<td>
+Force or forbid the unprivileged bootstrap in
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+Ephemeral opens (no 
+<code>persist</code>
+) have no user-visible 
+<code>ip netns</code>
+ name. Two ephemeral 
+<code>open(&quot;r1&quot;, &quot;j&quot;)</code>
+ calls yield two independent objects. 
+<code>persist=yes</code>
+ uses 
+<code>O_EXCL</code>
+; a second persist open of the same name fails.
+</p>
+<p>
+<code>close(ns)</code>
+ always unmounts this handle's pins. It does not wait on 
+<code>ns[&quot;refcount&quot;]</code>
+. Unmounting a pin does not destroy the kernel namespace: any process that already joined still holds an 
+<code>nsproxy</code>
+ reference. After 
+<code>close()</code>
+, a persist name disappears from 
+<code>ip netns list</code>
+, and a later 
+<code>open()</code>
+ of that name creates a new namespace. Live handles are also unmounted at process exit and on 
+<code>SIGINT</code>
+ / 
+<code>SIGTERM</code>
+ when those signals still have the default disposition. Cleanup runs only in the creating process, so 
+<code>fork()</code>
+ children that exit do not tear down the parent's pins. 
+<code>SIGKILL</code>
+ can still leave orphan mounts.
+</p>
+<h2 id="sec-exec">
+5. Joining a namespace
+</h2>
+<p>
+The namespace file leads when it is the scope of the call.
+</p>
+<p>
+<strong>
+<code>fork(ns)</code>
+</strong>
+ -- POSIX 
+<code>fork()</code>
+ with one optional argument. In the child, 
+<code>setns()</code>
+ runs before the function returns, so the first Icon statement is already namespaced. 
+<code>fork()</code>
+ with no argument is unchanged. 
+<code>exec()</code>
+ is unchanged: a child that already joined does not need extra namespace awareness.
+</p>
+<p>
+<strong>
+<code>spawn(ns, ce, ...)</code>
+</strong>
+ -- optional leading file, then the existing block/string/stack sizes. 
+<code>spawn()</code>
+ holds the namespace object, stores it on the co-expression, and starts the OS thread. The trampoline joins before any Icon code runs on that thread, then releases the hold, so 
+<code>close(ns)</code>
+ from the parent cannot race the join. With concurrent threads, the OS thread starts immediately; no 
+<code>@ce</code>
+ activation is required. 
+<code>wait(ce)</code>
+ waits for it to finish.
+</p>
+<p>
+<strong>
+<code>system(ns, argv, ...)</code>
+</strong>
+ -- same leading-file convention. The child joins before 
+<code>dup</code>
+ / 
+<code>exec</code>
+.
+</p>
+<pre><code class="language-unicon">procedure main()
+   local ns, pid
+   ns := open(&quot;r1&quot;, &quot;j&quot;) | stop(&amp;errortext)
+   pid := fork(ns) | stop(&quot;fork failed: &quot;, &amp;errortext)
+   if pid = 0 then {
+      system([&quot;ip&quot;, &quot;link&quot;, &quot;show&quot;])
+      exit(0)
+      }
+   wait(pid)
+   system(ns, [&quot;ip&quot;, &quot;link&quot;, &quot;show&quot;])
+   close(ns)
+end
+</code></pre>
+<p>
+<code>fork()</code>
+ fails (no value) only on the system-call error. A successful child result is 
+<code>0</code>
+, so discriminate with comparison, not 
+<code>else</code>
+.
+</p>
+<h2 id="sec-userns">
+6. Unprivileged bootstrap
+</h2>
+<p>
+Creating a network namespace needs 
+<code>CAP_NET_ADMIN</code>
+ in the current user namespace 
+[<a class="cite" href="#cite-user-namespaces7">16</a>]. 
+<code>userns=yes</code>
+ enters a new user namespace, maps the calling uid/gid to 0 inside it, enters a private mount namespace, and then creates the netns. The mapping is written by a short-lived 
+<code>fork()</code>
+ helper that stays in the host user namespace; writing 
+<code>uid_map</code>
+ from the same process that called 
+<code>unshare(CLONE_NEWUSER)</code>
+ is rejected on hosts that restrict unprivileged user namespaces.
+</p>
+<p>
+If 
+<code>userns=</code>
+ is omitted and the privileged create fails with 
+<code>EPERM</code>
+ or 
+<code>EACCES</code>
+, 
+<code>open(..., &quot;j&quot;)</code>
+ retries once after the same bootstrap. Explicit 
+<code>userns=yes</code>
+ bootstraps up front. Explicit 
+<code>userns=no</code>
+ never bootstraps.
+</p>
+<p>
+<code>unshare(CLONE_NEWUSER)</code>
+ fails with 
+<code>EINVAL</code>
+ if the process is already multithreaded. That must happen before any 
+<code>spawn()</code>
+-created thread exists; the 
+<code>&amp;errortext</code>
+ states the constraint.
+</p>
+<p>
+After a successful bootstrap the Unicon process is uid 0 
+<em>
+inside
+</em>
+ the user namespace for the rest of its life. Later 
+<code>open(..., &quot;j&quot;)</code>
+, 
+<code>fork(ns)</code>
+, 
+<code>spawn(ns, ...)</code>
+, 
+<code>system(ns, ...)</code>
+, and 
+<code>ip</code>
+ via 
+<code>package net</code>
+ need no further host privilege. A private tmpfs is mounted on 
+<code>/var/run/netns</code>
+ so 
+<code>persist=yes</code>
+ can create entries when the host directory is not writable to a mapped-root user namespace.
+</p>
+<p>
+Linux security modules may still deny further 
+<code>CLONE_NEWNS</code>
+ / 
+<code>CLONE_NEWNET</code>
+ unshares for unprivileged callers. In that case 
+<code>open()</code>
+ fails with the system 
+<code>&amp;errortext</code>
+; run with 
+<code>CAP_NET_ADMIN</code>
+, or relax the host policy.
+</p>
+<p>
+<code>ns[&quot;userns&quot;]</code>
+ reports whether this handle was created after bootstrap. The choice is fixed at 
+<code>open()</code>
+.
+</p>
+<h2 id="sec-peek">
+7. Status peek
+</h2>
+<pre><code class="language-unicon">procedure main()
+   local ns, k
+   ns := open(&quot;r1&quot;, &quot;j&quot;, &quot;persist=yes&quot;) | stop(&amp;errortext)
+   write(&quot;name=&quot;, ns[&quot;name&quot;])
+   write(&quot;persist=&quot;, \ns[&quot;persist&quot;] | &quot;no&quot;)
+   write(&quot;userns=&quot;, \ns[&quot;userns&quot;] | &quot;no&quot;)
+   write(&quot;refcount=&quot;, ns[&quot;refcount&quot;])
+   every k := key(ns) do
+      write(&quot;field &quot;, k)
+   close(ns)
+end
+</code></pre>
+<p>
+Unknown names raise 1336 (
+<code>bad netns status field</code>
+). An unpopulated field fails. Boolean fields that answered succeed with 
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+. 
+<code>key(ns)</code>
+ generates every answerable field. 
+<code>ns[&quot;*&quot;]</code>
+ snapshots those fields under one lock. Peeking a closed handle is error 174. 
+<code>key(ns)</code>
+ that has not yet produced a name also raises 174 if the handle is already closed.
+</p>
+<table>
+<thead>
+<tr>
+<th>
+Name
+</th>
+<th>
+Value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code>
+</td>
+<td>
+Namespace name from 
+<code>open()</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>persist</code>
+</td>
+<td>
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>userns</code>
+</td>
+<td>
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+</td>
+</tr>
+<tr>
+<td>
+<code>refcount</code>
+</td>
+<td>
+Integer; the open file plus any 
+<code>spawn()</code>
+ hold
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+<code>Attrib()</code>
+ has no netns setters. Interface, address, and route configuration lives in 
+<code>package net</code>
+.
+</p>
+<h2 id="sec-pkg">
+8. Link helpers
+</h2>
+<p>
+<code>uni/lib/netns.icn</code>
+ is pure Unicon. It shells out to 
+<code>ip</code>
+ / 
+<code>ip netns</code>
+. There is no rtnetlink binding.
+</p>
+<p>
+<code>Netns(name)</code>
+ prefers native 
+<code>open(name, &quot;j&quot;, &quot;persist=yes&quot;)</code>
+ and keeps the file open so the persist mount stays pinned. If that fails it tries an ephemeral native open, then 
+<code>ip netns add</code>
+. 
+<code>delete()</code>
+ closes the file or runs 
+<code>ip netns del</code>
+.
+</p>
+<p>
+<code>Link</code>
+ is the interface base. 
+<code>Veth</code>
+, 
+<code>Bridge</code>
+, 
+<code>Vrf</code>
+, and 
+<code>Tun</code>
+ create devices; a bare 
+<code>Link(name)</code>
+ wraps an existing interface. Every mutating method goes through 
+<code>run()</code>
+, which prefers 
+<code>system(nsfile, argv)</code>
+ on a native handle and otherwise uses 
+<code>ip netns exec</code>
+.
+</p>
+<p>
+<code>Link.move(target)</code>
+ accepts a 
+<code>Netns</code>
+ instance, a string name, or a native file (
+<code>target[&quot;name&quot;]</code>
+). 
+<code>Veth.peer()</code>
+ returns a host-resident 
+<code>Link</code>
+ for the other end and does not copy 
+<code>ns</code>
+; the two ends usually move into different namespaces. Create a veth 
+<em>
+inside
+</em>
+ a namespace when running unprivileged: host RTNETLINK create is often denied after user-namespace bootstrap.
+</p>
+<pre><code class="language-unicon">import net
+
+procedure main()
+   local a, b, v, peer
+   a := Netns(&quot;r1&quot;) | stop(&amp;errortext)
+   b := Netns(&quot;r2&quot;) | stop(&amp;errortext)
+   v := Veth(&quot;v1&quot;, &quot;v2&quot;, a) | stop(&amp;errortext)
+   peer := v.peer()
+   peer.move(b) | stop(&amp;errortext)
+   v.addr(&quot;10.0.0.1/24&quot;)
+   peer.addr(&quot;10.0.0.2/24&quot;)
+   v.up()
+   peer.up()
+   system(a.nsfile, [&quot;ping&quot;, &quot;-c&quot;, &quot;1&quot;, &quot;10.0.0.2&quot;])
+   v.delete()
+   a.delete()
+   b.delete()
+end
+</code></pre>
+<p>
+<code>uni/progs/unettopo.icn</code>
+ is that topology as a demo.
+</p>
+<h2 id="sec-impl">
+9. Runtime implementation
+</h2>
+<p>
+<strong>
+Open / close.
+</strong>
+ 
+<code>src/runtime/fsys.r</code>
+ parses mode 
+<code>j</code>
+ and the trailing attributes, then calls 
+<code>netns_create()</code>
+. 
+<code>close()</code>
+ releases the 
+<code>NetnsFile</code>
+.
+</p>
+<p>
+<strong>
+Join.
+</strong>
+ 
+<code>src/runtime/fxposix.ri</code>
+ (
+<code>fork</code>
+), 
+<code>src/runtime/fsys.r</code>
+ (
+<code>system</code>
+), and 
+<code>src/runtime/rcoexpr.r</code>
+ (
+<code>nctramp</code>
+ for 
+<code>spawn</code>
+) call 
+<code>netns_join()</code>
+. 
+<code>spawn()</code>
+ in 
+<code>fmisc.r</code>
+ uses 
+<code>OptNetns</code>
+ (
+<code>grttin.h</code>
+), the same optional-leading-arg pattern as 
+<code>OptWindow</code>
+.
+</p>
+<p>
+<strong>
+Helpers.
+</strong>
+ 
+<code>src/common/rnetns.c</code>
+ implements create, join, hold/release, userns bootstrap, and the exit/signal reaper. 
+<code>configure.ac</code>
+ link-checks 
+<code>unshare</code>
+ / 
+<code>setns</code>
+ / 
+<code>CLONE_NEWNET</code>
+. 
+<code>Fs_NETNS</code>
+ is 
+<code>0</code>
+ when the feature is off so 
+<code>OptNetns</code>
+ still compiles.
+</p>
+<p>
+<strong>
+Peek.
+</strong>
+ 
+<code>netns_peek</code>
+ in 
+<code>src/runtime/rposix.r</code>
+ uses the same 
+<code>filepeek</code>
+ table as sockets and SSH. 
+<code>oref.r</code>
+ implements 
+<code>ns[&quot;name&quot;]</code>
+; 
+<code>fstruct.r</code>
+ implements 
+<code>key(ns)</code>
+. Unknown names are 1336.
+</p>
+<p>
+<strong>
+Image.
+</strong>
+ 
+<code>image(ns)</code>
+ is 
+<code>netns(&lt;name&gt;)</code>
+.
+</p>
+<p>
+<strong>
+CLOEXEC.
+</strong>
+ No long-lived namespace fd is held; pins are paths. 
+<code>netns_join</code>
+ opens with 
+<code>O_CLOEXEC</code>
+. Create and bootstrap pipes use 
+<code>pipe2(O_CLOEXEC)</code>
+.
+</p>
+<h2 id="sec-status">
+10. Status and remaining work
+</h2>
+<p>
+The language surface described here is implemented: mode 
+<code>j</code>
+, persist/bridge/userns attributes, 
+<code>fork(ns)</code>
+ / 
+<code>spawn(ns, ...)</code>
+ / 
+<code>system(ns, ...)</code>
+, status peek, 
+<code>package net</code>
+ veth/bridge helpers, and the 
+<code>unettopo</code>
+ demo.
+</p>
+<p>
+<strong>
+Native rtnetlink.
+</strong>
+ Link helpers still shell out to 
+<code>ip(8)</code>
+.
+</p>
+<p>
+<strong>
+Other platforms.
+</strong>
+ No BSD jail or Windows backend.
+</p>
+<p>
+<strong>
+PID and mount isolation.
+</strong>
+ 
+<code>fork(ns)</code>
+ joins only the network namespace.
+</p>
+<p>
+<strong>
+<code>Attrib()</code>
+ writes
+</strong>
+ for interface, address, and route state. Use 
+<code>package net</code>
+.
+</p>
+<p>
+<strong>
+<code>Netns.list()</code>
+ / 
+<code>Netns.current()</code>
+</strong>
+, link statistics, and macvlan/ipvlan classes are not provided.
+</p>
+<h2 id="sec-coverage">
+Appendix: test coverage
+</h2>
+<p>
+<code>tests/posix/netns.icn</code>
+ drops to 
+<code>nobody</code>
+ when started as root, then opens with 
+<code>userns=yes</code>
+. It checks:
+</p>
+<ul>
+<li>
+<p>
+feature string and a successful 
+<code>open(..., &quot;j&quot;)</code>
+</p>
+</li>
+<li>
+<p>
+<code>ns[&quot;name&quot;]</code>
+, boolean 
+<code>persist</code>
+ / 
+<code>userns</code>
+, 
+<code>refcount</code>
+, 
+<code>key(ns)</code>
+, and 
+<code>ns[&quot;*&quot;]</code>
+</p>
+</li>
+<li>
+<p>
+<code>fork(ns)</code>
+ and 
+<code>system(ns, ...)</code>
+ see only 
+<code>lo</code>
+</p>
+</li>
+<li>
+<p>
+<code>spawn(ns, ...)</code>
+ when concurrent threads are present
+</p>
+</li>
+<li>
+<p>
+persist listing in 
+<code>ip netns list</code>
+, gone after 
+<code>close()</code>
+</p>
+</li>
+<li>
+<p>
+ephemeral name reuse vs persist 
+<code>O_EXCL</code>
+</p>
+</li>
+</ul>
+<p>
+Without a working userns or 
+<code>CAP_NET_ADMIN</code>
+ it prints 
+<code>This Program Requires ...</code>
+ so 
+<code>Makefile.test</code>
+ does not treat the run as 
+<code>FAIL</code>
+.
+</p>
+<p>
+<code>tests/unicon/nettopo.icn</code>
+ covers 
+<code>package net</code>
+: two 
+<code>Netns</code>
+ objects, a veth created inside the first namespace, peer move, addresses, and 
+<code>ip netns exec</code>
+ iface lists.
+</p>
+<p>
+Expected output is 
+<code>tests/posix/stand/netns.std</code>
+:
+</p>
+<pre><code class="language-text">feature=yes
+open=ok name=ut-ns persist=no userns=yes refcount=1
+key=ok
+fork-child: ifaces=lo
+fork-parent: ok
+system: ifaces=lo
+spawn: ifaces=lo
+close=ok
+persist=ok name=ut-nsp persist=yes
+bridge: ifaces=bridge0,lo
+listed=yes
+listed-after-close=no
+dup-ephemeral=ok
+dup-persist=eexist
+done
+</code></pre>
+<h2 id="references">
+References
+</h2>
+<div class="bibliography">
+<ol class="bibliography-list">
+<li id="cite-jeffery-utr15" value="1">
+Clinton Jeffery. &quot;How to Write a Unicon Technical Report&quot;. doc/utr/utr15.tex. 2013.
+</li>
+<li id="cite-libssh" value="2">
+The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
+</li>
+<li id="cite-jeffery-utr13" value="3">
+Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
+</li>
+<li id="cite-openssl" value="4">
+The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
+</li>
+<li id="cite-rfc2104" value="5">
+H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
+</li>
+<li id="cite-rfc1112" value="6">
+S. Deering. &quot;Host Extensions for IP Multicasting&quot;. RFC 1112. 1989.
+</li>
+<li id="cite-jeffery-pwu" value="7">
+Clinton Jeffery and Shamim Mohamed and Jafar Al-Gharaibeh. &quot;Programming with Unicon&quot;. doc/book/. 2026.
+</li>
+<li id="cite-rfc4607" value="8">
+H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
+</li>
+<li id="cite-algharaibeh-utr29" value="9">
+Jafar Al-Gharaibeh. &quot;Raw Sockets and Packet Layouts in Unicon&quot;. doc/utr/utr29.rst. 2026.
+</li>
+<li id="cite-algharaibeh-utr28" value="10">
+Jafar Al-Gharaibeh. &quot;Multicast and Socket Attributes in Unicon&quot;. doc/utr/utr28.rst. 2026.
+</li>
+<li id="cite-rfc792" value="11">
+J. Postel. &quot;Internet Control Message Protocol&quot;. RFC 792. 1981.
+</li>
+<li id="cite-rfc2236" value="12">
+W. Fenner. &quot;Internet Group Management Protocol, Version 2&quot;. RFC 2236. 1997.
+</li>
+<li id="cite-rfc3376" value="13">
+B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;Internet Group Management Protocol, Version 3&quot;. RFC 3376. 2002.
+</li>
+<li id="cite-rfc1071" value="14">
+R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
+</li>
+<li id="cite-namespaces7" value="15">
+&quot;namespaces(7)&quot;. Linux man-pages. 2024.
+</li>
+<li id="cite-user-namespaces7" value="16">
+&quot;user\_namespaces(7)&quot;. Linux man-pages. 2024.
+</li>
+</ol></div>
+<footer class="footer" role="contentinfo">
+&copy; 2026, Jafar Al-Gharaibeh. | Powered by uscribe | <a href="utr30.pdf">pdf</a> | <a href="_sources/utr30.rst.txt" rel="nofollow">source</a>
+</footer>
+</div></div>
+</body></html>

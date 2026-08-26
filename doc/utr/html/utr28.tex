@@ -375,7 +375,7 @@ The language surface described here is implemented: trailing attributes, implici
 \textbf{IPv6 SSM without \texttt{iface=}.} Not recommended. The implementation refuses to walk interfaces for IPv6 source filters.
 
 
-\textbf{Loopback delivery.} Alpine (especially under QEMU) often does not deliver loopback multicast even when the join succeeds. \texttt{tests/\allowbreak{}posix/\allowbreak{}mcast.\allowbreak{}icn} still checks membership and treats a missing datagram as success on Alpine so CI stays portable.
+\textbf{Loopback delivery.} Some environments do not deliver loopback multicast even when the join succeeds. \texttt{tests/\allowbreak{}posix/\allowbreak{}mcast.\allowbreak{}icn} still checks membership and treats a missing datagram as success on those hosts so CI stays portable.
 
 
 \textbf{Windows IPv6 SSM.} Membership calls are attempted; \texttt{loopback\_\allowbreak{}0} and UNIX \texttt{lo} / \texttt{lo0} names are mapped. Delivery and option support vary by stack; the test skips cleanly on \texttt{ENOPROTOOPT}.
@@ -498,6 +498,12 @@ B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Intern
 
 \bibitem[14]{cite-rfc1071}
 R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
+
+\bibitem[15]{cite-namespaces7}
+"namespaces(7)". Linux man-pages. 2024.
+
+\bibitem[16]{cite-user-namespaces7}
+"user\textbackslash{}\_namespaces(7)". Linux man-pages. 2024.
 
 \end{thebibliography}
 \end{document}
