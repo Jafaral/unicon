@@ -864,9 +864,9 @@ IPv6 SSM without
 <strong>
 Loopback delivery.
 </strong>
- Some environments do not deliver loopback multicast even when the join succeeds. 
+ Alpine (especially under QEMU) often does not deliver loopback multicast even when the join succeeds. 
 <code>tests/posix/mcast.icn</code>
- still checks membership and treats a missing datagram as success on those hosts so CI stays portable.
+ still checks membership and treats a missing datagram as success on Alpine so CI stays portable.
 </p>
 <p>
 <strong>
@@ -1045,12 +1045,6 @@ B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;I
 </li>
 <li id="cite-rfc1071" value="14">
 R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
-</li>
-<li id="cite-namespaces7" value="15">
-&quot;namespaces(7)&quot;. Linux man-pages. 2024.
-</li>
-<li id="cite-user-namespaces7" value="16">
-&quot;user\_namespaces(7)&quot;. Linux man-pages. 2024.
 </li>
 </ol></div>
 <footer class="footer" role="contentinfo">

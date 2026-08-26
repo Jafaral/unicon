@@ -749,7 +749,7 @@ Socket attributes (
 , 
 <code>proto</code>
 , ...) are applied separately and are unaffected. Live-session status is 
-<a href="utr30.html#sec-peek">section 6.4</a>
+<a href="utr27.html#sec-peek">section 6.4</a>
 .
 </p>
 <h3 id="sec-attrs-crypto">
@@ -916,7 +916,7 @@ Without
  reads that prefix. Supplying 
 <code>iv=</code>
  opts out -- useful for a wire format that does not prepend an IV, or for test vectors -- and hands uniqueness back to the caller. The default cipher is AEAD; the runtime appends the authentication tag after the ciphertext. Status peeks are 
-<a href="utr30.html#sec-peek">section 6.4</a>
+<a href="utr27.html#sec-peek">section 6.4</a>
 .
 </p>
 <h3 id="sec-attrs-shared">
@@ -1927,7 +1927,7 @@ After a handshake,
  peeks the negotiated suite and 
 <code>conn[&quot;certchain&quot;]</code>
  is a list of peer certificates as PEM strings; see 
-<a href="utr30.html#sec-peek">section 6.4</a>
+<a href="utr27.html#sec-peek">section 6.4</a>
  (
 <code>tests/crypto/tlspeek.icn</code>
 ). 
@@ -2006,7 +2006,7 @@ On
 , and 
 <code>sig=</code>
 . A change while a digest or cipher is in flight fails (1316). Status gets are 
-<a href="utr30.html#sec-peek">section 6.4</a>
+<a href="utr27.html#sec-peek">section 6.4</a>
 . Handles are not valid 
 <code>Attrib()</code>
  values.
@@ -2380,12 +2380,6 @@ B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;I
 </li>
 <li id="cite-rfc1071" value="14">
 R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
-</li>
-<li id="cite-namespaces7" value="15">
-&quot;namespaces(7)&quot;. Linux man-pages. 2024.
-</li>
-<li id="cite-user-namespaces7" value="16">
-&quot;user\_namespaces(7)&quot;. Linux man-pages. 2024.
 </li>
 </ol></div>
 <footer class="footer" role="contentinfo">

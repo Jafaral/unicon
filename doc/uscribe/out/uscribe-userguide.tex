@@ -10,6 +10,8 @@
   \usepackage{fvextra}%
   \fvset{breaklines=true,breakanywhere=true}%
 }{}
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{240,243,246}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -80,7 +82,8 @@ It is \textbf{not} a full RST/docutils toolchain. The markup subset is intention
 
 Mark listings with \texttt{.\allowbreak{}.\allowbreak{}~code-\allowbreak{}block::~unicon} (also \texttt{icon} or \texttt{icn}). In HTML they are highlighted client-side:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure greet(who)
    write("Hello, ", \\who | "world", "!")
 end
@@ -90,6 +93,7 @@ procedure main()
    greet()
 end
 \end{Verbatim}
+\end{shaded}
 
 
 See \hyperref[markup-markup-reference]{Markup Reference} for the full dialect, \hyperref[quickstart-quick-start]{Quick Start} to generate a tiny book, and \hyperref[reports-reports]{Reports} for a single paper or a catalog of papers.
@@ -166,9 +170,11 @@ A TeX engine on your \texttt{PATH}: \texttt{pdflatex}, \texttt{xelatex}, or \tex
 
 There is no Homebrew or apt package literally named \texttt{pdflatex}; that name is a program shipped inside a TeX distribution. Install one of the packages below, then confirm:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 which pdflatex || which xelatex || which lualatex
 \end{Verbatim}
+\end{shaded}
 
 \section{TeX / PDF dependencies by platform}
 \label{install-tex-pdf-dependencies-by-platform}
@@ -177,17 +183,21 @@ which pdflatex || which xelatex || which lualatex
 
 Compact (recommended for uscribe):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 brew install --cask basictex
 \end{Verbatim}
+\end{shaded}
 
 
 Full MacTeX (much larger):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 brew install --cask mactex
 # or: brew install --cask mactex-no-gui
 \end{Verbatim}
+\end{shaded}
 
 
 After BasicTeX or MacTeX, restart the terminal (or run \texttt{eval~"\$(/\allowbreak{}usr/\allowbreak{}libexec/\allowbreak{}path\_\allowbreak{}helper)"}) so the new binaries are on \texttt{PATH}.
@@ -197,40 +207,50 @@ After BasicTeX or MacTeX, restart the terminal (or run \texttt{eval~"\$(/\allowb
 
 Minimal (often enough):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo apt update
 sudo apt install texlive-latex-base
 \end{Verbatim}
+\end{shaded}
 
 
 Recommended if \texttt{pdflatex} complains about missing packages (hyperref, fancyvrb, graphicx fonts, and similar):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo apt install texlive-latex-recommended texlive-fonts-recommended
 \end{Verbatim}
+\end{shaded}
 
 
 Larger kitchen-sink options:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo apt install texlive-latex-extra
 # or everything: sudo apt install texlive-full
 \end{Verbatim}
+\end{shaded}
 
 \subsection{Fedora / RHEL-family}
 \label{install-fedora-rhel-family}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo dnf install texlive-latex
 # fuller: sudo dnf install texlive-scheme-medium
 # everything: sudo dnf install texlive-scheme-full
 \end{Verbatim}
+\end{shaded}
 
 \subsection{Arch Linux}
 \label{install-arch-linux}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo pacman -S texlive-basic texlive-latex
 # or a broader set: sudo pacman -S texlive-meta
 \end{Verbatim}
+\end{shaded}
 
 \subsection{Windows}
 \label{install-windows}
@@ -253,10 +273,12 @@ SVG figures are not embedded in PDF; convert them to PDF or PNG, or accept the b
 
 From the unicon tree:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 cd uni/uscribe
 make
 \end{Verbatim}
+\end{shaded}
 
 
 That compiles the \texttt{uscribe} package, links \texttt{.\allowbreak{}/\allowbreak{}uscribe}, and installs a copy to \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}.\allowbreak{}.\allowbreak{}/\allowbreak{}bin/\allowbreak{}uscribe}. A top-level \texttt{make~install} also installs \texttt{uscribe} into \texttt{\$(bindir)} alongside \texttt{unicon}, \texttt{udb}, and the other addon tools.
@@ -264,36 +286,44 @@ That compiles the \texttt{uscribe} package, links \texttt{.\allowbreak{}/\allowb
 
 Regenerate Make dependencies after adding \texttt{.\allowbreak{}icn} files:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 make deps
 \end{Verbatim}
+\end{shaded}
 
 \section{Verify}
 \label{install-verify}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe
 # no book.manifest in this directory: prints usage and exits
 \end{Verbatim}
+\end{shaded}
 
 \section{Build this manual}
 \label{install-build-this-manual}
 
 HTML:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 cd doc/uscribe
 make
 # open out/index.html
 \end{Verbatim}
+\end{shaded}
 
 
 PDF (after installing a TeX engine as above):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 cd doc/uscribe
 make pdf
 # open out/uscribe-userguide.pdf
 \end{Verbatim}
+\end{shaded}
 
 
 \texttt{make~latex} writes \texttt{out/\allowbreak{}uscribe-\allowbreak{}userguide.\allowbreak{}tex} without running a TeX engine. \texttt{make~pdf} writes the \texttt{.\allowbreak{}tex} and runs the engine twice (TOC and cross-references).
@@ -309,19 +339,22 @@ A uscribe project is a directory of chapter \texttt{.\allowbreak{}rst} files, a 
 
 \texttt{book.\allowbreak{}manifest} (name is conventional; any path works):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 # comments and blank lines are ignored
 preface.rst
 chapter1.rst
 chapter2.rst
 \end{Verbatim}
+\end{shaded}
 
 \section{2. Write chapters}
 \label{quickstart-2-write-chapters}
 
 Underline-style headings, paragraphs, lists, and directives. Example \texttt{chapter1.\allowbreak{}rst}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 First Chapter
 =============
 
@@ -343,6 +376,7 @@ Second Section
       write("hi")
    end
 \end{Verbatim}
+\end{shaded}
 
 
 \textbf{Underline rule:} the underline must be at least as long as the title. Shorter underlines are not treated as headings.
@@ -350,18 +384,21 @@ Second Section
 
 Here is that Unicon listing as it appears when built (syntax highlighted in HTML):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    write("hi")
 end
 \end{Verbatim}
+\end{shaded}
 
 \section{3. Book settings}
 \label{quickstart-3-book-settings}
 
 \texttt{book.\allowbreak{}conf} next to the manifest (optional; CLI overrides). Full key list: \hyperref[config-book-configuration]{Book Configuration}.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 title: My Book
 copyright: 2026, Your Name
 logo: images/logo.png
@@ -369,12 +406,15 @@ name: my-book
 theme: basic
 themePath: /path/to/uni/uscribe/themes
 \end{Verbatim}
+\end{shaded}
 
 \section{4. Build HTML}
 \label{quickstart-4-build-html}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe --targetDir=./out
 \end{Verbatim}
+\end{shaded}
 
 
 Or from a project \texttt{Makefile} patterned on \texttt{doc/\allowbreak{}uscribe/\allowbreak{}Makefile}.
@@ -387,9 +427,11 @@ Open \texttt{out/\allowbreak{}index.\allowbreak{}html}. Use the sidebar for chap
 
 Install a TeX engine first --- see the \emph{TeX / PDF dependencies by platform} section under \hyperref[install-installation]{Installation}. Then:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe --format=pdf --targetDir=./out
 \end{Verbatim}
+\end{shaded}
 
 
 Or \texttt{make~pdf}. Output is \texttt{out/\allowbreak{}STEM.\allowbreak{}pdf} from the \texttt{name} key (default stem \texttt{book}). This user guide uses \texttt{name:~uscribe-\allowbreak{}userguide}. SVG figures are not embedded; convert them to PDF or PNG for TeX.
@@ -445,7 +487,8 @@ If every file in the manifest is a report, uscribe also writes a catalog \texttt
 
 Start the \texttt{.\allowbreak{}rst} with a field list. \texttt{:docclass:~report} (or a \texttt{:trnumber:}) selects report layout: masthead, abstract, keywords, article PDF, section sidebar.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 :title: Report Mode Example
 :author: Uscribe Maintainers
 :trnumber: 0
@@ -458,6 +501,7 @@ Introduction
 ============
 
 \end{Verbatim}
+\end{shaded}
 
 
 Headings in the body become the sidebar TOC. Explicit labels (\texttt{.\allowbreak{}.\allowbreak{}~\_\allowbreak{}sec-\allowbreak{}intro:}) become \texttt{\#sec-\allowbreak{}intro} jump targets.
@@ -467,26 +511,32 @@ Headings in the body become the sidebar TOC. Explicit labels (\texttt{.\allowbre
 
 Put the paper in its own directory. Author, title, and abstract stay in the \texttt{.\allowbreak{}rst} field list (above). The manifest is one line. You do not need a per-report \texttt{.\allowbreak{}conf}.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 my-paper/
   book.manifest      # one line: paper.rst
   paper.rst
   book.conf          # optional: themePath (same file books use)
 \end{Verbatim}
+\end{shaded}
 
 
 \texttt{book.\allowbreak{}manifest}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 paper.rst
 \end{Verbatim}
+\end{shaded}
 
 
 Build from that directory (defaults pick up \texttt{book.\allowbreak{}manifest} and, if present, \texttt{book.\allowbreak{}conf}):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe --targetDir=./out
 \end{Verbatim}
+\end{shaded}
 
 
 Open \textbf{\texttt{paper.\allowbreak{}html}}. The sidebar is that paper's sections. \texttt{index.\allowbreak{}html} is a one-row catalog; you can ignore it.
@@ -500,7 +550,8 @@ This guide's live fixture lives next to the user-guide \texttt{book.\allowbreak{
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 out/
   paper.html       ← the report (section nav)
   paper.pdf        ← if you passed --format=pdf
@@ -509,13 +560,15 @@ out/
   _static/
   _sources/
 \end{Verbatim}
+\end{shaded}
 
 \section{Several reports and an index}
 \label{reports-several-reports-and-an-index}
 
 Same layout, more files in the manifest. Each paper is still one HTML page. \texttt{book.\allowbreak{}conf} \texttt{title} is the \emph{series} name on the catalog (and the link back from each paper's sidebar).
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 my-reports/
   book.manifest
   book.conf          # title: My Technical Reports
@@ -523,18 +576,23 @@ my-reports/
   paper-a.bib
   paper-b.rst
 \end{Verbatim}
+\end{shaded}
 
 
 \texttt{book.\allowbreak{}manifest}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 paper-a.rst
 paper-b.rst
 \end{Verbatim}
+\end{shaded}
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe --targetDir=./out
 \end{Verbatim}
+\end{shaded}
 
 
 Open \textbf{\texttt{index.\allowbreak{}html}} for the table (number, title, author, date, pdf/txt). Open a row to read that paper; its sidebar is that paper's sections.
@@ -601,9 +659,11 @@ If that file is missing, uscribe continues with CLI values and built-in defaults
 
 With the usual defaults (\texttt{book.\allowbreak{}manifest} in the current directory), a book directory only needs:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe --targetDir=./out
 \end{Verbatim}
+\end{shaded}
 
 \section{File format}
 \label{config-file-format}
@@ -667,6 +727,11 @@ How many leading chapters are unnumbered front matter (a preface before chapter 
 
 Sidebar tree lines (vertical spine and ticks) on the current chapter's section list. Default off: numbers and indentation only. Set \texttt{toctree:~true} (also \texttt{yes} / \texttt{on} / \texttt{1}; aliases \texttt{toc-\allowbreak{}tree}, \texttt{toc\_\allowbreak{}tree}) to draw the lines.
 
+\section{sources}
+\label{config-sources}
+
+Copy each chapter's RST into \texttt{targetDir/\allowbreak{}\_\allowbreak{}sources/\allowbreak{}} (as \texttt{.\allowbreak{}txt}) and add a \textbf{source} (or report \textbf{txt}) footer link. Default on. Set \texttt{sources:~false} (also \texttt{no} / \texttt{off} / \texttt{0}; alias \texttt{source}) so the published HTML tree does not include RST. LaTeX/PDF builds still write \texttt{.\allowbreak{}tex} next to the PDF; they are a different \texttt{-\allowbreak{}-\allowbreak{}format} from HTML. CLI: \texttt{-\allowbreak{}-\allowbreak{}sources=no}.
+
 \section{Not in book.conf}
 \label{config-not-in-book-conf}
 
@@ -694,7 +759,8 @@ These stay on the command line because they describe one \emph{build}, not the b
 
 The file that builds this manual:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 # Book-level settings (not chapter order --- that is book.manifest).
 # Paths are relative to this file. Command-line options override.
 title: uscribe User Guide
@@ -704,6 +770,7 @@ name: uscribe-userguide
 theme: basic
 themePath: ../../uni/uscribe/themes
 \end{Verbatim}
+\end{shaded}
 
 
 Chapter order is \texttt{book.\allowbreak{}manifest} in the same directory.
@@ -716,7 +783,8 @@ uscribe accepts a \textbf{restricted RST-like} dialect. Unknown constructs are e
 
 \section{Headings}
 \label{markup-headings}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 Chapter Title
 =============
 
@@ -726,6 +794,7 @@ Section
 Subsection
 ~~~~~~~~~~
 \end{Verbatim}
+\end{shaded}
 
 
 Characters \texttt{=~-\allowbreak{}~\textasciitilde{}~\textasciicircum{}~"} are recognized as underline styles (chapter through heading 5). Heading level follows the underline character. The underline length must be greater than or equal to the title length.
@@ -735,7 +804,8 @@ Characters \texttt{=~-\allowbreak{}~\textasciitilde{}~\textasciicircum{}~"} are 
 
 A chapter may start with an RST field list (Docutils bibliographic fields). Repeat \texttt{:author:} for several names. Book chapters show these as a byline under the first heading; omit the fields and nothing is added. Reports also use \texttt{:title:}, \texttt{:trnumber:}, \texttt{:abstract:}, \texttt{:keywords:}, and \texttt{:docclass:} for the cover --- see \hyperref[reports-reports]{Reports} for the one-paper and catalog workflows.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 :author: Jane Doe
 :author: Pat Lee
 :date: 2026-08-15
@@ -744,6 +814,7 @@ A chapter may start with an RST field list (Docutils bibliographic fields). Repe
 Chapter Title
 =============
 \end{Verbatim}
+\end{shaded}
 
 
 Book-wide title, logo, theme, and PDF name belong in \texttt{book.\allowbreak{}conf} (see \hyperref[config-book-configuration]{Book Configuration}). They are not chapter fields.
@@ -756,11 +827,13 @@ Blank lines separate paragraphs. Bullet lists use \texttt{-\allowbreak{}} or \te
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 1. Install the ``uscribe`` binary (:doc:`install`)
 2. Write a tiny book (:doc:`quickstart`)
 #. Pick a theme (:doc:`themes`)
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -785,7 +858,8 @@ Pick a theme (\hyperref[themes-themes]{Themes})
 
 A list item can also hold a nested listing:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 - Default mode prompt:
 
   .. code-block:: text
@@ -797,15 +871,18 @@ A list item can also hold a nested listing:
   - enter with ``config``
   - leave with ``end``
 \end{Verbatim}
+\end{shaded}
 
 \begin{itemize}
 \item 
 
 Default mode prompt:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 admin@r0>
 \end{Verbatim}
+\end{shaded}
 
 
 \item 
@@ -834,7 +911,8 @@ A term on its own line followed by an indented body. Blank lines inside the body
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 format
    Selects the builder.
 
@@ -843,6 +921,7 @@ format
 theme
    Names the HTML skin (``basic``, ``classic``, or ``dark``).
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -869,7 +948,8 @@ Names the HTML skin (\texttt{basic}, \texttt{classic}, or \texttt{dark}).
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 =====  ==========
 Flag   Meaning
 =====  ==========
@@ -878,6 +958,7 @@ latex  ``book.tex``
 pdf    run a TeX engine
 =====  ==========
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -906,7 +987,8 @@ pdf & run a TeX \\
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 +--------+--------+--------+
 | Left   | Mid    | Right  |
 +========+========+========+
@@ -915,6 +997,7 @@ Source:
 | C spanning two  | D      |
 +-----------------+--------+
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -942,7 +1025,8 @@ A plain grid without spans:
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 +--------+------------+
 | Flag   | Meaning    |
 +========+============+
@@ -951,6 +1035,7 @@ Source:
 | latex  | book.tex   |
 +--------+------------+
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -978,7 +1063,8 @@ latex & book.tex \\
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. list-table::
    :header-rows: 1
 
@@ -989,6 +1075,7 @@ Source:
    * - pdf
      - run a TeX engine
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -1018,7 +1105,8 @@ Place \texttt{.\allowbreak{}.\allowbreak{}~\_\allowbreak{}name:} immediately bef
 
 Source:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. _stable-labels:
 
 Stable labels
@@ -1028,6 +1116,7 @@ A preceding ``.. _name:`` attaches to the next heading. Link with a
 ref role naming that label, optionally with display text in angle
 brackets.
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -1084,7 +1173,8 @@ backticks for \texttt{inline~literals}
 
 Admonition bodies are re-parsed as nested blocks (lists, code, nested directives). Source then rendered:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. note::
 
    Admonition bodies can hold nested blocks:
@@ -1096,6 +1186,7 @@ Admonition bodies are re-parsed as nested blocks (lists, code, nested directives
 
       Nested directives are parsed, not flattened.
 \end{Verbatim}
+\end{shaded}
 
 \begin{quote}
 \textbf{Note.}
@@ -1131,7 +1222,8 @@ Also: \texttt{warning}, \texttt{tip}, \texttt{important}, \texttt{caution}, \tex
 
 Figures take a caption. If the caption already starts with \texttt{Figure~N} or \texttt{Table~N}, HTML and LaTeX keep that label instead of adding another number. Uncaptioned \texttt{.\allowbreak{}.\allowbreak{}~image::} is not numbered.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. _logo-figure:
 
 .. figure:: images/uscribe-logo.png
@@ -1140,6 +1232,7 @@ Figures take a caption. If the caption already starts with \texttt{Figure~N} or 
 
    The uscribe mark.
 \end{Verbatim}
+\end{shaded}
 
 \begin{figure}[htbp]
 \centering
@@ -1154,7 +1247,8 @@ See \hyperref[markup-logo-figure]{The uscribe mark.}.
 
 Other authoring forms (shown literally):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. code-block:: unicon
 
    procedure main()
@@ -1175,6 +1269,7 @@ Other authoring forms (shown literally):
    :end-before: marker
    :dedent: 3
 \end{Verbatim}
+\end{shaded}
 
 
 Paths are resolved next to the including chapter, then under the process cwd. Nested \texttt{include} is allowed; circular includes warn and are skipped.
@@ -1187,12 +1282,14 @@ Paths are resolved next to the including chapter, then under the process cwd. Ne
 
 Source (\texttt{includes/\allowbreak{}shared-\allowbreak{}tip.\allowbreak{}rst}):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 .. tip::
 
    Snippets under ``includes/`` can be pulled into any chapter with
    ``.. include::`` so the same advice is not copy-pasted.
 \end{Verbatim}
+\end{shaded}
 
 
 Rendered:
@@ -1208,21 +1305,25 @@ Snippets under \texttt{includes/\allowbreak{}} can be pulled into any chapter wi
 
 Pull a real \texttt{.\allowbreak{}icn} file as a listing. Language defaults from the extension (\texttt{.\allowbreak{}icn} → \texttt{unicon}); override with \texttt{:language:}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 # Shared sample for literalinclude demos
 procedure main()
    write("hello from includes/hello.icn")
    write(&version)
 end
 \end{Verbatim}
+\end{shaded}
 
 
 The same file, only the body between markers:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
    write("hello from includes/hello.icn")
    write(&version)
 \end{Verbatim}
+\end{shaded}
 
 \section{Unicon listings}
 \label{markup-unicon-listings}
@@ -1232,7 +1333,8 @@ The same file, only the body between markers:
 
 Example Unicon program as it appears in the built book:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 # Hello from a uscribe listing
 procedure main()
    every i := 1 to 3 do
@@ -1240,6 +1342,7 @@ procedure main()
    write(&version)
 end
 \end{Verbatim}
+\end{shaded}
 
 
 A line ending in \texttt{::} (RST literal-block introducer) followed by an indented block is also treated as a code listing. \texttt{Unicon::} becomes the label \texttt{Unicon:} plus the indented tree; a lone \texttt{::} introduces a block with no label.
@@ -1280,9 +1383,11 @@ All three are installed into \texttt{out/\allowbreak{}\_\allowbreak{}static/\all
 
 \section{Build-time default}
 \label{themes-build-time-default}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe ... --theme=classic --themePath=../themes
 \end{Verbatim}
+\end{shaded}
 
 
 \texttt{theme} and \texttt{themePath} may also be set in \texttt{book.\allowbreak{}conf} (see \hyperref[config-book-configuration]{Book Configuration}).
@@ -1290,18 +1395,21 @@ uscribe ... --theme=classic --themePath=../themes
 
 Or with the sample Makefiles:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 make          # THEME=basic
 make classic
 make dark
 \end{Verbatim}
+\end{shaded}
 
 
 \texttt{-\allowbreak{}-\allowbreak{}theme} only sets the \emph{initial} stylesheet until the reader selects another in the UI.
 
 \section{Theme layout on disk}
 \label{themes-theme-layout-on-disk}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 themes/
   basic/static/book.css
   classic/static/book.css
@@ -1311,6 +1419,7 @@ themes/
   _shared/highlight-unicon.js
   _shared/theme-switcher.js
 \end{Verbatim}
+\end{shaded}
 
 
 To add a custom theme, create \texttt{themes/\allowbreak{}mytheme/\allowbreak{}static/\allowbreak{}book.\allowbreak{}css} and pass \texttt{-\allowbreak{}-\allowbreak{}theme=mytheme}. Keep the same HTML class names (\texttt{.\allowbreak{}sidebar}, \texttt{.\allowbreak{}main}, \texttt{.\allowbreak{}tok-\allowbreak{}keyword}, …) so shared scripts keep working.
@@ -1323,9 +1432,11 @@ See \texttt{themes/\allowbreak{}README.\allowbreak{}md} in the source tree for l
 \label{cli-command-line}
 \section{Synopsis}
 \label{cli-synopsis}
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{shaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 uscribe [options]
 \end{Verbatim}
+\end{shaded}
 
 \section{Options}
 \label{cli-options}

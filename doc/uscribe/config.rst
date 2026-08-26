@@ -117,6 +117,16 @@ chapter's section list. Default off: numbers and indentation
 only. Set ``toctree: true`` (also ``yes`` / ``on`` / ``1``;
 aliases ``toc-tree``, ``toc_tree``) to draw the lines.
 
+sources
+-------
+
+Copy each chapter's RST into ``targetDir/_sources/`` (as ``.txt``)
+and add a **source** (or report **txt**) footer link. Default on.
+Set ``sources: false`` (also ``no`` / ``off`` / ``0``; alias
+``source``) so the published HTML tree does not include RST.
+LaTeX/PDF builds still write ``.tex`` next to the PDF; they are a
+different ``--format`` from HTML. CLI: ``--sources=no``.
+
 Not in book.conf
 ----------------
 
