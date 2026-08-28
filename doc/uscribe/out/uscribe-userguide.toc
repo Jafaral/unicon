@@ -54,12 +54,12 @@
 \contentsline {section}{\numberline {6.9}Directives}{26}{section.6.9}%
 \contentsline {section}{\numberline {6.10}Include / literalinclude}{29}{section.6.10}%
 \contentsline {section}{\numberline {6.11}Unicon listings}{30}{section.6.11}%
-\contentsline {chapter}{\numberline {7}Themes}{31}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Built-in themes}{31}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Build-time default}{31}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Theme layout on disk}{32}{section.7.3}%
-\contentsline {chapter}{\numberline {8}Command Line}{33}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Synopsis}{33}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Options}{33}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Outputs}{34}{section.8.3}%
-\contentsline {section}{\numberline {8.4}Exit status}{35}{section.8.4}%
+\contentsline {chapter}{\numberline {7}Themes}{32}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Built-in themes}{32}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Build-time default}{32}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Theme layout on disk}{33}{section.7.3}%
+\contentsline {chapter}{\numberline {8}Command Line}{34}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Synopsis}{34}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Options}{34}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Outputs}{35}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Exit status}{36}{section.8.4}%

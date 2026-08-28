@@ -286,7 +286,7 @@ make
 \end{uscribeshaded}
 
 
-That compiles the \texttt{uscribe} package, links \texttt{.\allowbreak{}/\allowbreak{}uscribe}, and installs a copy to \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}.\allowbreak{}.\allowbreak{}/\allowbreak{}bin/\allowbreak{}uscribe}. A top-level \texttt{make~install} also installs \texttt{uscribe} into \texttt{\$(bindir)} alongside \texttt{unicon}, \texttt{udb}, and the other addon tools.
+That compiles the \texttt{uscribe} package, links \texttt{.\allowbreak{}/\allowbreak{}uscribe}, and installs a copy to \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}.\allowbreak{}.\allowbreak{}/\allowbreak{}bin/\allowbreak{}uscribe}. \texttt{make~install} in this directory does the same. A top-level \texttt{make~install} also installs \texttt{uscribe} into \texttt{\$(bindir)} alongside \texttt{unicon}, \texttt{udb}, and the other addon tools, and copies themes to \texttt{\$(libdir)/\allowbreak{}unicon/\allowbreak{}uni/\allowbreak{}uscribe/\allowbreak{}themes}.
 
 
 Regenerate Make dependencies after adding \texttt{.\allowbreak{}icn} files:
@@ -409,7 +409,6 @@ copyright: 2026, Your Name
 logo: images/logo.png
 name: my-book
 theme: basic
-themePath: /path/to/uni/uscribe/themes
 \end{Verbatim}
 \end{uscribeshaded}
 
@@ -712,7 +711,7 @@ Initial HTML theme: \texttt{basic}, \texttt{classic}, or \texttt{dark} (or a cus
 \section{themePath}
 \label{config-themepath}
 
-Directory that contains theme subdirectories (\texttt{DIR/\allowbreak{}basic/\allowbreak{}static}, …). Also accepted as \texttt{themepath} or \texttt{theme\_\allowbreak{}path}. If omitted, uscribe searches \texttt{.\allowbreak{}/\allowbreak{}themes}, \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}themes}, and \texttt{themes}. CLI: \texttt{-\allowbreak{}-\allowbreak{}themePath}.
+Directory that contains theme subdirectories (\texttt{DIR/\allowbreak{}basic/\allowbreak{}static}, …). Also accepted as \texttt{themepath} or \texttt{theme\_\allowbreak{}path}. If omitted, uscribe searches \texttt{.\allowbreak{}/\allowbreak{}themes}, \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}themes}, \texttt{themes}, then Unicon's \texttt{uni/\allowbreak{}uscribe/\allowbreak{}themes} via \texttt{\&features} (\texttt{Binaries~at} / \texttt{Libraries~at}). CLI: \texttt{-\allowbreak{}-\allowbreak{}themePath}.
 
 \section{docclass}
 \label{config-docclass}
@@ -773,7 +772,6 @@ copyright: 2026, Jafar Al-Gharaibeh
 logo: images/uscribe-logo.png
 name: uscribe-userguide
 theme: basic
-themePath: ../../uni/uscribe/themes
 \end{Verbatim}
 \end{uscribeshaded}
 
@@ -1225,6 +1223,17 @@ Nested directives are parsed, not flattened.
 Also: \texttt{warning}, \texttt{tip}, \texttt{important}, \texttt{caution}, \texttt{attention}, \texttt{danger}, \texttt{error}, \texttt{hint}.
 
 
+CLI command signatures use \texttt{.\allowbreak{}.\allowbreak{}~clicmd::}, like FRR's command reference: the argument is the syntax line; an indented body hangs under the command as its description.
+
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
+.. clicmd:: pki gen <key-name> <key-type> <key-length>
+
+   Generate a private key.
+\end{Verbatim}
+\end{uscribeshaded}
+
+
 Figures take a caption. If the caption already starts with \texttt{Figure~N} or \texttt{Table~N}, HTML and LaTeX keep that label instead of adding another number. Uncaptioned \texttt{.\allowbreak{}.\allowbreak{}~image::} is not numbered.
 
 \begin{uscribeshaded}
@@ -1390,7 +1399,7 @@ All three are installed into \texttt{out/\allowbreak{}\_\allowbreak{}static/\all
 \label{themes-build-time-default}
 \begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
-uscribe ... --theme=classic --themePath=../themes
+uscribe ... --theme=classic
 \end{Verbatim}
 \end{uscribeshaded}
 
@@ -1487,7 +1496,7 @@ Initial HTML theme: \texttt{basic}, \texttt{classic}, or \texttt{dark} (or a cus
 
 \item[**--themePath=DIR**]
 
-Directory that contains theme subdirectories (\texttt{DIR/\allowbreak{}basic/\allowbreak{}static}, …). If omitted, uscribe searches \texttt{.\allowbreak{}/\allowbreak{}themes}, \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}themes}, and \texttt{themes}. HTML only.
+Directory that contains theme subdirectories (\texttt{DIR/\allowbreak{}basic/\allowbreak{}static}, …). If omitted, uscribe searches \texttt{.\allowbreak{}/\allowbreak{}themes}, \texttt{.\allowbreak{}.\allowbreak{}/\allowbreak{}themes}, \texttt{themes}, then Unicon's \texttt{uni/\allowbreak{}uscribe/\allowbreak{}themes} using the \texttt{Binaries~at} / \texttt{Libraries~at} strings in \texttt{\&features}. HTML only.
 
 \end{description}
 
