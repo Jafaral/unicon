@@ -361,7 +361,11 @@ txt
 <code>0</code>
 ; alias 
 <code>source</code>
-) so the published HTML tree does not include RST. LaTeX/PDF builds still write 
+) so the published HTML tree does not include RST. A rebuild in the same 
+<code>--targetDir</code>
+ also deletes a leftover 
+<code>_sources/</code>
+ from a previous build. LaTeX/PDF builds still write 
 <code>.tex</code>
  next to the PDF; they are a different 
 <code>--format</code>

@@ -10,8 +10,13 @@
   \usepackage{fvextra}%
   \fvset{breaklines=true,breakanywhere=true}%
 }{}
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{240,243,246}
+\IfFileExists{framed.sty}{%
+  \usepackage{framed}%
+  \definecolor{shadecolor}{RGB}{240,243,246}%
+  \newenvironment{uscribeshaded}{\shaded}{\endshaded}%
+}{%
+  \newenvironment{uscribeshaded}{}{}%
+}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -70,7 +75,7 @@ Unicon's \texttt{open()} already constructed TCP and UDP handles. Multicast -- a
 
 \textbf{Attributes are \texttt{name=value}, like graphics windows.} Unknown names fail \texttt{open()} with error 1310 (\texttt{bad~socket~attribute}). Booleans are exactly \texttt{yes} or \texttt{no}, matching \texttt{verifyPeer}.
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    if open(":5110", "nua4", "bogus=yes") then
@@ -83,17 +88,17 @@ procedure main()
       write("numeric boolean: ", &errortext)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 bogus: bad socket attribute
 numeric boolean: bad socket attribute
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \textbf{DWIM for the common cases.} Binding a UDP socket to a multicast group joins that group. Listeners default to \texttt{reuseaddr=yes}. No \texttt{iface=} means join every UP IPv4 interface and send out the first non-loopback IPv4 address (else loopback). Sending to \texttt{255.\allowbreak{}255.\allowbreak{}255.\allowbreak{}255} enables \texttt{SO\_\allowbreak{}BROADCAST}. Explicit attributes always override.
@@ -115,7 +120,7 @@ numeric boolean: bad socket attribute
 
 IP multicast uses UDP (modes \texttt{nu} / \texttt{nua}, optionally with \texttt{4} or \texttt{6} for family). A minimal receiver and sender:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local f, r
@@ -124,9 +129,9 @@ procedure main()
       write(r.addr, "  ", r.msg)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local f, i
@@ -135,7 +140,7 @@ procedure main()
       writes(f, "hello-" || i) & delay(500)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 The receiver binds the group address, so the runtime joins that group (ASM) and enables port reuse. The sender's destination is the group; without \texttt{iface=}, outbound multicast uses the first non-loopback IPv4 address. Kernel multicast loopback stays on, so a local receiver still sees the packets.
@@ -143,7 +148,7 @@ The receiver binds the group address, so the runtime joins that group (ASM) and 
 
 The same exchange in one process over loopback (this is the shape of \texttt{tests/\allowbreak{}posix/\allowbreak{}mcast.\allowbreak{}icn}). \texttt{iface=127.\allowbreak{}0.\allowbreak{}0.\allowbreak{}1} keeps the datagram on loopback even when the host has no multicast route:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local f, s, r
@@ -162,16 +167,16 @@ procedure main()
    close(f)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 hello-multicast
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{r.\allowbreak{}addr} is the sender (host plus an ephemeral port).
@@ -179,14 +184,14 @@ hello-multicast
 
 A wildcard bind plus explicit joins is the other shape:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 f := open(":5000", "nua",
           "iface=192.168.1.10",
           "join=239.1.1.1",
           "join=232.1.1.1,10.0.0.5")
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{join=group} is ASM; \texttt{join=group,\allowbreak{}source} is SSM. Attributes may be repeated. Mixing ASM and SSM in one call is allowed. If \texttt{open()} has no \texttt{4} / \texttt{6} flag, a \texttt{join=} group address picks the family so an IPv4 join is not attempted on an IPv6 wildcard socket.
@@ -196,14 +201,14 @@ f := open(":5000", "nua",
 
 Name the source before the group, or pass \texttt{source=} on a socket already bound to the group. Both IPv4 and IPv6 are supported. For IPv6 SSM, pass an explicit \texttt{iface=} (name or index) so the join uses a single interface:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 f := open("192.168.1.1@239.1.1.1:5000", "nua")
 f := open("239.1.1.1:5000", "nua", "source=192.168.1.1")
 f := open("::1@ff3e::1:5000", "nua6", "iface=lo0")
 f := open("ff3e::1:5000", "nua6", "iface=lo0", "source=::1")
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 On send or connect, \texttt{source@\allowbreak{}group:port} keeps only the group so the destination is the group address. The source is a receive-side filter, not a send address.
@@ -239,7 +244,7 @@ Attribute & Role \\
 
 \section{7. \texttt{Attrib()} and status peek}
 \label{utr28-sec-attrib}
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local f, g
@@ -254,18 +259,18 @@ procedure main()
    close(f)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 ttl=4
 mcastloop=yes
 groups: unpopulated
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Assignments in one call are applied together, preserving \texttt{iface} then \texttt{join} order. Status is peeked with \texttt{f["name"]}. Unknown names raise
@@ -307,7 +312,7 @@ Name & Value \\
 \texttt{hdrincl} & \texttt{"yes"} or \texttt{\&null}; typical on raw sockets \\
 \end{longtable}
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 f := open(":5110", "nua4") | stop(&errortext)
 Attrib(f, "ttl=4")
@@ -320,17 +325,17 @@ every k := key(f) do
    write("field ", k)
 close(f)
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Membership changes still use assignment form:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 Attrib(f, "join=239.1.1.2")
 Attrib(f, "iface=127.0.0.1", "leave=239.1.1.1")
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 On some Linux/musl builds \texttt{getsockopt(IP\_\allowbreak{}MULTICAST\_\allowbreak{}IF)} does not recover the interface used at join time. Pass \texttt{iface=} on \texttt{leave=} so \texttt{IP\_\allowbreak{}DROP\_\allowbreak{}MEMBERSHIP} matches the join. Already-not-a-member is success; the runtime also retries \texttt{INADDR\_\allowbreak{}ANY} and each local IPv4 address when a single DROP fails.
@@ -462,7 +467,7 @@ cache-hit alias vs independent attr open
 
 Expected output is \texttt{tests/\allowbreak{}posix/\allowbreak{}stand/\allowbreak{}mcast.\allowbreak{}std}:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 bogus attribute: bad socket attribute
 numeric boolean: bad socket attribute
@@ -480,7 +485,7 @@ ipv6-ssm-join: ok
 cache-attr open: independent
 Received hello-alias
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 \section{References}
 \label{utr28-references}

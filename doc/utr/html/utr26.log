@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.26)  26 AUG 2026 05:35
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.28)  28 AUG 2026 02:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -366,7 +366,7 @@ Package caption Info: longtable package is loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty
 Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
 ))
-Package hyperref Info: Option `colorlinks' set `true' on input line 25.
+Package hyperref Info: Option `colorlinks' set `true' on input line 30.
 
 (/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
@@ -376,24 +376,24 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 (./utr26.aux)
 \openout1 = `utr26.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 26.
-LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 31.
+LaTeX Font Info:    ... okay on input line 31.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -417,7 +417,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring ON on input line 26.
+Package hyperref Info: Link coloring ON on input line 31.
 
 (./utr26.out) (./utr26.out)
 \@outlinefile=\write4
@@ -428,30 +428,30 @@ Package caption Info: End \AtBeginDocument code.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
-8.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 5
+3.
  (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 48.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 53.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 48.
+(Font)              <14.4> on input line 53.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 48.
+(Font)              <7> on input line 53.
  [2]
 
 LaTeX Warning: Hyper reference `utr27-sec-examples' on page 1 undefined on inpu
-t line 61.
+t line 66.
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.83 
+l.88 
       [1]
-Overfull \hbox (6.80028pt too wide) in paragraph at lines 101--102
+Overfull \hbox (6.80028pt too wide) in paragraph at lines 106--107
 []\T1/cmr/m/n/12 Attributes are \T1/cmtt/m/n/12 "key=value" \T1/cmr/m/n/12 stri
 ngs passed as trail-ing ar-gu-ments to \T1/cmtt/m/n/12 open()\T1/cmr/m/n/12 ,
  []
@@ -461,40 +461,40 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.102 
+l.107 
        [2]
 
 LaTeX Warning: Hyper reference `utr29-sec-io' on page 3 undefined on input line
- 104.
+ 109.
 
 
-Overfull \hbox (2.94435pt too wide) in paragraph at lines 104--105
+Overfull \hbox (2.94435pt too wide) in paragraph at lines 109--110
 []\T1/cmr/m/n/12 All stream I/O fun-nels through one dis-patch point: \T1/cmtt/
 m/n/12 u_read() \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 u_write()
  []
 
 
-Overfull \hbox (8.63461pt too wide) in paragraph at lines 104--105
+Overfull \hbox (8.63461pt too wide) in paragraph at lines 109--110
 \T1/cmr/m/n/12 in \T1/cmtt/m/n/12 src/runtime/rposix.r\T1/cmr/m/n/12 , which al
 -ready branch on \T1/cmtt/m/n/12 Fs_Socket \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 Fs_
 Encrypt\T1/cmr/m/n/12 .
  []
 
 
-Overfull \hbox (6.89339pt too wide) in paragraph at lines 110--111
+Overfull \hbox (6.89339pt too wide) in paragraph at lines 115--116
 []\T1/cmtt/m/n/12 receive() \T1/cmr/m/n/12 al-ready re-turns a general-purpose 
 \T1/cmtt/m/n/12 posix_message \T1/cmr/m/n/12 record (\T1/cmtt/m/n/12 addr\T1/cm
 r/m/n/12 ,
  []
 
 
-Overfull \hbox (21.49815pt too wide) in paragraph at lines 113--114
+Overfull \hbox (21.49815pt too wide) in paragraph at lines 118--119
 \T1/cmr/m/n/12 iom that many func-tions take an op-tional lead-ing file or win-
 dow (\T1/cmtt/m/n/12 write("hello")
  []
 
 [3] [4] [5] [6]
-Overfull \hbox (0.37935pt too wide) in paragraph at lines 262--263
+Overfull \hbox (0.37935pt too wide) in paragraph at lines 267--268
 \T1/cmr/m/n/12 With no \T1/cmtt/m/n/12 cmd=\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 ope
 n(..., "h") \T1/cmr/m/n/12 re-quests a re-mote PTY and shell. \T1/cmtt/m/n/12 n
 et::ssh_
@@ -503,86 +503,86 @@ et::ssh_
 [7] [8]
 
 LaTeX Warning: Hyper reference `utr29-sec-io' on page 9 undefined on input line
- 326.
+ 331.
 
 
-Overfull \hbox (14.66743pt too wide) in paragraph at lines 331--332
+Overfull \hbox (14.66743pt too wide) in paragraph at lines 336--337
 \T1/cmtt/m/n/12 channel=no \T1/cmr/m/n/12 opens an au-then-ti-cated trans-port.
  Later \T1/cmtt/m/n/12 open(s, "hc") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 open(s,
  []
 
 [9] [10] [11]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 438.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 443.
  [12] [13] [14] [15]
-Overfull \hbox (5.95744pt too wide) in paragraph at lines 591--592
+Overfull \hbox (5.95744pt too wide) in paragraph at lines 596--597
 []\T1/cmr/m/n/12 On Win-dows, \T1/cmtt/m/n/12 select(&input) \T1/cmr/m/n/12 and
  \T1/cmtt/m/n/12 Attrib(f, "tty=raw") \T1/cmr/m/n/12 / \T1/cmtt/m/n/12 "tty=san
 e"
  []
 
 [16] [17] [18]
-Overfull \hbox (11.3737pt too wide) in paragraph at lines 687--688
+Overfull \hbox (11.3737pt too wide) in paragraph at lines 692--693
 []\T1/cmtt/m/n/12 sftp2rec() \T1/cmr/m/n/12 pop-u-lates the same \T1/cmtt/m/n/1
 2 posix_stat \T1/cmr/m/n/12 record as \T1/cmtt/m/n/12 stat2rec()\T1/cmr/m/n/12 
 . SFTP's
  []
 
 [19]
-Overfull \hbox (20.0597pt too wide) in paragraph at lines 698--699
+Overfull \hbox (20.0597pt too wide) in paragraph at lines 703--704
 []\T1/cmr/m/n/12 Guards are \T1/cmtt/m/n/12 #if HAVE_LIBSSH \T1/cmr/m/n/12 thro
 ugh-out \T1/cmtt/m/n/12 rstructs.h\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 rmacros.h\T1
 /cmr/m/n/12 , \T1/cmtt/m/n/12 feature.
  []
 
 
-Overfull \hbox (0.49704pt too wide) in paragraph at lines 718--719
+Overfull \hbox (0.49704pt too wide) in paragraph at lines 723--724
 []\T1/cmr/bx/n/12 Trust-on-first-use. \T1/cmr/m/n/12 Ver-i-fi-ca-tion is check-
 only (\T1/cmtt/m/n/12 ssh_session_is_known_
  []
 
 [20]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <12> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 721.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 726.
 
-Overfull \hbox (23.60867pt too wide) in paragraph at lines 726--727
+Overfull \hbox (23.60867pt too wide) in paragraph at lines 731--732
 \T1/cmtt/m/n/12 tests/posix/ssh.icn \T1/cmr/m/n/12 is de-ter-min-is-tic with-ou
 t a server: it checks that \T1/cmtt/m/n/12 &features
  []
 
 
-Overfull \hbox (0.90874pt too wide) in paragraph at lines 726--727
+Overfull \hbox (0.90874pt too wide) in paragraph at lines 731--732
 \T1/cmr/m/n/12 re-ports \T1/cmtt/m/n/12 secure shell\T1/cmr/m/n/12 , and that b
 ad at-tributes, \T1/cmtt/m/n/12 channel=maybe\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 c
 hannel=no
  []
 
 
-Overfull \hbox (7.21968pt too wide) in paragraph at lines 726--727
+Overfull \hbox (7.21968pt too wide) in paragraph at lines 731--732
 \T1/cmtt/m/n/12 SSH_TESTPORT\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_TESTKEY
 \T1/cmr/m/n/12 , \T1/cmtt/m/n/12 UNICON_SSH_KNOWNHOSTS\T1/cmr/m/n/12 , and \T1/
 cmtt/m/n/12 UNICON_
  []
 
 
-Overfull \hbox (10.41057pt too wide) in paragraph at lines 726--727
+Overfull \hbox (10.41057pt too wide) in paragraph at lines 731--732
 \T1/cmtt/m/n/12 SSH_SFTPPATH\T1/cmr/m/n/12 . The live path cov-ers exec std-out
 , \T1/cmtt/m/n/12 c["exitstatus"]\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 receive()
  []
 
 
-Underfull \hbox (badness 4779) in paragraph at lines 735--736
+Underfull \hbox (badness 4779) in paragraph at lines 740--741
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 738--739
+Underfull \hbox (badness 10000) in paragraph at lines 743--744
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
 
-Underfull \hbox (badness 1072) in paragraph at lines 744--745
+Underfull \hbox (badness 1072) in paragraph at lines 749--750
 []\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
  []
 
@@ -599,10 +599,10 @@ Package rerunfilecheck Info: File `utr26.out' has not changed.
 (rerunfilecheck)             Checksum: 630B6D1DE9794AC9418B2CB673088EFF;8037.
  ) 
 Here is how much of TeX's memory you used:
- 12393 strings out of 476182
- 200706 string characters out of 5795595
+ 12395 strings out of 476182
+ 200749 string characters out of 5795595
  1936975 words of memory out of 5000000
- 34172 multiletter control sequences out of 15000+600000
+ 34174 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,6n,79p,1037b,600s stack positions out of 10000i,1000n,20000p,200000b,200000s

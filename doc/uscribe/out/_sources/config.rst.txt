@@ -124,8 +124,10 @@ Copy each chapter's RST into ``targetDir/_sources/`` (as ``.txt``)
 and add a **source** (or report **txt**) footer link. Default on.
 Set ``sources: false`` (also ``no`` / ``off`` / ``0``; alias
 ``source``) so the published HTML tree does not include RST.
-LaTeX/PDF builds still write ``.tex`` next to the PDF; they are a
-different ``--format`` from HTML. CLI: ``--sources=no``.
+A rebuild in the same ``--targetDir`` also deletes a leftover
+``_sources/`` from a previous build. LaTeX/PDF builds still write
+``.tex`` next to the PDF; they are a different ``--format`` from
+HTML. CLI: ``--sources=no``.
 
 Not in book.conf
 ----------------

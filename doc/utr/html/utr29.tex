@@ -10,8 +10,13 @@
   \usepackage{fvextra}%
   \fvset{breaklines=true,breakanywhere=true}%
 }{}
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{240,243,246}
+\IfFileExists{framed.sty}{%
+  \usepackage{framed}%
+  \definecolor{shadecolor}{RGB}{240,243,246}%
+  \newenvironment{uscribeshaded}{\shaded}{\endshaded}%
+}{%
+  \newenvironment{uscribeshaded}{}{}%
+}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -90,12 +95,12 @@ The rest of Unicon networking already treats \texttt{open()} as the constructor 
 
 \section{4. Opening a raw socket}
 \label{utr29-sec-open}
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 f := open("8.8.8.8", "nr", "proto=icmp", "ttl=64") |
      stop(&errortext)
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 The first argument is a bare host or address, not \texttt{host:port}. Raw destinations are hosts. A single \texttt{host:port} form is accepted when there is exactly one colon and a non-empty port, but ICMP and IGMP do not use ports. IPv6 literals contain colons; they are treated as hosts and are not split as \texttt{host:port}.
@@ -133,7 +138,7 @@ Names are case-insensitive. Unknown names and numbers outside 0--255 fail at \te
 
 If the kernel refuses \texttt{SOCK\_\allowbreak{}RAW}, \texttt{open()} fails and \texttt{\&errortext} is the system message (typically "Operation not permitted" or "Permission denied"). That is success of the Unicon plumbing and a privilege problem on the host.
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local f
@@ -151,18 +156,18 @@ procedure main()
       write("raw-icmp: ", &errortext)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 missing-proto: bad socket attribute
 bad-proto: bad socket attribute
 raw-icmp: Operation not permitted
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 The last line is the unprivileged case. With privileges it prints \texttt{raw-\allowbreak{}icmp:~ok} (or the test suite's \texttt{plumbing-\allowbreak{}ok}).
@@ -218,7 +223,7 @@ Name & Peek value \\
 \texttt{rcvbuf} / \texttt{sndbuf} & Buffer sizes in bytes (integers) \\
 \end{longtable}
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 f := open("127.0.0.1", "nr", "proto=icmp") | stop(&errortext)
 write("proto=", f["proto"])
@@ -227,17 +232,17 @@ every k := key(f) do
    write("field ", k)
 close(f)
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 \section{6. Send and receive}
 \label{utr29-sec-io}
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 writes(f, icmp_bytes)
 r := receive(f)
 write(r.addr, "  ", *r.msg, " bytes")
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{writes()} calls \texttt{sock\_\allowbreak{}write()}, which for \texttt{SOCK\_\allowbreak{}RAW} (and UDP) does \texttt{sendto} to the \texttt{addrinfo} saved at \texttt{open()}. There is no \texttt{connect(2)}. Changing the destination means opening another handle (or, with \texttt{hdrincl=yes}, putting the destination in a supplied IP header).
@@ -264,7 +269,7 @@ Layer-1 helpers pack and unpack network-order integers (\texttt{u8} / \texttt{u1
 
 \subsection{7.1 Declaring a layout}
 \label{utr29-sec-ps-fields}
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 class IcmpEchoRequest : IcmpPacket()
    method define()
@@ -276,7 +281,7 @@ class IcmpEchoRequest : IcmpPacket()
    end
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{field(name,\allowbreak{}~size,\allowbreak{}~defval)} is a network-order integer. \texttt{bytes\_\allowbreak{}field} is opaque fixed-width bytes. \texttt{ipv4\_\allowbreak{}field} accepts a dotted-quad, integer, or four raw bytes on build and returns a dotted-quad on decode. \texttt{checksum\_\allowbreak{}field} is a 16-bit placeholder filled at \texttt{build()} time over the header plus payload. Pass \texttt{exclude\_\allowbreak{}off} / \texttt{exclude\_\allowbreak{}len} (1-based) to omit a range from the sum --- OSPF Authentication and PIM Register are the documented cases; those layouts are not in the library yet.
@@ -289,7 +294,7 @@ end
 
 Preferred call shape (no string-keyed tables required). This needs no raw socket:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 import net
 
@@ -303,19 +308,19 @@ procedure main()
    write("type=", v["type"], " id=", v["id"], " seq=", v["seq"])
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 type:int=8  code:int=0  checksum:checksum(auto)  id:int=0  seq:int=0
 type:int=8  code:int=0  checksum:checksum(auto)  id:int=1  seq:int=2
 len=10
 type=8 id=1 seq=2
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{set()} and \texttt{set\_\allowbreak{}payload()} are chainable. \texttt{build(extra,\allowbreak{}~payload,\allowbreak{}~lax)} overlays an optional table, appends payload, and returns the complete byte string with checksum filled. \texttt{decode(s)} returns a table of field names to values. \texttt{describe()} is a one-line summary for the REPL: names, kinds, defaults, required markers, and current \texttt{set()} values.
@@ -330,7 +335,7 @@ type=8 id=1 seq=2
 
 \texttt{uni/\allowbreak{}lib/\allowbreak{}icmp.\allowbreak{}icn} adds echo request (type 8) and echo reply (type 0) [11] on top of \texttt{PacketSpec}:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 PacketSpec
   IcmpPacket          strip_ip / match
@@ -338,12 +343,12 @@ PacketSpec
     IcmpEchoReply     type 0; match_echo(pkt, id, seq)
 Ping                  session wrapper
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{Ping(host)} opens \texttt{proto=icmp} with TTL 64 and a 2000 ms default wait. \texttt{echo()} sends a request (56 zero bytes unless a payload is given), waits with \texttt{select()}, and succeeds with a decode table plus \texttt{rtt} (milliseconds, real), \texttt{rtt\_\allowbreak{}us}, \texttt{ttl} (from the IPv4 header), and \texttt{addr}. Round-trip time uses \texttt{gettimeofday()}.
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 import net
 
@@ -356,7 +361,7 @@ procedure main()
    p.close()
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 \texttt{set\_\allowbreak{}timeout(ms)} changes the default wait. An explicit sequence number and payload can be passed to \texttt{echo()}; otherwise the session increments \texttt{seq}.
@@ -364,7 +369,7 @@ end
 
 The same exchange with an explicit socket:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 import net
 
@@ -383,7 +388,7 @@ procedure main()
    close(f)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Other ICMP types (destination unreachable, time exceeded, and so on) are not in the library. \texttt{proto=icmpv6} opens an ICMPv6 socket, but there are no Neighbor Discovery or echo layouts yet.
@@ -393,7 +398,7 @@ Other ICMP types (destination unreachable, time exceeded, and so on) are not in 
 
 \texttt{uni/\allowbreak{}lib/\allowbreak{}igmp.\allowbreak{}icn} covers IGMPv2 (RFC 2236) and IGMPv3 (RFC 3376):
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 PacketSpec
   IgmpPacket
@@ -401,7 +406,7 @@ PacketSpec
     Igmpv3Query / Igmpv3Report
 Igmp                     session wrapper
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 IGMPv2 messages are an eight-octet header. Report and leave \texttt{require()} a group. IGMPv3 queries add flags, QQIC, and a source list. IGMPv3 reports carry group records: ASM join/leave and SSM source filters (\texttt{join\_\allowbreak{}sources}, \texttt{allow}, \texttt{block}).
@@ -412,7 +417,7 @@ IGMPv2 messages are an eight-octet header. Report and leave \texttt{require()} a
 
 PacketSpec classes work without a raw socket:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 import net
 
@@ -428,12 +433,12 @@ procedure main()
    write("v3 join len=", *pkt)
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 type:int=22  max_resp_time:int=0  checksum:checksum(auto)  group:ipv4(required)
 type:int=34  reserved1:int=0  checksum:checksum(auto)  reserved2:int=0  nrecords:int=0
@@ -441,12 +446,12 @@ v2 report len=8
 type=22 group=239.1.1.1
 v3 join len=16
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Opening a live IGMP socket needs the same privileges as ICMP:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 import net
 
@@ -461,17 +466,17 @@ procedure main()
    g.close()
 end
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Session send helpers: \texttt{report} / \texttt{leave} / \texttt{query} (v2), \texttt{join} / \texttt{leave3} (v3 ASM), and \texttt{send(bytes)} for a hand-built packet. SSM source-filter joins use the PacketSpec class, not the session wrapper:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 pkt := Igmpv3Report().join_sources("239.1.1.1", ["192.0.2.1"])
 g.send(pkt)
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Exported constants (\texttt{IGMP\_\allowbreak{}MEMBERSHIP\_\allowbreak{}QUERY}, \texttt{IGMP\_\allowbreak{}V3\_\allowbreak{}MEMBERSHIP\_\allowbreak{}REPORT}, \texttt{IGMP\_\allowbreak{}CHANGE\_\allowbreak{}TO\_\allowbreak{}EXCLUDE\_\allowbreak{}MODE}, and the rest) are initialized on first \texttt{IgmpPacket} construction.
@@ -481,7 +486,7 @@ Exported constants (\texttt{IGMP\_\allowbreak{}MEMBERSHIP\_\allowbreak{}QUERY}, 
 
 \texttt{uni/\allowbreak{}progs/\allowbreak{}uping} and \texttt{uni/\allowbreak{}progs/\allowbreak{}uigmp} are teaching clients, not replacements for \texttt{ping(8)} or \texttt{tcpdump(1)}. They need \texttt{SOCK\_\allowbreak{}RAW} privileges:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 unicon uping
 unicon uigmp
@@ -490,21 +495,21 @@ sudo ./uigmp [seconds]
 sudo ./uping -v host    # also show open()/Ping API demos
 sudo ./uigmp -v         # also show open()/Igmp API demos
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Default mode uses the session wrappers. \texttt{-\allowbreak{}v} / \texttt{-\allowbreak{}d} also runs the lower-level \texttt{open(.\allowbreak{}.\allowbreak{}.\allowbreak{},\allowbreak{}~"nr",\allowbreak{}~.\allowbreak{}.\allowbreak{}.\allowbreak{})} plus PacketSpec path and prints \texttt{describe()} output.
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo ./uping 192.0.2.1
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 PING 192.0.2.1 (192.0.2.1): 56 data bytes
 64 bytes from 192.0.2.1: icmp_seq=0 ttl=118 time=18.390 ms
@@ -515,18 +520,18 @@ PING 192.0.2.1 (192.0.2.1): 56 data bytes
 4 packets transmitted, 4 packets received, 0.0% packet loss
 round-trip min/avg/max = 15.533/16.869/18.390 ms
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 sudo ./uigmp
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 listening on IGMP
 
@@ -534,7 +539,7 @@ listening on IGMP
 36 bytes from 192.0.2.10: IGMPv3 query group=239.1.1.1 max_resp=100 qrv=2
 36 bytes from 192.0.2.20: IGMPv3 report \{239.1.1.1 CHANGE_TO_EXCLUDE\}
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 \section{11. Runtime implementation}
 \label{utr29-sec-impl}
@@ -617,7 +622,7 @@ when \texttt{SOCK\_\allowbreak{}RAW} is allowed, \texttt{f["proto"]} is 1 after 
 
 Expected output is \texttt{tests/\allowbreak{}posix/\allowbreak{}stand/\allowbreak{}raw\_\allowbreak{}sock.\allowbreak{}std}:
 
-\begin{shaded}
+\begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 missing-proto: bad socket attribute
 bad-proto: bad socket attribute
@@ -631,7 +636,7 @@ read-mode-r: ok
 raw-peek:ok
 raw-key:ok
 \end{Verbatim}
-\end{shaded}
+\end{uscribeshaded}
 
 
 On an unprivileged account the \texttt{raw-\allowbreak{}*} lines still print \texttt{plumbing-\allowbreak{}ok}: the test treats both a successful \texttt{socket()} and a privilege denial as passing plumbing. The posix suite picks up every \texttt{*.\allowbreak{}icn} in that directory.
