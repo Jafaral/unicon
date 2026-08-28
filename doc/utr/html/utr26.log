@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.28)  28 AUG 2026 02:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.8.28)  28 AUG 2026 02:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -581,12 +581,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 743--744
 []\T1/cmr/m/n/12 The lib-ssh Project. "lib-ssh -- The SSH Li-brary".
  []
 
-
-Underfull \hbox (badness 1072) in paragraph at lines 749--750
-[]\T1/cmr/m/n/12 The OpenSSL Project. "OpenSSL -- Cryp-tog-ra-phy and SSL/TLS
- []
-
-[21] [22] (./utr26.aux)
+[21] (./utr26.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -599,10 +594,10 @@ Package rerunfilecheck Info: File `utr26.out' has not changed.
 (rerunfilecheck)             Checksum: 630B6D1DE9794AC9418B2CB673088EFF;8037.
  ) 
 Here is how much of TeX's memory you used:
- 12395 strings out of 476182
- 200749 string characters out of 5795595
+ 12372 strings out of 476182
+ 200355 string characters out of 5795595
  1936975 words of memory out of 5000000
- 34174 multiletter control sequences out of 15000+600000
+ 34163 multiletter control sequences out of 15000+600000
  568501 words of font info for 55 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,6n,79p,1037b,600s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -618,10 +613,10 @@ ec/ecrm1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr26.pdf (24 pages, 188284 bytes).
+Output written on utr26.pdf (23 pages, 186843 bytes).
 PDF statistics:
- 820 PDF objects out of 1000 (max. 8388607)
- 347 compressed objects within 4 object streams
- 87 named destinations out of 1000 (max. 500000)
+ 803 PDF objects out of 1000 (max. 8388607)
+ 331 compressed objects within 4 object streams
+ 75 named destinations out of 1000 (max. 500000)
  345 words of extra memory for PDF output out of 10000 (max. 10000000)
 
