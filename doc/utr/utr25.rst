@@ -1,5 +1,8 @@
 :title: Native Unicode Support in the Unicon Runtime
 :author: Jafar Al-Gharaibeh
+:author: Clinton Jeffery
+:author: Bruce Rennie
+:author: Don Ward
 :trnumber: 25
 :date: August 2026
 :copyright: 2026, Jafar Al-Gharaibeh
