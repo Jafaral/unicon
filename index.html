@@ -282,6 +282,9 @@ disabled by default. Those can be turned on by doing
 <code>--enable-FEATURE</code>, for example, to enable operator
 overloading:</p>
 <pre><code>./configure --enable-ovld</code></pre>
+<p>Native Unicode string support is also off by default (64-bit
+only):</p>
+<pre><code>./configure --enable-unicode</code></pre>
 <p>One other aspect to consider is that the configure script is
 opportunistic when it comes to turning on features. Features that are
 enabled by default will be disabled automatically if they are missing

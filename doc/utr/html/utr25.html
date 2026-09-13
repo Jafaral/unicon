@@ -85,6 +85,14 @@ placeholder="Search..." aria-label="Filter section list">
 </a></li>
 <li class="toc-l1"><a href="#sec-status">9. Status and future work
 </a></li>
+<li class="toc-l1"><a href="#sec-perf">10. Performance
+</a></li>
+<li class="toc-l2"><a href="#sec-bench-suite">10.1 
+<code>tests/bench</code>
+ suite
+</a></li>
+<li class="toc-l2"><a href="#sec-ascii-bench">10.2 ASCII string operations
+</a></li>
 <li class="toc-l1"><a href="#sec-coverage">Appendix: test coverage
 </a></li>
 <li class="toc-l1"><a href="#references">References
@@ -95,13 +103,13 @@ placeholder="Search..." aria-label="Filter section list">
 <div class="main">
 <header class="report-masthead">
 <h1 class="report-title">Native Unicode Support in the Unicon Runtime</h1>
-<p class="report-authors">Jafar Al-Gharaibeh, Clinton Jeffery, Bruce Rennie, Don Ward</p>
+<p class="report-authors">Jafar Al-Gharaibeh</p>
 <p class="report-tr">Unicon Technical Report: 25</p>
 <p class="report-date">August 2026</p>
 <p class="report-pdf"><a href="utr25.pdf">pdf</a> | <a href="_sources/utr25.rst.txt">txt</a></p>
 <div class="report-abstract">
 <p class="report-abstract-label">Abstract</p>
-<p>Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, compile-time and I/O tagging, Unicode-aware operations, the language API, examples, and remaining work.</p>
+<p>Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, compile-time and I/O tagging, Unicode-aware operations, the language API, examples, remaining work, and measurements against Unicon without the feature.</p>
 <p class="report-keywords"><span class="report-keywords-label">Keywords:</span> Unicon, Unicode, UTF-8, strings, runtime, technical report.</p>
 </div>
 </header>
@@ -114,16 +122,28 @@ This report describes native Unicode support in the Unicon runtime: how a string
 <a href="utr27.html#sec-examples">section 8</a>
  collects short programs by operation. Automated tests live under 
 <code>tests/unicode/</code>
-.
+. 
+<a href="utr25.html#sec-perf">Section 10</a>
+ records interpreter timings.
 </p>
 <p>
-The feature is optional. A 64-bit build without 
-<code>NoUniconUnicode</code>
+The feature is optional and off by default. A 64-bit build configured with 
+<code>--enable-unicode</code>
  reports 
 <code>Unicode</code>
  in 
 <code>&amp;features</code>
-. On 32-bit, or with that switch, the tag macros are no-ops and the suite is skipped.
+. On 32-bit, or without that switch, the tag macros are no-ops and the suite is skipped. Reads stay untagged unless the program asks: 
+<code>unicode(s)</code>
+ tags a value on demand; 
+<code>open(..., &quot;i&quot;)</code>
+ tags subsequent reads on that handle. Mode 
+<code>i</code>
+ is international (input as text); 
+<code>u</code>
+ is already untranslated. Details are in 
+<a href="utr29.html#sec-io">section 6</a>
+.
 </p>
 <h3 id="sec-term">
 1.1 Terminology: Unicode vs. UTF-8
@@ -209,7 +229,7 @@ Available on 64-bit builds (
 ) when compiled with 
 <code>UniconUnicode</code>
  defined (
-<code>src/h/config.h</code>
+<code>./configure --enable-unicode</code>
 ). With the feature disabled, every macro described below reduces to today's unmodified behavior, so no call site needs its own conditional compilation.
 </p>
 <pre><code class="language-text">bit 63       F_Nqual        (existing -- qualifier vs. typed value)
@@ -476,7 +496,9 @@ The
 <code>||</code>
  operator (
 <code>src/runtime/ocat.r</code>
-) has three internal implementation paths, corresponding to different memory-layout optimizations (zero-copy when operands are already adjacent in string space, in-place extension when the left operand is the most recently allocated string, and a general copying path otherwise). All three propagate both the UTF-8 tag and the cached codepoint count to their result: the tag is set if either operand is tagged; the codepoint count is computed as the sum of each operand's contribution, where an untagged operand's own byte length stands in for its codepoint count (valid, since an untagged string is by construction pure ASCII), and a tagged operand contributes its cached count if one is available. If either operand's count is not available (uncached or otherwise unknown), the result's count is left uncached rather than guessed, and a subsequent size query on the result falls back to a full scan.
+) has three internal implementation paths, corresponding to different memory-layout optimizations (zero-copy when operands are already adjacent in string space, in-place extension when the left operand is the most recently allocated string, and a general copying path otherwise). All three propagate both the UTF-8 tag and the cached codepoint count to their result: the tag is set if either operand is tagged; the codepoint count is computed as the sum of each operand's contribution, where an untagged operand's own byte length stands in for its codepoint count (valid, since an untagged string is by construction pure ASCII), and a tagged operand contributes its cached count if one is available. If one side has a known count and the other is tagged but uncached and at most 
+<code>UqConcatScanMax</code>
+ bytes (4096), that short side is walked so the known count is not discarded. If a count is still unavailable afterwards, the result's count is left uncached rather than guessed, and a subsequent size query on the result falls back to a full scan.
 </p>
 <p>
 Per 
@@ -538,7 +560,7 @@ The
  mode character to 
 <code>open()</code>
 </strong>
-, which sets 
+ (international / input as text), which sets 
 <code>Fs_Unicode</code>
  (file-status bit 
 <code>040</code>
@@ -561,7 +583,9 @@ reads
 <code>i</code>
  onto a pty handle (
 <a href="utr29.html#sec-status">section 9</a>
-). SFTP open rewrites the status word and likewise drops the bit.
+). SFTP open rewrites the status word and likewise drops the bit. 
+<code>u</code>
+ remains untranslated; a different unused letter is still an open question.
 </p>
 </li>
 <li>
@@ -623,15 +647,17 @@ assign
 <code>*</code>
  and 
 <code>[]</code>
- are codepoints. The inverse would return the same UTF-8 bytes with an untagged descriptor, so 
+ are codepoints. There is no public inverse yet. Internally it would be the same UTF-8 bytes with the tag cleared (a descriptor copy plus 
+<code>SetStrLen</code>
+) so 
 <code>*</code>
  and 
 <code>[]</code>
- mean bytes. That operation is not implemented; a descriptor copy plus 
-<code>SetStrLen</code>
- is sufficient. Until then, the practical way to drop the tag is to write the bytes and read them back without mode 
-<code>i</code>
-.
+ mean bytes. 
+<code>string()</code>
+ is not that operation (
+<a href="utr25.html#sec-string">section 7.1</a>
+).
 </p>
 <h3 id="sec-string">
 7.1 
@@ -680,11 +706,11 @@ assign
 7.2 Content test vs. tag test
 </h3>
 <p>
-These are different questions. Below, 
+A string has two independent properties: whether its payload contains non-ASCII UTF-8, and whether this descriptor is currently tagged. Untagged café bytes from a file and a tagged café literal can have the same bytes; only the bit differs. Below, 
 <code>foo</code>
- stands for the inverse of 
+ stands for the unimplemented inverse of 
 <code>unicode</code>
-.
+ (same bytes, tag cleared).
 </p>
 <table>
 <thead>
@@ -1342,6 +1368,704 @@ Existing UTF-8 support in the standard library and tools.
 . That map is now built from 
 <code>char()</code>
  bytes so the keys stay untagged; other byte-oriented scanners in the tree may need the same treatment.
+</p>
+<h2 id="sec-perf">
+10. Performance
+</h2>
+<p>
+<a href="utr25.html#sec-design">Section 2</a>
+ requires that pure ASCII keep the historic string cost. 
+<a href="utr25.html#sec-bench-suite">Section 10.1</a>
+ compares Unicon master to this implementation with Unicode compiled in, on a Linux host. 
+<a href="utr25.html#sec-ascii-bench">Section 10.2</a>
+ isolates ASCII string operations on the same sources with the feature compiled out versus compiled in.
+</p>
+<h3 id="sec-bench-suite">
+10.1 
+<code>tests/bench</code>
+ suite
+</h3>
+<p>
+<code>./run-benchmark</code>
+ averages three executions of each program, on a 64-bit Linux host (AMD Ryzen 9 9950X, 32 cores, 4.4 GHz, gcc 13.3.0). The suite is a mix of allocation, arithmetic, and some string work; it is not an isolated string microbenchmark (
+<a href="utr25.html#sec-ascii-bench">section 10.2</a>
+). Sequential elapsed times, seconds:
+</p>
+<table>
+<thead>
+<tr>
+<th>
+program
+</th>
+<th>
+master
+</th>
+<th>
+Unicode compiled in
+</th>
+<th>
+difference
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+concord
+</td>
+<td>
+0.693
+</td>
+<td>
+0.702
+</td>
+<td>
++1.3%
+</td>
+</tr>
+<tr>
+<td>
+deal
+</td>
+<td>
+0.541
+</td>
+<td>
+0.535
+</td>
+<td>
+-1.1%
+</td>
+</tr>
+<tr>
+<td>
+ipxref
+</td>
+<td>
+0.416
+</td>
+<td>
+0.411
+</td>
+<td>
+-1.2%
+</td>
+</tr>
+<tr>
+<td>
+queens
+</td>
+<td>
+0.847
+</td>
+<td>
+0.841
+</td>
+<td>
+-0.7%
+</td>
+</tr>
+<tr>
+<td>
+rsg
+</td>
+<td>
+0.541
+</td>
+<td>
+0.525
+</td>
+<td>
+-3.0%
+</td>
+</tr>
+<tr>
+<td>
+binary-trees
+</td>
+<td>
+1.209
+</td>
+<td>
+1.227
+</td>
+<td>
++1.5%
+</td>
+</tr>
+<tr>
+<td>
+fannkuch
+</td>
+<td>
+0.719
+</td>
+<td>
+0.733
+</td>
+<td>
++1.9%
+</td>
+</tr>
+<tr>
+<td>
+fasta
+</td>
+<td>
+0.737
+</td>
+<td>
+0.731
+</td>
+<td>
+-0.8%
+</td>
+</tr>
+<tr>
+<td>
+k-nucleotide
+</td>
+<td>
+1.079
+</td>
+<td>
+1.078
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+mandelbrot
+</td>
+<td>
+2.955
+</td>
+<td>
+2.924
+</td>
+<td>
+-1.0%
+</td>
+</tr>
+<tr>
+<td>
+meteor-contest
+</td>
+<td>
+1.020
+</td>
+<td>
+1.021
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+n-body
+</td>
+<td>
+1.139
+</td>
+<td>
+1.129
+</td>
+<td>
+-0.9%
+</td>
+</tr>
+<tr>
+<td>
+pidigits
+</td>
+<td>
+0.880
+</td>
+<td>
+0.893
+</td>
+<td>
++1.5%
+</td>
+</tr>
+<tr>
+<td>
+regex-dna
+</td>
+<td>
+1.119
+</td>
+<td>
+1.115
+</td>
+<td>
+-0.4%
+</td>
+</tr>
+<tr>
+<td>
+reverse-complement
+</td>
+<td>
+0.951
+</td>
+<td>
+0.948
+</td>
+<td>
+-0.3%
+</td>
+</tr>
+<tr>
+<td>
+spectral-norm
+</td>
+<td>
+0.816
+</td>
+<td>
+0.782
+</td>
+<td>
+-4.2%
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+Wall-clock time for the full suite was 1m23.3s on master and 1m23.5s with Unicode compiled in (user time 15m27s vs 15m41s). Sequential programs differ by at most a few percent, with no consistent direction. Concurrent programs on this host (
+<code>chameneos-redux</code>
+, concurrent 
+<code>regex-dna</code>
+, 
+<code>binary-trees</code>
+, 
+<code>mandelbrot</code>
+, 
+<code>thread-ring</code>
+) vary more between runs than sequential ones and are not treated as a Unicode-cost signal.
+</p>
+<h3 id="sec-ascii-bench">
+10.2 ASCII string operations
+</h3>
+<p>
+<code>tests/bench/strascii/</code>
+ times one untagged ASCII operation per program. The two interpreters are this implementation without 
+<code>--enable-unicode</code>
+ and with it; the strings stay untagged either way. Host: macOS, arm64, clang 21.0.0. 
+<code>cpu</code>
+ is milliseconds from 
+<code>&amp;time</code>
+; 
+<code>wall</code>
+ is milliseconds from 
+<code>gettimeofday()</code>
+. Each side is the mean of three runs. Difference is CPU on versus off (wall deltas match to a fraction of a percent).
+</p>
+<table>
+<thead>
+<tr>
+<th>
+program
+</th>
+<th>
+n
+</th>
+<th>
+CPU off
+</th>
+<th>
+wall off
+</th>
+<th>
+CPU on
+</th>
+<th>
+wall on
+</th>
+<th>
+difference
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>*s</code>
+</td>
+<td>
+100,000,000
+</td>
+<td>
+3259
+</td>
+<td>
+3261
+</td>
+<td>
+3303
+</td>
+<td>
+3306
+</td>
+<td>
++1%
+</td>
+</tr>
+<tr>
+<td>
+<code>s[i]</code>
+</td>
+<td>
+4,000
+</td>
+<td>
+4367
+</td>
+<td>
+4372
+</td>
+<td>
+4407
+</td>
+<td>
+4413
+</td>
+<td>
++1%
+</td>
+</tr>
+<tr>
+<td>
+<code>a || b</code>
+</td>
+<td>
+40,000,000
+</td>
+<td>
+1620
+</td>
+<td>
+1622
+</td>
+<td>
+1661
+</td>
+<td>
+1662
+</td>
+<td>
++3%
+</td>
+</tr>
+<tr>
+<td>
+<code>s ||:= piece</code>
+</td>
+<td>
+80,000,000
+</td>
+<td>
+2426
+</td>
+<td>
+2428
+</td>
+<td>
+2432
+</td>
+<td>
+2435
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+<code>s[i:j]</code>
+</td>
+<td>
+20,000,000
+</td>
+<td>
+1457
+</td>
+<td>
+1458
+</td>
+<td>
+1480
+</td>
+<td>
+1481
+</td>
+<td>
++2%
+</td>
+</tr>
+<tr>
+<td>
+<code>!s</code>
+</td>
+<td>
+7,000
+</td>
+<td>
+3702
+</td>
+<td>
+3705
+</td>
+<td>
+3713
+</td>
+<td>
+3716
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+<code>move(1)</code>
+</td>
+<td>
+16,000
+</td>
+<td>
+2970
+</td>
+<td>
+2973
+</td>
+<td>
+2957
+</td>
+<td>
+2959
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+<code>tab(&amp;pos+1)</code>
+</td>
+<td>
+13,000
+</td>
+<td>
+3004
+</td>
+<td>
+3006
+</td>
+<td>
+3039
+</td>
+<td>
+3043
+</td>
+<td>
++1%
+</td>
+</tr>
+<tr>
+<td>
+<code>find()</code>
+</td>
+<td>
+400,000
+</td>
+<td>
+3597
+</td>
+<td>
+3600
+</td>
+<td>
+3610
+</td>
+<td>
+3613
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+<code>match()</code>
+</td>
+<td>
+70,000,000
+</td>
+<td>
+3244
+</td>
+<td>
+3247
+</td>
+<td>
+3258
+</td>
+<td>
+3261
+</td>
+<td>
+0%
+</td>
+</tr>
+<tr>
+<td>
+<code>reverse()</code>
+</td>
+<td>
+14,000,000
+</td>
+<td>
+2650
+</td>
+<td>
+2653
+</td>
+<td>
+2651
+</td>
+<td>
+2654
+</td>
+<td>
+0%
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+The shell 
+<code>time</code>
+ of 
+<code>make run</code>
+ was 33.1s with Unicode compiled out and 32.7s with it compiled in (mean of three on each side). CPU and wall agree to a few milliseconds on both builds. Every program is within 3%. ASCII-only work does not pay a measurable tax when the feature is compiled in.
+</p>
+<p>
+The 1--3% residuals are not UTF-8 walks. Untagged ASCII never takes the tagged branch. The on-build still does extra work that rtt deletes entirely from the off-build:
+</p>
+<ul>
+<li>
+<p>
+<code>StrLen</code>
+ is 
+<code>(q).dword &amp; ByteLenMask</code>
+ rather than the historic dword. Every length read pays an extra AND. 
+<code>SetStrLen</code>
+ writes a masked length (and clears tag bits that were already 0).
+</p>
+</li>
+<li>
+<p>
+<code>if (IsUniQual(...))</code>
+ is still present. The UTF-8 body does not run; the branch is predicted not taken. Off-build: the 
+<code>if</code>
+ is gone.
+</p>
+</li>
+<li>
+<p>
+Every 
+<code>||</code>
+ calls 
+<code>uq_concat_propagate</code>
+, which tests both operands and returns immediately when neither is tagged. No scan of the payload.
+</p>
+</li>
+</ul>
+<p>
+That accounts for the spread in the table:
+</p>
+<table>
+<thead>
+<tr>
+<th>
+gap
+</th>
+<th>
+what the on-build does on untagged ASCII
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>a || b</code>
+ +3%
+</td>
+<td>
+40 million allocate-and-copy operations, then
+</td>
+</tr>
+<tr>
+<td>
+<code>s[i:j]</code>
+ +2%
+</td>
+<td>
+20 million slices, two 
+<code>IsUniQual</code>
+ tests each (length bound,
+</td>
+</tr>
+<tr>
+<td>
+<code>*s</code>
+, 
+<code>s[i]</code>
+, 
+<code>tab</code>
+ +1%
+</td>
+<td>
+One failed tag test and a masked 
+<code>StrLen</code>
+ per operation,
+</td>
+</tr>
+<tr>
+<td>
+<code>s ||:= piece</code>
+ 0%
+</td>
+<td>
+The same concat helper, but the loop appends 10 bytes at
+</td>
+</tr>
+<tr>
+<td>
+<code>find</code>
+, 
+<code>match</code>
+, 
+<code>reverse</code>
+, 
+<code>!s</code>
+ 0%
+</td>
+<td>
+The work is byte loops or allocation. The tag check is in the
+</td>
+</tr>
+</tbody>
+</table>
+<p>
+Nothing in this suite walks UTF-8 on pure ASCII. Shrinking the residual further (skipping the concat helper when both sides are untagged at the call site, or avoiding the 
+<code>StrLen</code>
+ mask until the tag is set) is not required: ASCII kept the historic cost.
 </p>
 <h2 id="sec-coverage">
 Appendix: test coverage

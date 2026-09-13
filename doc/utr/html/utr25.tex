@@ -34,7 +34,7 @@
 \begin{center}
 {\LARGE\bfseries Native Unicode Support in the Unicon Runtime \par}
 \vskip 3em
-{\large\bfseries Jafar Al-Gharaibeh\\Clinton Jeffery\\Bruce Rennie\\Don Ward \par}
+{\large\bfseries Jafar Al-Gharaibeh \par}
 \vskip 1.0em
 {\bfseries Unicon Technical Report: 25\par}
 \vskip 1.0em
@@ -42,7 +42,7 @@
 \vskip 5.5em
 {\bfseries Abstract}\par
 \begin{quote}
-Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, compile-time and I/O tagging, Unicode-aware operations, the language API, examples, and remaining work.
+Unicon strings historically have no concept of Unicode: a string is a byte sequence, and operations like subscripting, length, and concatenation operate on bytes. This report describes a native implementation that gives strings UTF-8 awareness while preserving byte-for-byte performance and memory layout for content that is pure ASCII. The approach -- tagging a string's existing descriptor rather than introducing a new allocated representation -- is the tagged-qualifier design. The report covers the bit-level representation, compile-time and I/O tagging, Unicode-aware operations, the language API, examples, remaining work, and measurements against Unicon without the feature.
 \end{quote}
 \begin{quote}
 {\bfseries Keywords:} Unicon, Unicode, UTF-8, strings, runtime, technical report.
@@ -63,10 +63,10 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr25-sec-intro}
 
-This report describes native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. \hyperref[utr27-sec-examples]{section 8} collects short programs by operation. Automated tests live under \texttt{tests/\allowbreak{}unicode/\allowbreak{}}.
+This report describes native Unicode support in the Unicon runtime: how a string is tagged, how literals and I/O become tagged, which operations interpret positions as codepoints, and what is still byte-oriented. It is formatted as a Unicon Technical Report [1]. \hyperref[utr27-sec-examples]{section 8} collects short programs by operation. Automated tests live under \texttt{tests/\allowbreak{}unicode/\allowbreak{}}. \hyperref[utr25-sec-perf]{Section 10} records interpreter timings.
 
 
-The feature is optional. A 64-bit build without \texttt{NoUniconUnicode} reports \texttt{Unicode} in \texttt{\&features}. On 32-bit, or with that switch, the tag macros are no-ops and the suite is skipped.
+The feature is optional and off by default. A 64-bit build configured with \texttt{-\allowbreak{}-\allowbreak{}enable-\allowbreak{}unicode} reports \texttt{Unicode} in \texttt{\&features}. On 32-bit, or without that switch, the tag macros are no-ops and the suite is skipped. Reads stay untagged unless the program asks: \texttt{unicode(s)} tags a value on demand; \texttt{open(.\allowbreak{}.\allowbreak{}.\allowbreak{},\allowbreak{}~"i")} tags subsequent reads on that handle. Mode \texttt{i} is international (input as text); \texttt{u} is already untranslated. Details are in \hyperref[utr29-sec-io]{section 6}.
 
 \subsection{1.1 Terminology: Unicode vs. UTF-8}
 \label{utr25-sec-term}
@@ -93,7 +93,7 @@ The tag reuses bits already present in the descriptor's length word rather than 
 \subsection{2.1 Bit layout}
 \label{utr25-sec-bits}
 
-Available on 64-bit builds (\texttt{WordBits~==~64}) when compiled with \texttt{UniconUnicode} defined (\texttt{src/\allowbreak{}h/\allowbreak{}config.\allowbreak{}h}). With the feature disabled, every macro described below reduces to today's unmodified behavior, so no call site needs its own conditional compilation.
+Available on 64-bit builds (\texttt{WordBits~==~64}) when compiled with \texttt{UniconUnicode} defined (\texttt{.\allowbreak{}/\allowbreak{}configure~-\allowbreak{}-\allowbreak{}enable-\allowbreak{}unicode}). With the feature disabled, every macro described below reduces to today's unmodified behavior, so no call site needs its own conditional compilation.
 
 \begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
@@ -213,7 +213,7 @@ Both are registered as ordinary built-in functions (\texttt{src/\allowbreak{}h/\
 \section{5. Concatenation}
 \label{utr25-sec-concat}
 
-The \texttt{||} operator (\texttt{src/\allowbreak{}runtime/\allowbreak{}ocat.\allowbreak{}r}) has three internal implementation paths, corresponding to different memory-layout optimizations (zero-copy when operands are already adjacent in string space, in-place extension when the left operand is the most recently allocated string, and a general copying path otherwise). All three propagate both the UTF-8 tag and the cached codepoint count to their result: the tag is set if either operand is tagged; the codepoint count is computed as the sum of each operand's contribution, where an untagged operand's own byte length stands in for its codepoint count (valid, since an untagged string is by construction pure ASCII), and a tagged operand contributes its cached count if one is available. If either operand's count is not available (uncached or otherwise unknown), the result's count is left uncached rather than guessed, and a subsequent size query on the result falls back to a full scan.
+The \texttt{||} operator (\texttt{src/\allowbreak{}runtime/\allowbreak{}ocat.\allowbreak{}r}) has three internal implementation paths, corresponding to different memory-layout optimizations (zero-copy when operands are already adjacent in string space, in-place extension when the left operand is the most recently allocated string, and a general copying path otherwise). All three propagate both the UTF-8 tag and the cached codepoint count to their result: the tag is set if either operand is tagged; the codepoint count is computed as the sum of each operand's contribution, where an untagged operand's own byte length stands in for its codepoint count (valid, since an untagged string is by construction pure ASCII), and a tagged operand contributes its cached count if one is available. If one side has a known count and the other is tagged but uncached and at most \texttt{UqConcatScanMax} bytes (4096), that short side is walked so the known count is not discarded. If a count is still unavailable afterwards, the result's count is left uncached rather than guessed, and a subsequent size query on the result falls back to a full scan.
 
 
 Per \hyperref[utr25-sec-strlen]{section 2.3}, all three paths must apply tagging after computing the result length via \texttt{SetStrLen}, not before.
@@ -237,7 +237,7 @@ Three mechanisms tag content when the program wants it:
 
 \item 
 
-\textbf{The \texttt{i} mode character to \texttt{open()}}, which sets \texttt{Fs\_\allowbreak{}Unicode} (file-status bit \texttt{040}, the slot previously marked available in \texttt{src/\allowbreak{}h/\allowbreak{}rmacros.\allowbreak{}h}) on the handle. Subsequent \texttt{read()} / \texttt{reads()} calls then run \texttt{UqMaybeTagRead} and tag their results when the payload is multi-byte. This is implemented at the file, socket, messaging, and SSH channel return points [3]. Pseudo-terminal \emph{reads} will tag if the bit is set; \texttt{open()} itself still cannot carry \texttt{i} onto a pty handle (\hyperref[utr29-sec-status]{section 9}). SFTP open rewrites the status word and likewise drops the bit.
+\textbf{The \texttt{i} mode character to \texttt{open()}} (international / input as text), which sets \texttt{Fs\_\allowbreak{}Unicode} (file-status bit \texttt{040}, the slot previously marked available in \texttt{src/\allowbreak{}h/\allowbreak{}rmacros.\allowbreak{}h}) on the handle. Subsequent \texttt{read()} / \texttt{reads()} calls then run \texttt{UqMaybeTagRead} and tag their results when the payload is multi-byte. This is implemented at the file, socket, messaging, and SSH channel return points [3]. Pseudo-terminal \emph{reads} will tag if the bit is set; \texttt{open()} itself still cannot carry \texttt{i} onto a pty handle (\hyperref[utr29-sec-status]{section 9}). SFTP open rewrites the status word and likewise drops the bit. \texttt{u} remains untranslated; a different unused letter is still an open question.
 
 
 \item 
@@ -255,7 +255,7 @@ Adding a new file-status flag to \texttt{open()}'s mode-character parsing is not
 \texttt{type()} is \texttt{"string"} for both views. There is no \texttt{"unicode"} type: \texttt{type(x)~==~"string"}, and \texttt{||} / \texttt{string()} treat tagged values as strings. ASCII is never tagged -- \texttt{unicode("hello")} is a no-op -- and on ASCII, \texttt{*s}, \texttt{s[i]}, and scanning already match the text view.
 
 
-\texttt{unicode(s)} is the text view: \texttt{*} and \texttt{[]} are codepoints. The inverse would return the same UTF-8 bytes with an untagged descriptor, so \texttt{*} and \texttt{[]} mean bytes. That operation is not implemented; a descriptor copy plus \texttt{SetStrLen} is sufficient. Until then, the practical way to drop the tag is to write the bytes and read them back without mode \texttt{i}.
+\texttt{unicode(s)} is the text view: \texttt{*} and \texttt{[]} are codepoints. There is no public inverse yet. Internally it would be the same UTF-8 bytes with the tag cleared (a descriptor copy plus \texttt{SetStrLen}) so \texttt{*} and \texttt{[]} mean bytes. \texttt{string()} is not that operation (\hyperref[utr25-sec-string]{section 7.1}).
 
 \subsection{7.1 \texttt{string()} is not the inverse}
 \label{utr25-sec-string}
@@ -268,7 +268,7 @@ Adding a new file-status flag to \texttt{open()}'s mode-character parsing is not
 \subsection{7.2 Content test vs. tag test}
 \label{utr25-sec-tests}
 
-These are different questions. Below, \texttt{foo} stands for the inverse of \texttt{unicode}.
+A string has two independent properties: whether its payload contains non-ASCII UTF-8, and whether this descriptor is currently tagged. Untagged café bytes from a file and a tagged café literal can have the same bytes; only the bit differs. Below, \texttt{foo} stands for the unimplemented inverse of \texttt{unicode} (same bytes, tag cleared).
 
 \begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}}
 \hline
@@ -573,6 +573,130 @@ A block-based representation (tentatively \texttt{struct~b\_\allowbreak{}unistr}
 
 
 \textbf{Existing UTF-8 support in the standard library and tools.} \texttt{uni/\allowbreak{}lib/\allowbreak{}utf8.\allowbreak{}icn} [4] walks strings byte-by-byte under the assumption that indexing is always byte-oriented. That is no longer safe for a tagged string, where indexing is codepoint-oriented. The library's tests are excluded from the suite when the feature is enabled (\texttt{tests/\allowbreak{}general/\allowbreak{}Makefile}, conditioned on \texttt{unicode} in \texttt{\&features}). The library still provides codepoint-range set operations and several scanning primitives with no native equivalent, and remains usable when native tagging is off. Reconciling the two is unresolved. uscribe hit the same assumption in its LaTeX Unicode map: keys written as UTF-8 literals became tagged, so \texttt{move(*fromStr)} skipped one codepoint and left leftover bytes for \texttt{pdflatex}. That map is now built from \texttt{char()} bytes so the keys stay untagged; other byte-oriented scanners in the tree may need the same treatment.
+
+\section{10. Performance}
+\label{utr25-sec-perf}
+
+\hyperref[utr25-sec-design]{Section 2} requires that pure ASCII keep the historic string cost. \hyperref[utr25-sec-bench-suite]{Section 10.1} compares Unicon master to this implementation with Unicode compiled in, on a Linux host. \hyperref[utr25-sec-ascii-bench]{Section 10.2} isolates ASCII string operations on the same sources with the feature compiled out versus compiled in.
+
+\subsection{10.1 \texttt{tests/\allowbreak{}bench} suite}
+\label{utr25-sec-bench-suite}
+
+\texttt{.\allowbreak{}/\allowbreak{}run-\allowbreak{}benchmark} averages three executions of each program, on a 64-bit Linux host (AMD Ryzen 9 9950X, 32 cores, 4.4 GHz, gcc 13.3.0). The suite is a mix of allocation, arithmetic, and some string work; it is not an isolated string microbenchmark (\hyperref[utr25-sec-ascii-bench]{section 10.2}). Sequential elapsed times, seconds:
+
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*4)*1/4+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*4)*1/4+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*4)*1/4+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*4)*1/4+2\tabcolsep*(1-1)\relax}}
+\hline
+program & master & Unicode compiled in & difference \\
+\hline
+\endfirsthead
+\hline
+program & master & Unicode compiled in & difference \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+concord & 0.693 & 0.702 & +1.3\% \\
+deal & 0.541 & 0.535 & -1.1\% \\
+ipxref & 0.416 & 0.411 & -1.2\% \\
+queens & 0.847 & 0.841 & -0.7\% \\
+rsg & 0.541 & 0.525 & -3.0\% \\
+binary-trees & 1.209 & 1.227 & +1.5\% \\
+fannkuch & 0.719 & 0.733 & +1.9\% \\
+fasta & 0.737 & 0.731 & -0.8\% \\
+k-nucleotide & 1.079 & 1.078 & 0\% \\
+mandelbrot & 2.955 & 2.924 & -1.0\% \\
+meteor-contest & 1.020 & 1.021 & 0\% \\
+n-body & 1.139 & 1.129 & -0.9\% \\
+pidigits & 0.880 & 0.893 & +1.5\% \\
+regex-dna & 1.119 & 1.115 & -0.4\% \\
+reverse-complement & 0.951 & 0.948 & -0.3\% \\
+spectral-norm & 0.816 & 0.782 & -4.2\% \\
+\end{longtable}
+
+
+Wall-clock time for the full suite was 1m23.3s on master and 1m23.5s with Unicode compiled in (user time 15m27s vs 15m41s). Sequential programs differ by at most a few percent, with no consistent direction. Concurrent programs on this host (\texttt{chameneos-\allowbreak{}redux}, concurrent \texttt{regex-\allowbreak{}dna}, \texttt{binary-\allowbreak{}trees}, \texttt{mandelbrot}, \texttt{thread-\allowbreak{}ring}) vary more between runs than sequential ones and are not treated as a Unicode-cost signal.
+
+\subsection{10.2 ASCII string operations}
+\label{utr25-sec-ascii-bench}
+
+\texttt{tests/\allowbreak{}bench/\allowbreak{}strascii/\allowbreak{}} times one untagged ASCII operation per program. The two interpreters are this implementation without \texttt{-\allowbreak{}-\allowbreak{}enable-\allowbreak{}unicode} and with it; the strings stay untagged either way. Host: macOS, arm64, clang 21.0.0. \texttt{cpu} is milliseconds from \texttt{\&time}; \texttt{wall} is milliseconds from \texttt{gettimeofday()}. Each side is the mean of three runs. Difference is CPU on versus off (wall deltas match to a fraction of a percent).
+
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*7)*1/7+2\tabcolsep*(1-1)\relax}}
+\hline
+program & n & CPU off & wall off & CPU on & wall on & difference \\
+\hline
+\endfirsthead
+\hline
+program & n & CPU off & wall off & CPU on & wall on & difference \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+\texttt{*s} & 100,000,000 & 3259 & 3261 & 3303 & 3306 & +1\% \\
+\texttt{s[i]} & 4,000 & 4367 & 4372 & 4407 & 4413 & +1\% \\
+\texttt{a~||~b} & 40,000,000 & 1620 & 1622 & 1661 & 1662 & +3\% \\
+\texttt{s~||:=~piece} & 80,000,000 & 2426 & 2428 & 2432 & 2435 & 0\% \\
+\texttt{s[i:j]} & 20,000,000 & 1457 & 1458 & 1480 & 1481 & +2\% \\
+\texttt{!s} & 7,000 & 3702 & 3705 & 3713 & 3716 & 0\% \\
+\texttt{move(1)} & 16,000 & 2970 & 2973 & 2957 & 2959 & 0\% \\
+\texttt{tab(\&pos+1)} & 13,000 & 3004 & 3006 & 3039 & 3043 & +1\% \\
+\texttt{find()} & 400,000 & 3597 & 3600 & 3610 & 3613 & 0\% \\
+\texttt{match()} & 70,000,000 & 3244 & 3247 & 3258 & 3261 & 0\% \\
+\texttt{reverse()} & 14,000,000 & 2650 & 2653 & 2651 & 2654 & 0\% \\
+\end{longtable}
+
+
+The shell \texttt{time} of \texttt{make~run} was 33.1s with Unicode compiled out and 32.7s with it compiled in (mean of three on each side). CPU and wall agree to a few milliseconds on both builds. Every program is within 3\%. ASCII-only work does not pay a measurable tax when the feature is compiled in.
+
+
+The 1--3\% residuals are not UTF-8 walks. Untagged ASCII never takes the tagged branch. The on-build still does extra work that rtt deletes entirely from the off-build:
+
+\begin{itemize}
+\item 
+
+\texttt{StrLen} is \texttt{(q).\allowbreak{}dword~\&~ByteLenMask} rather than the historic dword. Every length read pays an extra AND. \texttt{SetStrLen} writes a masked length (and clears tag bits that were already 0).
+
+
+\item 
+
+\texttt{if~(IsUniQual(.\allowbreak{}.\allowbreak{}.\allowbreak{}))} is still present. The UTF-8 body does not run; the branch is predicted not taken. Off-build: the \texttt{if} is gone.
+
+
+\item 
+
+Every \texttt{||} calls \texttt{uq\_\allowbreak{}concat\_\allowbreak{}propagate}, which tests both operands and returns immediately when neither is tagged. No scan of the payload.
+
+
+\end{itemize}
+
+That accounts for the spread in the table:
+
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
+\hline
+gap & what the on-build does on untagged ASCII \\
+\hline
+\endfirsthead
+\hline
+gap & what the on-build does on untagged ASCII \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+\texttt{a~||~b} +3\% & 40 million allocate-and-copy operations, then \\
+\texttt{s[i:j]} +2\% & 20 million slices, two \texttt{IsUniQual} tests each (length bound, \\
+\texttt{*s}, \texttt{s[i]}, \texttt{tab} +1\% & One failed tag test and a masked \texttt{StrLen} per operation, \\
+\texttt{s~||:=~piece} 0\% & The same concat helper, but the loop appends 10 bytes at \\
+\texttt{find}, \texttt{match}, \texttt{reverse}, \texttt{!s} 0\% & The work is byte loops or allocation. The tag check is in the \\
+\end{longtable}
+
+
+Nothing in this suite walks UTF-8 on pure ASCII. Shrinking the residual further (skipping the concat helper when both sides are untagged at the call site, or avoiding the \texttt{StrLen} mask until the tag is set) is not required: ASCII kept the historic cost.
 
 \section{Appendix: test coverage}
 \label{utr25-sec-coverage}

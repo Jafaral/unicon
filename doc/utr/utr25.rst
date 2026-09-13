@@ -1,8 +1,5 @@
 :title: Native Unicode Support in the Unicon Runtime
 :author: Jafar Al-Gharaibeh
-:author: Clinton Jeffery
-:author: Bruce Rennie
-:author: Don Ward
 :trnumber: 25
 :date: August 2026
 :copyright: 2026, Jafar Al-Gharaibeh
@@ -15,7 +12,8 @@
    descriptor rather than introducing a new allocated representation --
    is the tagged-qualifier design. The report covers the bit-level
    representation, compile-time and I/O tagging, Unicode-aware
-   operations, the language API, examples, and remaining work.
+   operations, the language API, examples, remaining work, and
+   measurements against Unicon without the feature.
 :keywords: Unicon, Unicode, UTF-8, strings, runtime, technical report.
 :docclass: report
 
@@ -30,10 +28,16 @@ which operations interpret positions as codepoints, and what is still
 byte-oriented. It is formatted as a Unicon Technical Report
 :cite:`Jeffery:UTR15`. :ref:`section 8 <sec-examples>` collects short
 programs by operation. Automated tests live under ``tests/unicode/``.
+:ref:`Section 10 <sec-perf>` records interpreter timings.
 
-The feature is optional. A 64-bit build without ``NoUniconUnicode``
-reports ``Unicode`` in ``&features``. On 32-bit, or with that switch,
-the tag macros are no-ops and the suite is skipped.
+The feature is optional and off by default. A 64-bit build configured
+with ``--enable-unicode`` reports ``Unicode`` in ``&features``. On
+32-bit, or without that switch, the tag macros are no-ops and the
+suite is skipped. Reads stay untagged unless the program asks:
+``unicode(s)`` tags a value on demand; ``open(..., "i")`` tags
+subsequent reads on that handle. Mode ``i`` is international (input as
+text); ``u`` is already untranslated. Details are in
+:ref:`section 6 <sec-io>`.
 
 .. _sec-term:
 
@@ -83,9 +87,10 @@ string's representation.
 --------------
 
 Available on 64-bit builds (``WordBits == 64``) when compiled with
-``UniconUnicode`` defined (``src/h/config.h``). With the feature
-disabled, every macro described below reduces to today's unmodified
-behavior, so no call site needs its own conditional compilation.
+``UniconUnicode`` defined (``./configure --enable-unicode``). With the
+feature disabled, every macro described below reduces to today's
+unmodified behavior, so no call site needs its own conditional
+compilation.
 
 .. code-block:: text
 
@@ -318,9 +323,11 @@ count is computed as the sum of each operand's contribution, where an
 untagged operand's own byte length stands in for its codepoint count
 (valid, since an untagged string is by construction pure ASCII), and a
 tagged operand contributes its cached count if one is available. If
-either operand's count is not available (uncached or otherwise
-unknown), the result's count is left uncached rather than guessed, and
-a subsequent size query on the result falls back to a full scan.
+one side has a known count and the other is tagged but uncached and at
+most ``UqConcatScanMax`` bytes (4096), that short side is walked so
+the known count is not discarded. If a count is still unavailable
+afterwards, the result's count is left uncached rather than guessed,
+and a subsequent size query on the result falls back to a full scan.
 
 Per :ref:`section 2.3 <sec-strlen>`, all three paths must apply
 tagging after computing the result length via ``SetStrLen``, not
@@ -364,16 +371,18 @@ Three mechanisms tag content when the program wants it:
   <sec-compile>`), the count is computed and cached. If ``s`` is pure
   ASCII, it is returned unchanged. ``string(s)`` is not the inverse;
   see :ref:`section 7 <sec-api>`.
-- **The ``i`` mode character to ``open()``**, which sets
-  ``Fs_Unicode`` (file-status bit ``040``, the slot previously marked
-  available in ``src/h/rmacros.h``) on the handle. Subsequent
-  ``read()`` / ``reads()`` calls then run ``UqMaybeTagRead`` and tag
-  their results when the payload is multi-byte. This is implemented at
-  the file, socket, messaging, and SSH channel return points
-  :cite:`AlGharaibeh:UTR26`. Pseudo-terminal *reads* will tag if the
-  bit is set; ``open()`` itself still cannot carry ``i`` onto a pty
-  handle (:ref:`section 9 <sec-status>`). SFTP open rewrites the
-  status word and likewise drops the bit.
+- **The ``i`` mode character to ``open()``** (international / input as
+  text), which sets ``Fs_Unicode`` (file-status bit ``040``, the slot
+  previously marked available in ``src/h/rmacros.h``) on the handle.
+  Subsequent ``read()`` / ``reads()`` calls then run
+  ``UqMaybeTagRead`` and tag their results when the payload is
+  multi-byte. This is implemented at the file, socket, messaging, and
+  SSH channel return points :cite:`AlGharaibeh:UTR26`.
+  Pseudo-terminal *reads* will tag if the bit is set; ``open()``
+  itself still cannot carry ``i`` onto a pty handle
+  (:ref:`section 9 <sec-status>`). SFTP open rewrites the status word
+  and likewise drops the bit. ``u`` remains untranslated; a different
+  unused letter is still an open question.
 - **A global default** for ``open()`` when the caller omits a mode is
   not implemented.
 
@@ -400,12 +409,11 @@ values as strings. ASCII is never tagged -- ``unicode("hello")`` is a
 no-op -- and on ASCII, ``*s``, ``s[i]``, and scanning already match
 the text view.
 
-``unicode(s)`` is the text view: ``*`` and ``[]`` are codepoints. The
-inverse would return the same UTF-8 bytes with an untagged descriptor,
-so ``*`` and ``[]`` mean bytes. That operation is not implemented; a
-descriptor copy plus ``SetStrLen`` is sufficient. Until then, the
-practical way to drop the tag is to write the bytes and read them back
-without mode ``i``.
+``unicode(s)`` is the text view: ``*`` and ``[]`` are codepoints. There
+is no public inverse yet. Internally it would be the same UTF-8 bytes
+with the tag cleared (a descriptor copy plus ``SetStrLen``) so ``*``
+and ``[]`` mean bytes. ``string()`` is not that operation
+(:ref:`section 7.1 <sec-string>`).
 
 .. _sec-string:
 
@@ -433,8 +441,11 @@ a builtin ``isunicode(s)`` is unnecessary; see
 7.2 Content test vs. tag test
 -----------------------------
 
-These are different questions. Below, ``foo`` stands for the inverse
-of ``unicode``.
+A string has two independent properties: whether its payload contains
+non-ASCII UTF-8, and whether this descriptor is currently tagged.
+Untagged café bytes from a file and a tagged café literal can have
+the same bytes; only the bit differs. Below, ``foo`` stands for the
+unimplemented inverse of ``unicode`` (same bytes, tag cleared).
 
 .. list-table::
    :header-rows: 1
@@ -821,6 +832,262 @@ literals became tagged, so ``move(*fromStr)`` skipped one codepoint
 and left leftover bytes for ``pdflatex``. That map is now built from
 ``char()`` bytes so the keys stay untagged; other byte-oriented
 scanners in the tree may need the same treatment.
+
+.. _sec-perf:
+
+10. Performance
+===============
+
+:ref:`Section 2 <sec-design>` requires that pure ASCII keep the
+historic string cost. :ref:`Section 10.1 <sec-bench-suite>` compares
+Unicon master to this implementation with Unicode compiled in, on a
+Linux host. :ref:`Section 10.2 <sec-ascii-bench>` isolates ASCII
+string operations on the same sources with the feature compiled out
+versus compiled in.
+
+.. _sec-bench-suite:
+
+10.1 ``tests/bench`` suite
+--------------------------
+
+``./run-benchmark`` averages three executions of each program, on a
+64-bit Linux host (AMD Ryzen 9 9950X, 32 cores, 4.4 GHz, gcc 13.3.0).
+The suite is a mix of allocation, arithmetic, and some string work; it
+is not an isolated string microbenchmark (:ref:`section 10.2
+<sec-ascii-bench>`). Sequential elapsed times, seconds:
+
+.. list-table::
+   :header-rows: 1
+
+   * - program
+     - master
+     - Unicode compiled in
+     - difference
+   * - concord
+     - 0.693
+     - 0.702
+     - +1.3%
+   * - deal
+     - 0.541
+     - 0.535
+     - -1.1%
+   * - ipxref
+     - 0.416
+     - 0.411
+     - -1.2%
+   * - queens
+     - 0.847
+     - 0.841
+     - -0.7%
+   * - rsg
+     - 0.541
+     - 0.525
+     - -3.0%
+   * - binary-trees
+     - 1.209
+     - 1.227
+     - +1.5%
+   * - fannkuch
+     - 0.719
+     - 0.733
+     - +1.9%
+   * - fasta
+     - 0.737
+     - 0.731
+     - -0.8%
+   * - k-nucleotide
+     - 1.079
+     - 1.078
+     - 0%
+   * - mandelbrot
+     - 2.955
+     - 2.924
+     - -1.0%
+   * - meteor-contest
+     - 1.020
+     - 1.021
+     - 0%
+   * - n-body
+     - 1.139
+     - 1.129
+     - -0.9%
+   * - pidigits
+     - 0.880
+     - 0.893
+     - +1.5%
+   * - regex-dna
+     - 1.119
+     - 1.115
+     - -0.4%
+   * - reverse-complement
+     - 0.951
+     - 0.948
+     - -0.3%
+   * - spectral-norm
+     - 0.816
+     - 0.782
+     - -4.2%
+
+Wall-clock time for the full suite was 1m23.3s on master and 1m23.5s
+with Unicode compiled in (user time 15m27s vs 15m41s). Sequential
+programs differ by at most a few percent, with no consistent
+direction. Concurrent programs on this host (``chameneos-redux``,
+concurrent ``regex-dna``, ``binary-trees``, ``mandelbrot``,
+``thread-ring``) vary more between runs than sequential ones and are
+not treated as a Unicode-cost signal.
+
+.. _sec-ascii-bench:
+
+10.2 ASCII string operations
+----------------------------
+
+``tests/bench/strascii/`` times one untagged ASCII operation per
+program. The two interpreters are this implementation without
+``--enable-unicode`` and with it; the strings stay untagged either
+way. Host: macOS, arm64, clang 21.0.0. ``cpu`` is milliseconds from
+``&time``; ``wall`` is milliseconds from ``gettimeofday()``.
+Each side is the mean of three runs. Difference is CPU on versus off
+(wall deltas match to a fraction of a percent).
+
+.. list-table::
+   :header-rows: 1
+
+   * - program
+     - n
+     - CPU off
+     - wall off
+     - CPU on
+     - wall on
+     - difference
+   * - ``*s``
+     - 100,000,000
+     - 3259
+     - 3261
+     - 3303
+     - 3306
+     - +1%
+   * - ``s[i]``
+     - 4,000
+     - 4367
+     - 4372
+     - 4407
+     - 4413
+     - +1%
+   * - ``a || b``
+     - 40,000,000
+     - 1620
+     - 1622
+     - 1661
+     - 1662
+     - +3%
+   * - ``s ||:= piece``
+     - 80,000,000
+     - 2426
+     - 2428
+     - 2432
+     - 2435
+     - 0%
+   * - ``s[i:j]``
+     - 20,000,000
+     - 1457
+     - 1458
+     - 1480
+     - 1481
+     - +2%
+   * - ``!s``
+     - 7,000
+     - 3702
+     - 3705
+     - 3713
+     - 3716
+     - 0%
+   * - ``move(1)``
+     - 16,000
+     - 2970
+     - 2973
+     - 2957
+     - 2959
+     - 0%
+   * - ``tab(&pos+1)``
+     - 13,000
+     - 3004
+     - 3006
+     - 3039
+     - 3043
+     - +1%
+   * - ``find()``
+     - 400,000
+     - 3597
+     - 3600
+     - 3610
+     - 3613
+     - 0%
+   * - ``match()``
+     - 70,000,000
+     - 3244
+     - 3247
+     - 3258
+     - 3261
+     - 0%
+   * - ``reverse()``
+     - 14,000,000
+     - 2650
+     - 2653
+     - 2651
+     - 2654
+     - 0%
+
+The shell ``time`` of ``make run`` was 33.1s with Unicode compiled out
+and 32.7s with it compiled in (mean of three on each side). CPU and
+wall agree to a few milliseconds on both builds. Every program is
+within 3%. ASCII-only work does not pay a measurable tax when the
+feature is compiled in.
+
+The 1--3% residuals are not UTF-8 walks. Untagged ASCII never takes
+the tagged branch. The on-build still does extra work that rtt
+deletes entirely from the off-build:
+
+- ``StrLen`` is ``(q).dword & ByteLenMask`` rather than the historic
+  dword. Every length read pays an extra AND. ``SetStrLen`` writes a
+  masked length (and clears tag bits that were already 0).
+- ``if (IsUniQual(...))`` is still present. The UTF-8 body does not
+  run; the branch is predicted not taken. Off-build: the ``if`` is
+  gone.
+- Every ``||`` calls ``uq_concat_propagate``, which tests both
+  operands and returns immediately when neither is tagged. No scan of
+  the payload.
+
+That accounts for the spread in the table:
+
+.. list-table::
+   :header-rows: 1
+
+   * - gap
+     - what the on-build does on untagged ASCII
+   * - ``a || b`` +3%
+     - 40 million allocate-and-copy operations, then
+       ``uq_concat_propagate``, then ``*(a || b)`` (another
+       ``IsUniQual`` and a masked ``StrLen``). A few extra nanoseconds
+       per operation on top of ``memcpy``.
+   * - ``s[i:j]`` +2%
+     - 20 million slices, two ``IsUniQual`` tests each (length bound,
+       then extract). ASCII takes the ``else`` and uses byte
+       ``StrLen``. No ``uq_seek_cp``.
+   * - ``*s``, ``s[i]``, ``tab`` +1%
+     - One failed tag test and a masked ``StrLen`` per operation,
+       tens of millions of times.
+   * - ``s ||:= piece`` 0%
+     - The same concat helper, but the loop appends 10 bytes at
+       ``strfree``. Interpreter overhead and ``alcstr`` dwarf two bit
+       tests. ``*s`` runs once per round, not per append.
+   * - ``find``, ``match``, ``reverse``, ``!s`` 0%
+     - The work is byte loops or allocation. The tag check is in the
+       noise.
+
+Nothing in this suite walks UTF-8 on pure ASCII. Shrinking the
+residual further (skipping the concat helper when both sides are
+untagged at the call site, or avoiding the ``StrLen`` mask until the
+tag is set) is not required: ASCII kept the historic cost.
 
 .. _sec-coverage:
 
