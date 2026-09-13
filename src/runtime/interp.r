@@ -823,7 +823,7 @@ L_areal:
           opnd = (word)strcons + GetWord;
 
             /*
-             * Unicon: literal tagging is a compile-time concern only.
+             * Unicode: literal tagging is a compile-time concern only.
              * icont (uniquallen(), lcode.c) encodes F_UniQual directly
              * into this literal's length word for every string literal
              * it compiles, tagged or not -- *rsp already carries the

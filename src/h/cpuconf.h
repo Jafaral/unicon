@@ -61,8 +61,10 @@
 
 /*
  * F_UniQual -- UTF-8-tagged string qualifier (same bit as F_Var; that
- * flag only applies when F_Nqual is set). Always defined: real bit when
- * UniconUnicode is on, else 0 so call sites need no #ifdef.
+ * flag only applies when F_Nqual is set). Defined as the real bit when
+ * UniconUnicode is on. Call sites that walk UTF-8 or set the tag are
+ * wrapped in #ifdef UniconUnicode; IsUniQual is 0 when the feature is
+ * off so a missed wrap still compiles.
  *
  * Qualifier dword layout with the feature on:
  *   bits 0-31   byte length   (ByteLenMask)

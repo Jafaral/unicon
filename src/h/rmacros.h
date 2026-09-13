@@ -42,7 +42,9 @@
 #define Fs_Pipe         020     /* reading or writing on a pipe */
                                 /* see also: BPipe down below */
 
+#ifdef UniconUnicode
 #define Fs_Unicode      040     /* tagged UTF-8 reads via open() "i" mode */
+#endif                                  /* UniconUnicode */
 
 #define Fs_Reading     0100     /* last file operation was read */
 #define Fs_Writing     0200     /* last file operation was write */
@@ -278,13 +280,16 @@
 #define Qual(d)         (!((d).dword & F_Nqual))
 
 /*
- * Length of string (byte length; always masked so F_UniQual/cp_count
- * bits are not part of the value). StrLen is no longer an lvalue --
- * use SetStrLen. SetStrLen overwrites dword (does not preserve tag /
- * cp_count): most call sites write into fresh descriptors whose prior
- * dword is garbage. To retag: SetStrLen, then SetUniQual, then
- * SetCpCount if needed.
+ * Length of string. With UniconUnicode, the qualifier dword also holds
+ * F_UniQual and a cached codepoint count, so StrLen masks to the low
+ * 32 bits and is not an lvalue -- use SetStrLen. SetStrLen overwrites
+ * dword (does not preserve tag / cp_count). To retag: SetStrLen, then
+ * SetUniQual, then SetCpCount if needed.
+ *
+ * Without UniconUnicode, StrLen is the historic dword lvalue and
+ * SetStrLen is a plain store -- no mask.
  */
+#ifdef UniconUnicode
 #define StrLen(q)       ((q).dword & ByteLenMask)
 #define SetStrLen(q,n)  ((q).dword = ((uword)(n) & ByteLenMask))
 
@@ -342,6 +347,9 @@ static inline word uq_seek_cp(const unsigned char *bytes, word target_cp)
    return bpos;
    }
 
+/* If the unknown side of a concat is this short, walk it rather than drop the known count. */
+#define UqConcatScanMax 4096
+
 /*
  * Opt-in tagging for a just-read string, gated on Fs_Unicode (open "i").
  * s is a struct descrip; status is the file status word.
@@ -356,6 +364,13 @@ static inline word uq_seek_cp(const unsigned char *bytes, word target_cp)
             } \
          } \
       } while (0)
+
+#else                                   /* UniconUnicode */
+#define StrLen(q)       ((q).dword)
+#define SetStrLen(q,n)  ((q).dword = (uword)(n))
+#define IsUniQual(d)    0
+#define UqMaybeTagRead(s, status) do { } while (0)
+#endif                                  /* UniconUnicode */
 
 /*
  * Location of first character of string.

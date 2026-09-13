@@ -66,20 +66,10 @@ operator{1} * size(x)
       }
    type_case x of {
       string: inline {
+#ifdef UniconUnicode
          /*
-          * Unicon Phase 0 (design doc, the *size fix): a tagged
-          * qualifier's size means codepoints, not bytes. The common
-          * case (string literal, cp_count cached by the Op_Str
-          * promotion trigger) is O(1). Concatenation results don't
-          * currently get cp_count propagated in every case (§5), so
-          * they can fall back to walking -- via the shared uq_scan
-          * helper (rmacros.h), not a fourth copy of the same loop.
-          * (Earlier version of this comment claimed RTT made sharing
-          * awkward -- that was never actually true for a plain C
-          * function in a universally-included header; the real RTT
-          * constraint, discovered later, was specifically about
-          * #ifdef evaluation inside .r body blocks, which doesn't
-          * apply to an ordinary function call like this one.)
+          * A tagged qualifier's size means codepoints, not bytes.
+          * Cached CpCount is O(1); otherwise walk with uq_scan.
           */
          if (IsUniQual(x)) {
             word uq_cnt = CpCount(x);
@@ -91,6 +81,7 @@ operator{1} * size(x)
             return C_integer uq_ncps;
             }
             }
+#endif                                  /* UniconUnicode */
          return C_integer StrLen(x);
          }
       list: inline {
@@ -175,6 +166,7 @@ operator{1} * size(x)
 end
 
 
+#ifdef UniconUnicode
 "unicode(s) - treat s as Unicode text: tag the descriptor and cache a"
 " codepoint count if the UTF-8 bytes are non-ASCII. Same bytes, new view."
 " Pure ASCII is left untagged. Already tagged: fill in a missing count."
@@ -208,6 +200,7 @@ function{1} unicode(s)
       return s;
       }
 end
+#endif                                  /* UniconUnicode */
 
 
 "=x - tab(match(x)).  Reverses effects if resumed."

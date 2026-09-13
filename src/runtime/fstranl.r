@@ -150,7 +150,7 @@ function{*} find(s1,s2,i,j)
       s1_len = StrLen(s1);
 
       /*
-       * Unicon: same reasoning as match() above -- i/j mean
+       * Unicode: same reasoning as match() above -- i/j mean
        * codepoints for a tagged s2, the byte comparison itself doesn't
        * need to change (UTF-8 self-synchronization), only the position
        * bookkeeping does. Unlike match(), find() is a generator, so
@@ -158,6 +158,7 @@ function{*} find(s1,s2,i,j)
        * s1 at each byte offset a codepoint boundary lands on, and
        * suspending the codepoint index rather than the byte offset.
        */
+#ifdef UniconUnicode
       if (IsUniQual(s2)) {
          word uq_ncps, uq_ii, uq_jj, uq_bpos, uq_bend;
          unsigned char *uq_bytes = (unsigned char *)StrLoc(s2);
@@ -200,6 +201,7 @@ function{*} find(s1,s2,i,j)
             }
          fail;
          }
+#endif                                  /* UniconUnicode */
 
       /*
        * Loop through s2[i:j] trying to find s1 at each point, stopping
@@ -241,7 +243,7 @@ function{0,1} many(c,s,i,j)
       C_integer start_i = cnv_i;
 
       /*
-       * Unicon Phase 0: str_anal (above) computed cnv_i/cnv_j using
+       * Unicode: str_anal (above) computed cnv_i/cnv_j using
        * StrLen(s) -- byte semantics. str_anal is an RTT-native
        * construct (not something in this file to edit directly), so
        * rather than touch it, a tagged s recomputes its own
@@ -255,6 +257,7 @@ function{0,1} many(c,s,i,j)
        * -- a b_unicset counterpart (design doc §8) would be needed to
        * do anything more than that.
        */
+#ifdef UniconUnicode
       if (IsUniQual(s)) {
          unsigned char *uq_bytes = (unsigned char *)StrLoc(s);
          word uq_blen = StrLen(s);
@@ -290,6 +293,7 @@ function{0,1} many(c,s,i,j)
             fail;
          return C_integer uq_ii;
          }
+#endif                                  /* UniconUnicode */
 
       /*
        * Move i along s[i:j] until a character that is not in c is found
@@ -321,7 +325,7 @@ function{0,1} match(s1,s2,i,j)
       char *str1, *str2;
 
       /*
-       * Unicon: i/j mean codepoints, not bytes, for a tagged s2.
+       * Unicode: i/j mean codepoints, not bytes, for a tagged s2.
        * str_anal (above) already computed cnv_i/cnv_j using byte-based
        * StrLen(s2) -- discarded here in favor of recomputing from the
        * original i/j the same way many()/sect() do. The byte-level
@@ -331,6 +335,7 @@ function{0,1} match(s1,s2,i,j)
        * a correct codepoint-level match. Only the bounds fed into the
        * comparison, and the position returned, need to mean codepoints.
        */
+#ifdef UniconUnicode
       if (IsUniQual(s2)) {
          word uq_ncps, uq_ii, uq_jj, uq_bstart, uq_bend, uq_s1cp;
          unsigned char *uq_bytes = (unsigned char *)StrLoc(s2);
@@ -381,6 +386,7 @@ function{0,1} match(s1,s2,i,j)
 
          return C_integer uq_ii + uq_s1cp;
          }
+#endif                                  /* UniconUnicode */
 
       /*
        * Cannot match unless s2[i:j] is as long as s1.

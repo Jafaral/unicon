@@ -112,6 +112,7 @@ function{1} char(i)
 end
 
 
+#ifdef UniconUnicode
 "uchar(i) - produce a UTF-8 encoded string for Unicode codepoint i. The"
 " Unicode-aware alternative to char(), which stays byte-oriented (0-255)"
 " for backward compatibility -- see design doc for why."
@@ -177,6 +178,7 @@ function{1} uchar(i)
       }
       }
 end
+#endif                                  /* UniconUnicode */
 
 
 "collect(i1,i2) - call garbage collector to ensure i2 bytes in region i1."
@@ -705,6 +707,7 @@ function{1} ord(s)
 end
 
 
+#ifdef UniconUnicode
 "uord(s) - produce the Unicode codepoint of the single UTF-8 character"
 " in s. The Unicode-aware alternative to ord(), which stays byte-oriented"
 " for backward compatibility. Strict about malformed input -- errors"
@@ -759,6 +762,7 @@ function{1} uord(s)
       return C_integer uq_cp;
       }
 end
+#endif                                  /* UniconUnicode */
 
 
 "name(v) - return the name of a variable."

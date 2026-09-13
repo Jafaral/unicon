@@ -24,7 +24,7 @@ function{0,1+} move(i)
       /*
        * Save old &pos.  Local variable j holds &pos before the move.
        *
-       * Unicon Phase 0: if &subject is tagged, i/j/&pos mean
+       * Unicode: if &subject is tagged, i/j/&pos mean
        * codepoints, not bytes -- the position arithmetic itself
        * (bounds checks, +=) is already unit-agnostic (same principle
        * as cvpos(), design doc §4), so it needs no changes at all.
@@ -36,6 +36,7 @@ function{0,1+} move(i)
        */
       oldpos = j = k_pos;
 
+#ifdef UniconUnicode
       if (IsUniQual(k_subject)) {
          if (CpCount(k_subject) != CpCountSentinel)
             uq_total = CpCount(k_subject);
@@ -43,6 +44,7 @@ function{0,1+} move(i)
             uq_scan((unsigned char *)StrLoc(k_subject), StrLen(k_subject), &uq_total);
          }
       else
+#endif                                  /* UniconUnicode */
          uq_total = StrLen(k_subject);
 
       /*
@@ -68,6 +70,7 @@ function{0,1+} move(i)
       /*
        * Suspend substring of &subject that was moved over.
        */
+#ifdef UniconUnicode
       if (IsUniQual(k_subject)) {
          unsigned char *uq_bytes = (unsigned char *)StrLoc(k_subject);
          word uq_start = uq_seek_cp(uq_bytes, j - 1);
@@ -75,6 +78,7 @@ function{0,1+} move(i)
          suspend string(uq_end - uq_start, (char *)(uq_bytes + uq_start));
          }
       else
+#endif                                  /* UniconUnicode */
          suspend string(i, StrLoc(k_subject) + j - 1);
 
       /*
@@ -107,11 +111,12 @@ function{0,1} pos(i)
       CURTSTATE();
 
       /*
-       * Unicon Phase 0: pos() never touches actual bytes -- it's
+       * Unicode: pos() never touches actual bytes -- it's
        * purely a position comparison, and cvpos() is already
        * unit-agnostic (design doc §4). Only the bound passed to it
        * needs to mean codepoints instead of bytes for a tagged subject.
        */
+#ifdef UniconUnicode
       if (IsUniQual(k_subject)) {
          if (CpCount(k_subject) != CpCountSentinel)
             uq_total = CpCount(k_subject);
@@ -119,6 +124,7 @@ function{0,1} pos(i)
             uq_scan((unsigned char *)StrLoc(k_subject), StrLen(k_subject), &uq_total);
          }
       else
+#endif                                  /* UniconUnicode */
          uq_total = StrLen(k_subject);
 
       /*
@@ -149,11 +155,12 @@ function{0,1+} tab(i)
       CURTSTATE();
 
       /*
-       * Unicon Phase 0: same shape as move() -- uq_total replaces
+       * Unicode: same shape as move() -- uq_total replaces
        * StrLen(k_subject) as the bound everywhere (cvpos() is already
        * unit-agnostic), and only the final substring extraction needs
        * a tagged-aware branch to turn positions into byte pointers.
        */
+#ifdef UniconUnicode
       if (IsUniQual(k_subject)) {
          if (CpCount(k_subject) != CpCountSentinel)
             uq_total = CpCount(k_subject);
@@ -161,6 +168,7 @@ function{0,1+} tab(i)
             uq_scan((unsigned char *)StrLoc(k_subject), StrLen(k_subject), &uq_total);
          }
       else
+#endif                                  /* UniconUnicode */
          uq_total = StrLen(k_subject);
 
       /*
@@ -195,6 +203,7 @@ function{0,1+} tab(i)
       /*
        * Suspend the portion of &subject that was tabbed over.
        */
+#ifdef UniconUnicode
       if (IsUniQual(k_subject)) {
          unsigned char *uq_bytes = (unsigned char *)StrLoc(k_subject);
          word uq_start = uq_seek_cp(uq_bytes, j - 1);
@@ -202,6 +211,7 @@ function{0,1+} tab(i)
          suspend string(uq_end - uq_start, (char *)(uq_bytes + uq_start));
          }
       else
+#endif                                  /* UniconUnicode */
          suspend string(i, StrLoc(k_subject) + j - 1);
 
       /*

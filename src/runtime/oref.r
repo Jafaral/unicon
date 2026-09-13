@@ -26,6 +26,7 @@ operator{*} ! bang(underef x -> dx)
           * a character can tag or untag the result.
           */
          for (i = 1; ; i++) {
+#ifdef UniconUnicode
             word n, bpos, w;
             unsigned char *bytes;
 
@@ -41,7 +42,9 @@ operator{*} ! bang(underef x -> dx)
                w = uq_lead_width(bytes[bpos]);
                suspend tvsubs(&x, bpos + 1, w);
                }
-            else {
+            else
+#endif                                  /* UniconUnicode */
+            {
                if (i > StrLen(dx))
                   break;
                suspend tvsubs(&x, i, (word)1);
@@ -457,6 +460,7 @@ operator{*} ! bang(underef x -> dx)
                 * the same values as s[i]. Untagged strings stay one
                 * byte each.
                 */
+#ifdef UniconUnicode
                if (IsUniQual(dx)) {
                   unsigned char *bytes = (unsigned char *)StrLoc(dx);
                   word ncps, cp, bpos, w;
@@ -477,11 +481,14 @@ operator{*} ! bang(underef x -> dx)
                      }
                   }
                else {
+#endif                                  /* UniconUnicode */
                   for (i = 1; i <= StrLen(dx); i++) {
                      ch = *(StrLoc(dx) + i - 1);
                      suspend string(1, (char *)&allchars[FromAscii(ch) & 0xFF]);
                      }
+#ifdef UniconUnicode
                   }
+#endif                                  /* UniconUnicode */
                }
             }
          else
@@ -522,6 +529,7 @@ operator{0,1} ? random(underef x -> dx)
           * trapped variable. On a tagged Unicon string the range is
           * codepoints and the trap spans the full UTF-8 character.
           */
+#ifdef UniconUnicode
          if (IsUniQual(dx)) {
             word ncps, bpos, w;
             unsigned char *bytes;
@@ -539,6 +547,7 @@ operator{0,1} ? random(underef x -> dx)
             w = uq_lead_width(bytes[bpos]);
             return tvsubs(&x, bpos + 1, w);
             }
+#endif                                  /* UniconUnicode */
          if ((val = StrLen(dx)) <= 0)
             fail;
          rval = RandVal;        /* This form is used to get around */
@@ -563,6 +572,7 @@ operator{0,1} ? random(underef x -> dx)
             CURTSTATE();
 #endif                                  /* ConcurrentCOMPILER */
 
+#ifdef UniconUnicode
             if (IsUniQual(dx)) {
                word ncps, bpos, w;
                unsigned char *bytes;
@@ -580,6 +590,7 @@ operator{0,1} ? random(underef x -> dx)
                w = uq_lead_width(bytes[bpos]);
                return string(w, StrLoc(dx) + bpos);
                }
+#endif                                  /* UniconUnicode */
             if ((val = StrLen(dx)) <= 0)
                fail;
             rval = RandVal;
@@ -951,7 +962,7 @@ operator{0,1} [:] sect(underef x -> dx, i, j)
          word uq_total;
 
          /*
-          * Unicon Phase 0: same uq_total substitution as move/tab/pos
+          * Unicode: same uq_total substitution as move/tab/pos
           * (fscan.r) -- cvpos() is already unit-agnostic. sect goes
           * further than those: a multi-character slice can itself
           * contain non-ASCII content or not, independent of whether
@@ -962,6 +973,7 @@ operator{0,1} [:] sect(underef x -> dx, i, j)
           * subs_asgn fix rather than the coarser "inherit the source's
           * tag" shortcut.
           */
+#ifdef UniconUnicode
          if (IsUniQual(dx)) {
             if (CpCount(dx) != CpCountSentinel)
                uq_total = CpCount(dx);
@@ -969,6 +981,7 @@ operator{0,1} [:] sect(underef x -> dx, i, j)
                uq_scan((unsigned char *)StrLoc(dx), StrLen(dx), &uq_total);
             }
          else
+#endif                                  /* UniconUnicode */
             uq_total = StrLen(dx);
 
          i = cvpos((long)i, (long)uq_total);
@@ -985,6 +998,7 @@ operator{0,1} [:] sect(underef x -> dx, i, j)
          else
             j = j - i;
 
+#ifdef UniconUnicode
          if (IsUniQual(dx)) {
             unsigned char *uq_bytes = (unsigned char *)StrLoc(dx);
             word uq_bstart = uq_seek_cp(uq_bytes, i - 1);
@@ -1007,7 +1021,9 @@ operator{0,1} [:] sect(underef x -> dx, i, j)
                return uq_result;
                }
             }
-         else {
+         else
+#endif                                  /* UniconUnicode */
+            {
             if (use_trap) {
                return tvsubs(&x, i, j);
                }
@@ -1462,22 +1478,12 @@ operator{0,1} [] subsc(underef x -> dx,y)
             char ch;
             word i;
 
+#ifdef UniconUnicode
             if (is:string(dx) && IsUniQual(dx)) {
                /*
-                * Unicon Phase 0 (design doc §7.2): dx is a tagged
-                * Unicode string. y means codepoint index, not byte
-                * index. No cache/index yet -- Phase 0's whole point is
-                * demonstrating correctness before optimization -- so
-                * this walks from the start every time (the "baseline"
-                * scheme from the design doc's benchmarks), via the
-                * shared uq_scan/uq_seek_cp helpers (rmacros.h) rather
-                * than a fourth copy of the same inline loop. Unconditional
-                * -- no #ifdef here on purpose, see rmacros.h: IsUniQual
-                * is always defined (always false when the feature is
-                * off), so this branch is simply never taken rather than
-                * needing RTT to strip an #ifdef from inside a body
-                * block, which it doesn't do reliably (confirmed
-                * directly against generated intermediate C).
+                * Tagged Unicon string: y is a codepoint index, not a
+                * byte index. Walk from the start (no index cache yet)
+                * via uq_scan/uq_seek_cp.
                 */
                unsigned char *bytes = (unsigned char *)StrLoc(dx);
                word blen = StrLen(dx);
@@ -1491,14 +1497,14 @@ operator{0,1} [] subsc(underef x -> dx,y)
 
                bpos = uq_seek_cp(bytes, i - 1);
 
-               /* a single extracted character is small enough to stay
-                  a plain, untagged qualifier either way -- design doc
-                  §4.2 */
+               /* a single extracted character stays an untagged
+                  qualifier -- design doc §4.2 */
                if (use_trap)
                   return tvsubs(&x, bpos+1, uq_lead_width(bytes[bpos]));
                else
                   return string(uq_lead_width(bytes[bpos]), (char *)(bytes+bpos));
                }
+#endif                                  /* UniconUnicode */
 
             /*
              * Convert y to a position in x and fail if the position

@@ -678,7 +678,7 @@ void f(dptr s, dptr d)
           */
          MakeStr(StrLoc(v) + Blk(bp,Tvsubs)->sspos - 1, Blk(bp,Tvsubs)->sslen, d);
          /*
-          * Unicon Phase 0: this is the far more common path for a
+          * Unicode: this is the far more common path for a
           * Unicode-aware sect/subsc result than oref.r's own tagging
           * logic ever reaches -- sspos/sslen are already byte-based
           * (matching what tvsubs() is always called with), so this is
@@ -690,6 +690,7 @@ void f(dptr s, dptr d)
           * up, not oref.r's own body block (see design doc §8/§5 for
           * why that surprised the first version of this fix).
           */
+#ifdef UniconUnicode
          if (IsUniQual(v)) {
             word uq_ncps;
             if (uq_scan((unsigned char *)StrLoc(*d), StrLen(*d), &uq_ncps)) {
@@ -698,6 +699,7 @@ void f(dptr s, dptr d)
                   SetCpCount(*d, uq_ncps);
                }
             }
+#endif                                  /* UniconUnicode */
         }
 
       tvtbl: {

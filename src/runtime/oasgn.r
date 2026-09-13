@@ -525,7 +525,7 @@ int subs_asgn(dptr dest, const dptr src)
    memcpy(StrLoc(rsltstr)+prelen+StrLen(srcstr), StrLoc(deststr)+poststrt, postlen);
 
    /*
-    * Unicon Phase 0: propagate the tag if either deststr or srcstr
+    * Unicode: propagate the tag if either deststr or srcstr
     * is tagged -- this was the confirmed gap (design doc §8 item 2):
     * subs_asgn never called SetUniQual at all, so a substring
     * assignment into a tagged string silently untagged the result.
@@ -536,6 +536,7 @@ int subs_asgn(dptr dest, const dptr src)
     * (a lead byte with no continuation, or a continuation with no
     * lead) caches a count that does not match a walk of rsltstr.
     */
+#ifdef UniconUnicode
    if (IsUniQual(deststr) || IsUniQual(srcstr)) {
       word uq_ncps;
       SetUniQual(rsltstr);
@@ -543,6 +544,7 @@ int subs_asgn(dptr dest, const dptr src)
       if ((uword)uq_ncps <= CpCountMax)
          SetCpCount(rsltstr, uq_ncps);
       }
+#endif                                  /* UniconUnicode */
 
    /*
     * Perform the assignment and update the trapped variable.

@@ -774,20 +774,12 @@ Deliberate Syntax Error
                status &= ~Fs_Untrans;
                continue;
 
+#ifdef UniconUnicode
             case 'i':
             case 'I':
-               /*
-                * Unicon Phase 0: explicit per-file/socket opt-in for
-                * Unicode-aware reads(), matching the same
-                * text/binary-mode-flag convention as 't'/'b' rather
-                * than automatic scanning at every read() call, which
-                * was benchmarked and rejected (readbench.c: a naive
-                * scan roughly 15-50x slower in relative terms than
-                * today's plain memcpy at realistic read sizes -- see
-                * design doc for the numbers this decision is based on).
-                */
                status |= Fs_Unicode;
                continue;
+#endif                                  /* UniconUnicode */
 
             case '6':
 #if defined(PosixFns) || defined(Messaging)
@@ -1270,7 +1262,11 @@ Deliberate Syntax Error
                extern int Merror;
                if (do_verify != 0)
                   status |= Fs_Verify;
-               if (status & ~(Fs_Messaging|Fs_Read|Fs_Write|Fs_Untrans|Fs_Verify|Fs_Unicode)) {
+               if (status & ~(Fs_Messaging|Fs_Read|Fs_Write|Fs_Untrans|Fs_Verify
+#ifdef UniconUnicode
+                              |Fs_Unicode
+#endif
+                             )) {
                   runerr(209, spec);
                   }
                else {
@@ -1594,7 +1590,10 @@ Deliberate Syntax Error
                af_fam = AF_UNSPEC;
 
             /* The only allowed values for flags are "n" and "na" */
-            if (status & ~(Fs_Read|Fs_Write|Fs_Socket|Fs_Append|Fs_Unbuf|Fs_Listen|Fs_Unicode
+            if (status & ~(Fs_Read|Fs_Write|Fs_Socket|Fs_Append|Fs_Unbuf|Fs_Listen
+#ifdef UniconUnicode
+                          |Fs_Unicode
+#endif
 #if HAVE_LIBSSL
                           |Fs_Encrypt
 #endif                                  /* HAVE_LIBSSL */
@@ -2441,9 +2440,14 @@ function{0,1} reads(f,i)
             }
          INC_NARTHREADS_CONTROLLED;
          {
-         /* local s (char*) shadows the outer struct descrip s -- build
-            a separate temporary to tag rather than risk string(...)'s
-            expression-vs-return-position semantics */
+         /*
+          * UqMaybeTagRead needs a descriptor it can mutate. return
+          * string(p, n) builds the qualifier at the return site, so
+          * there is no value to tag afterwards. MakeStr here points
+          * at bytes already in string space -- no extra allocation.
+          * The result is tended because it is a qualifier into string
+          * space; local char *s shadows the outer descrip s.
+          */
          tended struct descrip uq_result;
          MakeStr(s, slen, &uq_result);
          UqMaybeTagRead(uq_result, status);
@@ -2686,6 +2690,7 @@ function{0,1} reads(f,i)
                dlen = i;
             Protect(sptr = alcstr(dbuf, dlen), runerr(0));
             {
+            /* Same as the pty reads() path: tag a named descriptor. */
             tended struct descrip uq_result;
             MakeStr(sptr, dlen, &uq_result);
             UqMaybeTagRead(uq_result, status);
@@ -2705,9 +2710,12 @@ function{0,1} reads(f,i)
             nbytes = i;
          Protect(sptr = alcstr(de->d_name, nbytes), runerr(0));
          {
-         /* directory entry names are legitimately UTF-8 on most modern
-            filesystems -- worth tagging on request the same as any
-            other text content */
+         /*
+          * Directory names are UTF-8 on most filesystems; tag on
+          * request like any other text. Same tended-descriptor reason
+          * as the pty reads() path: return string() cannot be tagged
+          * after the fact.
+          */
          tended struct descrip uq_result;
          MakeStr(sptr, nbytes, &uq_result);
          UqMaybeTagRead(uq_result, status);
@@ -2812,7 +2820,7 @@ function{0,1} reads(f,i)
          fail;
       SetStrLen(s, tally);
       /*
-       * Unicon Phase 0: explicit per-file opt-in, set via open()'s
+       * Unicode: explicit per-file opt-in, set via open()'s
        * "i" mode char (Fs_Unicode). Not automatic -- every read() call
        * paying a scan, even ones that never touch non-ASCII content,
        * was benchmarked and rejected (readbench.c, design doc). status

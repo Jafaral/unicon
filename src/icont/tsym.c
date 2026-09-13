@@ -173,7 +173,7 @@ static void putglob(char *id, int id_type, int n_args)
  * putlit makes a constant symbol table entry and returns the table "index"
  *  of the constant.  alclit does the work if there is a collision.
  *
- * Unicon Phase 0: for a string literal (idtype == F_StrLit), scan its
+ * Unicode: for a string literal (idtype == F_StrLit), scan its
  * bytes once, here, at translate time -- id/len are already the final,
  * decoded byte content (confirmed empirically: literals like "caf\xc3\xa9"
  * already produce byte-correct UTF-8 in the compiled icode's string
@@ -192,12 +192,14 @@ int putlit(char *id, int idtype, int len)
    register struct tcentry *ptr;
 
    if (idtype == F_StrLit) {
+#ifdef UniconUnicode
       register int uq_i;
       for (uq_i = 0; uq_i < len; uq_i++)
          if (((unsigned char *)id)[uq_i] >= 0x80) {
             idtype |= F_UniQualLit;
             break;
             }
+#endif                                  /* UniconUnicode */
       }
 
    if ((ptr = clookup(id,idtype)) == NULL) {   /* add to head of hash chain */

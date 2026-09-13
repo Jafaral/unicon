@@ -690,7 +690,7 @@ function{1} reverse(x)
       register word slen;
 
       /*
-       * Unicon: a naive byte-reversal breaks a multi-byte codepoint's
+       * Unicode: a naive byte-reversal breaks a multi-byte codepoint's
        * lead-byte/continuation-byte structure -- reversing "café"
        * (bytes c,a,f,0xC3,0xA9) byte-for-byte produces 0xA9,0xC3,f,a,c,
        * which is not valid UTF-8 (0xA9 is a continuation byte and
@@ -703,6 +703,7 @@ function{1} reverse(x)
        * end -- so the first codepoint encountered ends up last, and its
        * own bytes are copied as a unit, not reversed themselves.
        */
+#ifdef UniconUnicode
       if (IsUniQual(x)) {
          unsigned char *uq_src = (unsigned char *)StrLoc(x);
          word uq_slen = StrLen(x);
@@ -731,6 +732,7 @@ function{1} reverse(x)
             }
          return result;
          }
+#endif                                  /* UniconUnicode */
 
       /*
        * Allocate a copy of x.
