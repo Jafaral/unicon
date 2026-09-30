@@ -194,7 +194,7 @@ jobs:
           mesa-libGL-devel mesa-libGLU-devel \
           openssl-devel libssh-devel unixODBC-devel freetype-devel libXft-devel
         case "${{ matrix.cfg.image }}" in
-          fedora*) dnf -y install openal-devel freealut-devel libogg-devel libvorbis-devel ;;
+          fedora*) dnf -y install openal-soft-devel freealut-devel libogg-devel libvorbis-devel ;;
         esac
 
     - name: Configure

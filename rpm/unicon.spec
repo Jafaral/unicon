@@ -21,7 +21,7 @@ BuildRequires: libXft-devel, freetype-devel
 # for libraries that were actually linked come from the automatic soname
 # generator, so a Rocky build does not require OpenAL.
 %if 0%{?fedora}
-BuildRequires: openal-devel, freealut-devel, libogg-devel, libvorbis-devel
+BuildRequires: openal-soft-devel, freealut-devel, libogg-devel, libvorbis-devel
 %endif
 
 
