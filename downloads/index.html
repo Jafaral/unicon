@@ -56,6 +56,17 @@
 <ul>
 <li><em>none yet</em></li>
 </ul>
+<h2>Arch Linux / CachyOS</h2>
+<p>Download either the Arch Linux or the CachyOS directory.
+ They are built in different containers and are not
+ interchangeable. From the graphics directory, skip the
+ no-graphics packages. They conflict with this set:</p>
+<pre><code>sudo pacman -U $(ls ./*.pkg.tar.zst | grep -v nographics)</code></pre>
+<p>The <code>nographics</code> directory contains only
+ <code>unicon-runtime-nographics</code>.</p>
+<ul>
+<li><em>none yet</em></li>
+</ul>
 <h2>Windows</h2>
 <p>Download the 64-bit <code>.exe</code> and run it. The installer
  is unsigned, so Windows may report an unknown publisher.
