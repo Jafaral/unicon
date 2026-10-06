@@ -1949,9 +1949,8 @@ the idle window between operations. Status including \texttt{type}
 (material role), \texttt{op} (operation), certificate identity, and a
 non-destructive hash \texttt{hash} peek uses \texttt{h["\textit{name}"]}.
 For a co-expression or list, integer attribute codes from
-\texttt{threadh.icn} query thread inbox/outbox sizes and query or set
-their limits and channel limits (see Chapter~8; requires Concurrent).
-Sizes are read-only; several limits may be set in one call.
+\texttt{threadh.icn} query or set thread inbox/outbox and channel limits
+(see Chapter~8; requires Concurrent).
 
 \bigskip
 \hrule\vspace{0.1cm}
@@ -3003,9 +3002,13 @@ uses \texttt{write}/\texttt{read} through the SSL layer like TLS.
 UDP sockets must be in the INET domain; the
 address must have a colon. 
 
-For a DBM database, only one modifier character may be used: if
-\texttt{s1} is \texttt{"dr"} it indicates that the database should be
-opened in read-only mode.  For an ODBC database, following the mode
+For a DBM database, \texttt{"d"} opens for reading and writing and
+\texttt{"dr"} opens read-only. The database file is locked. As for a
+socket, the optional integer third argument is a timeout in
+milliseconds: 0, or omitting it, waits until the lock is free, and a
+positive value makes \texttt{open()} fail if the lock is still busy
+then. \texttt{lock=no} opens without a lock; \texttt{lock=yes} is the
+default.  For an ODBC database, following the mode
 letter \texttt{"o"} comes an optional string default table name used
 by functions such as \texttt{dbcolumns()}, followed by two generally
 required strings giving the username and password authentication for the
@@ -3731,9 +3734,7 @@ program that created \texttt{c}.
 
 \noindent
 \index{wait()}\texttt{wait(x)} waits for \texttt{x}. If \texttt{x} is
-a thread, \texttt{wait()} waits for it to finish. A thread is waited for
-once: \texttt{wait()} fails if the thread never ran or has already been
-waited for, also by a concurrent \texttt{wait()}. If \texttt{x} is
+a thread, \texttt{wait()} waits for it to finish. If \texttt{x} is
 a condition variable \texttt{wait()} waits until that variable is
 subsequently signaled by another thread. The condition variable's mutex
 must be locked by the calling thread (run-time error 186 otherwise), and
