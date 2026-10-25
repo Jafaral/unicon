@@ -702,6 +702,10 @@ int checkOpenConsole( FILE *w, char *s );
       wclrp     alc_rgbTrueColor        (wbp w,unsigned long r,
                                            unsigned long g, unsigned long b);
       int       alc_centry              (wdp wd);
+      int       buckinsert              (wdp wd, wclrp wc);
+      int       buckdelete              (wdp wd, wclrp wc);
+      int       ensure_wcolor           (int *numColors, int *sizColors,
+                                           int **theColors, int limit);
       wclrp     alc_color               (wbp w, char *s);
       void      copy_colors             (wbp w1, wbp w2);
       void      free_xcolor             (wbp w, unsigned long c);
