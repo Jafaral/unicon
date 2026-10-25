@@ -3211,14 +3211,14 @@ int mutable_color(wbp w, dptr argv, int ac, int *retval)
    colorname = colorname + strlen(colorname) + 1;
    *colorname = '\0';                           /* value unknown */
 
-   if (ws->numColors < WMAXCOLORS) {
-      if (ws->theColors == NULL) {
-         ws->theColors = (short *)calloc(WMAXCOLORS, sizeof(short));
-         if (ws->theColors == NULL)
-            return RunError;
-         }
-      ws->theColors[ws->numColors++] = i;
+   if (ws->theColors == NULL) {
+      ws->theColors = (short *)calloc(WMAXCOLORS, sizeof(short));
+      if (ws->theColors == NULL)
+         return RunError;
+      ws->sizColors = WMAXCOLORS;
       }
+   if (ws->numColors < ws->sizColors)
+      ws->theColors[ws->numColors++] = i;
 
    if (ac > 0) {                     /* set the color */
       if (ac != 1) return RunError;
@@ -4371,16 +4371,14 @@ Pixmap loadimage(wbp w, char *filename,
          wd->colors[j].b = color.blue;
          clr = lcolor(w, color);
          sprintf(wd->colors[j].name,"%ld,%ld,%ld",clr.red,clr.green,clr.blue);
-         if (ws->numColors == WMAXCOLORS)
-            ;
-         else {
-            if (ws->theColors == NULL) {
-               ws->theColors = (short *)calloc(WMAXCOLORS, sizeof(short));
-               if (ws->theColors == NULL)
-                  return (Pixmap) NULL;
-               }
-            ws->theColors[ws->numColors++] = j;
+         if (ws->theColors == NULL) {
+            ws->theColors = (short *)calloc(WMAXCOLORS, sizeof(short));
+            if (ws->theColors == NULL)
+               return (Pixmap) NULL;
+            ws->sizColors = WMAXCOLORS;
             }
+         if (ws->numColors < ws->sizColors)
+            ws->theColors[ws->numColors++] = j;
          }
 #else                                   /* HAVE_LIBXPM */
       return (Pixmap) NULL;
