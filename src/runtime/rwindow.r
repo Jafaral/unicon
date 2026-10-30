@@ -3777,11 +3777,11 @@ int wattrib(wbp w, char *s, long len, dptr answer, char * abuf)
          break;
          }
       case A_IMAGE: {
-#if NT
+#ifdef MSWindows
          ws->initimage.format = UCOLOR_BGR;
-#else
+#else                                   /* MSWindows */
          ws->initimage.format = UCOLOR_RGB;
-#endif
+#endif                                  /* MSWindows */
          ws->initimage.is_bottom_up = 0;
 
          /* first try supported image file formats; then try platform-dependent format */

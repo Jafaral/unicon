@@ -2486,11 +2486,11 @@ function{0,1} ReadImage(argv[argc])
       else
 #endif                                  /* Graphics3D */
       {
-#if NT
+#ifdef MSWindows
          imd.format = UCOLOR_BGR;
-#else
+#else                                   /* MSWindows */
          imd.format = UCOLOR_RGB;
-#endif
+#endif                                  /* MSWindows */
          imd.is_bottom_up = 0;
       }
 
