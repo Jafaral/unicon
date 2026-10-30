@@ -1231,110 +1231,142 @@ struct palentry *bmp_paltbl(int n, int *colortable)
 }
 
 /*
- * Construct Icon-style imgdata from BMP-style rasterdata.
- * Only trick we know about so far is to reverse rows so first row is bottom
- * But apparently this is wrong (for some bmp's?) if there's no color table.
+ * Little-endian fields of a BMP header.
  */
-unsigned char * bmp_data(int width, int height, int bpp, char * rasterdata, int bottom_up)
+static long bmp_le32(unsigned char *b)
 {
-   int i;
-   int rowbytes = width * bpp;
-   char *tmp;
-
-   if (bottom_up) return (unsigned char *)rasterdata;
-
-   if ((tmp = malloc(rowbytes))==NULL) return NULL;
-   for(i=0;i<height/2;i++) {
-      memmove(tmp, rasterdata + (i * rowbytes), rowbytes);
-      memmove(rasterdata + (i * rowbytes),
-           rasterdata + (height-i-1) * rowbytes, rowbytes);
-      memmove(rasterdata + (height-i-1) * rowbytes, tmp, rowbytes);
-      }
-  free(tmp);
-  return (unsigned char *)rasterdata;
+   return (long)((unsigned long)b[0] | ((unsigned long)b[1] << 8) |
+                 ((unsigned long)b[2] << 16) | ((unsigned long)b[3] << 24));
 }
 
+static int bmp_le16(unsigned char *b)
+{
+   return b[0] | (b[1] << 8);
+}
 
 /*
  * readBMP() - BMP file reader, patterned after readGIF().
+ *
+ * Reads uncompressed BMP files with 1, 4 or 8 bits per pixel (with a
+ * color table) or 24 or 32 bits per pixel.  The file stores pixels as
+ * blue, green, red; imd->format says which order the caller wants.  Rows
+ * are padded to a multiple of four bytes, and are stored bottom up
+ * unless the height is negative.
  */
 int readBMP(char *filename, int p, struct imgdata *imd)
 {
   FILE *f;
-  int c;
-  char headerstuff[52]; /* 54 - 2 byte magic number = 52 */
-  int filesize, width, height, compression, imagesize, numcolors;
-  short bitcount;
+  unsigned char hdr[54], *row = NULL, *data = NULL;
   int *colortable = NULL;
-  char *rasterdata;
+  long offbits, hdrsize, stride, i;
+  int width, height, topdown = 0, bitcount, compression, numcolors;
+  int x, y, outbpp;
+
   if ((f = fopen(filename, "rb")) == NULL) return Failed;
-  if (((c = getc(f)) != 'B') || ((c = getc(f)) != 'M')) {
+  if (fread(hdr, 1, 54, f) < 54 || hdr[0] != 'B' || hdr[1] != 'M') {
      fclose(f);
      return Failed;
      }
-  if (fread(headerstuff, 1, 52, f) < 52) {
-     fclose(f);
-     return Failed;
-     }
-  filesize = *(int *)(headerstuff);
-  width = *(int *)(headerstuff+16);
-  height = *(int *)(headerstuff+20);
-  bitcount = *(short *)(headerstuff+26);
-  switch(bitcount) {
-     case 1: numcolors = 1; break;
-     case 4: numcolors = 16; break;
-     case 8: numcolors = 256; break;
-     case 16: numcolors = 65536; break;
-     case 24: numcolors = 65536 * 256;
-     default:
-        /* teart as 8-bit ?*/
-        numcolors = 256; break;
-     }
-  compression = *(int *)(headerstuff+28);
+  offbits = bmp_le32(hdr+10);
+  hdrsize = bmp_le32(hdr+14);
+  width = (int)bmp_le32(hdr+18);
+  height = (int)bmp_le32(hdr+22);
+  bitcount = bmp_le16(hdr+28);
+  compression = (int)bmp_le32(hdr+30);
+  numcolors = (int)bmp_le32(hdr+46);
   if (compression != 0) {
      fprintf(stderr, "warning, can't read compressed bmp's yet\n");
      fclose(f);
      return Failed;
      }
-
-  imagesize = *(int *)(headerstuff+32);
-  if (compression == 0 && (imagesize==0)) {
-     imagesize = filesize - 54;
-     if (bitcount <= 8) imagesize -= 4 * numcolors;
+  if (height < 0) {
+     height = -height;
+     topdown = 1;
+     }
+  if (hdrsize < 40 || width <= 0 || height <= 0 ||
+      (bitcount != 1 && bitcount != 4 && bitcount != 8 &&
+       bitcount != 24 && bitcount != 32)) {
+     fclose(f);
+     return Failed;
      }
 
+  /*
+   * The color table follows the header; it has 2^bitcount entries
+   * unless the header says how many are used.
+   */
   if (bitcount <= 8) {
-     if ((colortable = (int *)malloc(4 * numcolors)) == NULL) {
-        fclose(f); return Failed;
-        }
-     if (fread(colortable, 4, numcolors, f) < numcolors) {
-        fclose(f); return Failed;
-        }
+     if (numcolors <= 0 || numcolors > (1 << bitcount))
+        numcolors = 1 << bitcount;
+     if ((colortable = (int *)malloc(4 * numcolors)) == NULL ||
+         fseek(f, 14 + hdrsize, SEEK_SET) != 0 ||
+         fread(colortable, 4, numcolors, f) < numcolors)
+        goto bmperr;
      }
-  if ((rasterdata = (char *)malloc(imagesize))) {
-     if (fread(rasterdata, 1, imagesize, f) < imagesize) {
-        fclose(f); return Failed;
-        }
-     /* OK, read the whole thing, now what to do with it ? */
-     imd->width = width;
-     imd->height = height;
-     if (colortable) {
-        imd->paltbl = bmp_paltbl(numcolors, colortable);
-        imd->data = bmp_data(width, height, 1, rasterdata, imd->is_bottom_up);
-        }
-     else {
-        imd->paltbl = NULL;
-        imd->data = bmp_data(width, height, 3, rasterdata, imd->is_bottom_up);
-#if NT
-        if (imd->format == UCOLOR_RGB &&  bitcount == 24 ){
-           unsigned char *byte, t;
-           for (byte=imd->data; byte<imd->data+width*height*3; byte+=3)
-             {t = byte[0]; byte[0] = byte[2]; byte[2] = t;}
+
+  stride = ((long)width * bitcount + 31) / 32 * 4;
+  outbpp = (bitcount <= 8) ? 1 : 3;
+  if ((row = malloc(stride)) == NULL ||
+      (data = malloc((long)width * height * outbpp)) == NULL ||
+      fseek(f, offbits, SEEK_SET) != 0)
+     goto bmperr;
+
+  for (i = 0; i < height; i++) {
+     unsigned char *out;
+     if (fread(row, 1, stride, f) < stride)
+        goto bmperr;
+     y = topdown ? i : height - 1 - i;          /* row from the top */
+     if (imd->is_bottom_up)
+        y = height - 1 - y;
+     out = data + (long)y * width * outbpp;
+     switch (bitcount) {
+        case 1:
+           for (x = 0; x < width; x++)
+              out[x] = (row[x >> 3] >> (7 - (x & 7))) & 1;
+           break;
+        case 4:
+           for (x = 0; x < width; x++)
+              out[x] = (x & 1) ? (row[x >> 1] & 15) : (row[x >> 1] >> 4);
+           break;
+        case 8:
+           memcpy(out, row, width);
+           break;
+        default: {                              /* 24 or 32 bits */
+           int n = bitcount / 8;
+           unsigned char *o = out;
+           for (x = 0; x < width; x++, o += 3) {
+              unsigned char *px = row + x * n;  /* blue, green, red */
+              if (imd->format == UCOLOR_BGR) {
+                 o[0] = px[0]; o[1] = px[1]; o[2] = px[2];
+                 }
+              else {
+                 o[0] = px[2]; o[1] = px[1]; o[2] = px[0];
+                 }
+              }
            }
-#endif
         }
-     return Succeeded;
+     if (bitcount <= 8)                         /* stay inside the table */
+        for (x = 0; x < width; x++)
+           if (out[x] >= numcolors) out[x] = 0;
      }
+
+  imd->width = width;
+  imd->height = height;
+  if (colortable) {
+     if ((imd->paltbl = bmp_paltbl(numcolors, colortable)) == NULL)
+        goto bmperr;
+     }
+  else
+     imd->paltbl = NULL;
+  imd->data = data;
+  free(colortable);
+  free(row);
+  fclose(f);
+  return Succeeded;
+
+bmperr:
+  free(colortable);
+  free(row);
+  free(data);
   fclose(f);
   return Failed;
 }
@@ -2246,12 +2278,13 @@ int writeBMP(wbp w, char *filename, int x, int y, int width, int height)
 
 static int bmpwrite(wbp w, char *filename, int x, int y, int width, int height)
    {
-   int i, a[6];
+   int i, a[6], stride;
    short sh[2];
    long len;
    struct palentry paltbl[DMAXCOLORS];
 
    len = (long)width * (long)height;    /* total length of data */
+   stride = (width + 3) / 4 * 4;        /* bytes per row in the file */
 
    if (!(gf_f = fopen(filename, "wb")))
       return Failed;
@@ -2264,7 +2297,7 @@ static int bmpwrite(wbp w, char *filename, int x, int y, int width, int height)
       return RunError;
 
    fprintf(gf_f, "BM");
-   a[0] = 54 + 4 * 256 + len;
+   a[0] = 54 + 4 * 256 + stride * height;
    a[1] = 0;
    a[2] = 54 + 4 * 256;
    a[3] = 40;
@@ -2275,22 +2308,29 @@ static int bmpwrite(wbp w, char *filename, int x, int y, int width, int height)
    sh[1] = 8;
    if (fwrite(sh, 2, 2, gf_f) < 2) return Failed;
    a[0] = 0;
-   a[1] = len;
+   a[1] = stride * height;
    a[2] = a[3] = 3938; /* presumably, hardwire to assume 100dpi */
    a[4] = 256; /* colors used */
    a[5] = 0; /* colors important */
    if (fwrite(a, 4, 6, gf_f) < 6) return Failed;
 
    for (i=0; i<256; i++) {
-      unsigned char c[4];
-      c[0] = paltbl[i].clr.red >> 8;
+      unsigned char c[4];                       /* blue, green, red, 0 */
+      c[0] = paltbl[i].clr.blue >> 8;
       c[1] = paltbl[i].clr.green >> 8;
-      c[2] = paltbl[i].clr.blue >> 8;
+      c[2] = paltbl[i].clr.red >> 8;
       c[3] = 0;
       if (fwrite(c, 4, 1, gf_f) < 1) return Failed;
       }
-   if (bmp_data(width, height, 1, (char *)gf_string, 0) == NULL) return RunError;
-   if (fwrite(gf_string, width, height, gf_f) < height) return Failed;
+   /* rows go bottom up, each padded to a multiple of four bytes */
+   for (i = height - 1; i >= 0; i--) {
+      static unsigned char pad[3];
+      if (fwrite(gf_string + (long)i * width, 1, width, gf_f) < width)
+         return Failed;
+      if (stride > width &&
+          fwrite(pad, 1, stride - width, gf_f) < stride - width)
+         return Failed;
+      }
    return Succeeded;
 }
 
