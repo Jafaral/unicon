@@ -597,6 +597,11 @@ when those libraries were found):
   match the faces existing programs were laid out for. Each window
   chooses for itself, including after it is open:
   \texttt{WAttrib("aa=on")}. Unicon sizes stay pixel heights.
+  With \texttt{aa=on}, \texttt{Font(w)} returns the string last
+  requested, so saving it and passing it back restores the same face
+  and size. A raw fontconfig pattern takes an \texttt{fc:} prefix
+  (\texttt{font=fc:Arial:pixelsize=18}); \texttt{Font(w)} keeps that
+  prefix.
   \texttt{./configure --without-Xft} leaves Xft out of the binary.
 \item \textbf{2D/3D OpenGL} (\texttt{"gl"} / OpenGL 2D): FreeType
   rasterizes fonts for the GL path. The font string may name a
