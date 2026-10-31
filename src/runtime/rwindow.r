@@ -1955,6 +1955,92 @@ void my_error_exit (j_common_ptr cinfo)
 /*
  * jpegread(filename, p, image) - read jpeg file
  */
+/*
+ * Exif data (in a JPEG APP1 marker) is a TIFF file, in either byte order.
+ */
+static unsigned long exif_get(unsigned char *b, int n, int bigendian)
+{
+   unsigned long v = 0;
+   int i;
+   for (i = 0; i < n; i++)
+      v |= (unsigned long)b[bigendian ? i : n - 1 - i] << (8 * (n - 1 - i));
+   return v;
+}
+
+/*
+ * jpeg_orientation(cinfo) - return the Exif orientation (1 to 8) of a JPEG
+ * file whose APP1 markers were saved, or 1 (shown as stored) if it has
+ * none.  Cameras store pictures as the sensor read them and record how
+ * to turn them upright in this tag of the first image directory.
+ */
+static int jpeg_orientation(struct jpeg_decompress_struct *cinfo)
+{
+   struct jpeg_marker_struct *m;
+   unsigned char *d;
+   unsigned long len, ifd, n, i, v;
+   int be;
+
+   for (m = cinfo->marker_list; m != NULL; m = m->next) {
+      if (m->marker != JPEG_APP0 + 1 || m->data_length < 6 + 8 ||
+          memcmp(m->data, "Exif\0\0", 6))
+         continue;
+      d = m->data + 6;
+      len = m->data_length - 6;
+      if (d[0] == 'M' && d[1] == 'M') be = 1;
+      else if (d[0] == 'I' && d[1] == 'I') be = 0;
+      else continue;
+      ifd = exif_get(d + 4, 4, be);
+      if (ifd > len || len - ifd < 2)
+         continue;
+      n = exif_get(d + ifd, 2, be);
+      for (i = 0; i < n && (len - ifd - 2) / 12 > i; i++) {
+         unsigned char *e = d + ifd + 2 + 12 * i;
+         if (exif_get(e, 2, be) == 0x0112) {      /* Orientation */
+            v = exif_get(e + 8, 2, be);
+            return (v >= 1 && v <= 8) ? (int)v : 1;
+            }
+         }
+      }
+   return 1;
+}
+
+/*
+ * jpeg_turn(imd, bpp, orient) - turn an image read top row first upright
+ * according to its Exif orientation, giving rows in the order imd asks.
+ * Orientations 5 to 8 swap the width and the height.
+ */
+static int jpeg_turn(struct imgdata *imd, int bpp, int orient)
+{
+   int w = imd->width, h = imd->height, dw, dh, dx, dy, sx, sy;
+   unsigned char *out, *o;
+
+   if ((out = malloc((size_t)w * h * bpp)) == NULL)
+      return Failed;
+   dw = (orient >= 5) ? h : w;
+   dh = (orient >= 5) ? w : h;
+   for (dy = 0; dy < dh; dy++) {
+      o = out + (size_t)(imd->is_bottom_up ? dh - 1 - dy : dy) * dw * bpp;
+      for (dx = 0; dx < dw; dx++, o += bpp) {
+         switch (orient) {
+            case 2:  sx = w - 1 - dx; sy = dy;         break; /* mirrored */
+            case 3:  sx = w - 1 - dx; sy = h - 1 - dy; break; /* turned 180 */
+            case 4:  sx = dx;         sy = h - 1 - dy; break; /* flipped */
+            case 5:  sx = dy;         sy = dx;         break; /* transposed */
+            case 6:  sx = dy;         sy = h - 1 - dx; break; /* turn 90 cw */
+            case 7:  sx = w - 1 - dy; sy = h - 1 - dx; break; /* transverse */
+            case 8:  sx = w - 1 - dy; sy = dx;         break; /* turn 90 ccw */
+            default: sx = dx;         sy = dy;         break;
+            }
+         memcpy(o, imd->data + ((size_t)sy * w + sx) * bpp, bpp);
+         }
+      }
+   free(imd->data);
+   imd->data = out;
+   imd->width = dw;
+   imd->height = dh;
+   return Succeeded;
+}
+
 static int jpegread(char *filename, int p, struct imgdata *imd)
 {
    struct jpeg_decompress_struct cinfo; /* libjpeg struct */
@@ -1962,7 +2048,7 @@ static int jpegread(char *filename, int p, struct imgdata *imd)
    JSAMPARRAY buffer;
    unsigned char *row_ptr;
    int row_stride, row_stride_shift;
-   int i;
+   int i, orient;
    static FILE *jpg_f = NULL;                   /* input file */
 
 #ifdef MSWindows
@@ -1984,7 +2070,9 @@ static int jpegread(char *filename, int p, struct imgdata *imd)
 
    jpeg_create_decompress(&cinfo);
    jpeg_stdio_src(&cinfo, jpg_f);
+   jpeg_save_markers(&cinfo, JPEG_APP0 + 1, 0xFFFF);    /* for Exif */
    jpeg_read_header(&cinfo, TRUE);
+   orient = jpeg_orientation(&cinfo);
 
    /*
     * set parameters for decompression
@@ -2042,7 +2130,10 @@ static int jpegread(char *filename, int p, struct imgdata *imd)
    buffer = (*cinfo.mem->alloc_sarray)
       ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
-   if (imd->is_bottom_up){
+   /*
+    * A picture to be turned upright is read top row first, then turned.
+    */
+   if (imd->is_bottom_up && orient == 1){
       row_stride_shift = -row_stride;
       row_ptr = imd->data + (cinfo.output_height-1) * row_stride;
       }
@@ -2079,6 +2170,9 @@ static int jpegread(char *filename, int p, struct imgdata *imd)
 
    fclose(jpg_f);
    jpg_f = NULL;
+
+   if (orient != 1)
+      return jpeg_turn(imd, row_stride / imd->width, orient);
    return Succeeded;
 }
 
