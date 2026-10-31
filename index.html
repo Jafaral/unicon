@@ -333,15 +333,6 @@ replace dnf with yum):</p>
 <pre><code>dnf install libjpeg-turbo-devel libpng-devel libX11-devel mesa-libGL-devel mesa-libGLU-devel
             freetype-devel openal-soft-devel freealut-devel libogg-devel libvorbis-devel
         openssl-devel libssh-devel unixODBC-devel libXft-devel libXpm-devel</code></pre>
-<p><code>libXft</code> links antialiased 2D X11 text (<code>Xft</code>
-in <code>unicon -features</code>; fontconfig comes along as an Xft
-dependency). A window uses it when its <code>aa</code> attribute is
-<code>on</code> (<code>WOpen("aa=on")</code> or
-<code>WAttrib("aa=on")</code>). The default is off unless
-<code>UNICON_XFT=on</code>. <code>./configure --without-Xft</code>
-leaves it out of the binary. FreeType rasterizes TrueType/OpenType fonts
-for OpenGL graphics and is also used under Xft. See the Fonts section of
-the Unicon book (Chapter 7) and UTR 21/22.</p>
 <p>Go into the Unicon directory and run:</p>
 <pre><code>./configure
 make -j</code></pre>
@@ -390,7 +381,7 @@ build:</p></li>
 <li>Install the optional libraries for a full build (Unicon will build
 without them but some features will be absent).</li>
 </ul>
-<pre><code>pacman -S mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh mingw-w64-ucrt-x86_64-libpng mingw-w64-ucrt-x86_64-libjpeg-turbo </code></pre>
+<pre><code>pacman -S mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh mingw-w64-ucrt-x86_64-libpng mingw-w64-ucrt-x86_64-libjpeg-turbo mingw-w64-ucrt-x86_64-freetype</code></pre>
 <ul>
 <li>Clone the Unicon repository:</li>
 </ul>
@@ -400,7 +391,7 @@ with different conventions for the end of line character.</p>
 <ul>
 <li>Configure Unicon:</li>
 </ul>
-<pre><code>./configure --build=x86_64-w64-mingw32</code></pre>
+<pre><code>./configure --build=x86_64-w64-mingw32 CPPFLAGS=-I/ucrt64/include/freetype2</code></pre>
 <p>The option <code>x86_64-w64-mingw32</code> ensures the build is
 64-bit. After the script finishes do:</p>
 <pre><code>make</code></pre>
