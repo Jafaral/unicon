@@ -2072,12 +2072,12 @@ static int pngread(char *filename, int p, struct imgdata *imd)
     */
 
    /*
-    * do file gamma for gamma correction, or use a default gamma
+    * Like the pixels of other image files, PNG samples are shown as they
+    * are, unless a gAMA (or sRGB) chunk says how they were encoded; then
+    * convert them for a standard (sRGB, gamma 2.2) display.
     */
    if (png_get_gAMA(png_ptr, info_ptr, &gamma))
-      png_set_gamma(png_ptr, GammaCorrection, gamma);
-   else
-      png_set_gamma(png_ptr, GammaCorrection, 1.0/2.2);
+      png_set_gamma(png_ptr, 2.2, gamma);
 
    /*
     * All transformations have been registered; now update info_ptr data,
