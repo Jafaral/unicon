@@ -2332,6 +2332,84 @@ static int bmpwrite(wbp w, char *filename, int x, int y, int width, int height)
 
 
 /*
+ * getimpal(w, x, y, width, height, paltbl, data) - get an image as a
+ * string of color indices, one per pixel, and a table of the colors as
+ * they are shown.  More than 256 colors are mapped onto a 6x7x6 color
+ * cube.  Returns 0 if the image cannot be read.
+ */
+static int getimpal(wbp w, int x, int y, int width, int height,
+                    struct palentry paltbl[DMAXCOLORS], unsigned char *data)
+   {
+   unsigned char *rgb, *s;
+   unsigned long clist[DMAXCOLORS], px, lastpx = 0;
+   long i, len = (long)width * height;
+   int n = 0, k = 0, lo, hi, cube = 0;
+
+   if (!(rgb = (unsigned char *)malloc((msize)len * 3 + 1)))
+      return 0;
+   if (!getimstr24(w, x, y, width, height, rgb)) {
+      free(rgb);
+      return 0;
+      }
+
+   /*
+    * Make a sorted list of the colors, as long as there are no more than
+    * DMAXCOLORS of them.
+    */
+   for (i = 0, s = rgb; i < len; i++, s += 3) {
+      px = ((unsigned long)s[0] << 16) | ((unsigned long)s[1] << 8) | s[2];
+      for (lo = 0, hi = n; lo < hi; ) {
+         k = (lo + hi) / 2;
+         if (clist[k] < px) lo = k + 1;
+         else hi = k;
+         }
+      if (lo < n && clist[lo] == px)
+         continue;
+      if (n == DMAXCOLORS) {
+         cube = 1;
+         break;
+         }
+      memmove(clist + lo + 1, clist + lo, (n - lo) * sizeof(clist[0]));
+      clist[lo] = px;
+      n++;
+      }
+
+   for (i = 0, s = rgb; i < len; i++, s += 3) {
+      if (cube)
+         k = ((s[0] * 5 + 127) / 255 * 7 + (s[1] * 6 + 127) / 255) * 6 +
+             (s[2] * 5 + 127) / 255;
+      else {
+         px = ((unsigned long)s[0] << 16) | ((unsigned long)s[1] << 8) | s[2];
+         if (i == 0 || px != lastpx) {
+            for (lo = 0, hi = n - 1; lo < hi; ) {
+               k = (lo + hi) / 2;
+               if (clist[k] < px) lo = k + 1;
+               else hi = k;
+               }
+            k = lo;
+            lastpx = px;
+            }
+         }
+      data[i] = k;
+      if (!paltbl[k].used) {
+         paltbl[k].used = paltbl[k].valid = 1;
+         if (cube) {
+            paltbl[k].clr.red = k / 42 * 51 * 257;
+            paltbl[k].clr.green = k / 6 % 7 * 255 / 6 * 257;
+            paltbl[k].clr.blue = k % 6 * 51 * 257;
+            }
+         else {
+            paltbl[k].clr.red = (px >> 16) * 257;
+            paltbl[k].clr.green = ((px >> 8) & 0xFF) * 257;
+            paltbl[k].clr.blue = (px & 0xFF) * 257;
+            }
+         }
+      }
+   free(rgb);
+   return 1;
+   }
+
+/*
  * writeGIF(w, filename, x, y, width, height) - write GIF image
  *
  * Returns Succeeded, Failed, or RunError.
@@ -2378,7 +2456,7 @@ static int gfwrite(wbp w, char *filename, int x, int y, int width, int height)
 
    for (i = 0; i < DMAXCOLORS; i++)
       paltbl[i].used = paltbl[i].valid = paltbl[i].transpt = 0;
-   if (!getimstr(w, x, y, width, height, paltbl, gf_string))
+   if (!getimpal(w, x, y, width, height, paltbl, gf_string))
       return RunError;
 
    gfpack(gf_string, len, paltbl);      /* pack color table, set color params */
