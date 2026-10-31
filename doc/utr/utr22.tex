@@ -39,11 +39,11 @@ details on this implementation.
 
 Currently, the OpenGL-based 2D facilities described in this report
 have only been implemented and tested on Linux systems.
-The OpenGL 2D and 2D/3D facilities are experimental and are not built by
-default.  They require the OpenGL and FreeType development headers and
-libraries (and, on Linux, the X11 ones), and are enabled with
-\texttt{./configure --enable-opengl2d}.
-The source code is configured when \texttt{OpenGL 2D graphics} appears in
+The OpenGL 2D and 2D/3D facilities are enabled by installing the OpenGL and 
+FreeType development headers and libraries. 
+Additionally, Linux systems require the installation of X11 development headers 
+and libraries.
+The source code is configured when \texttt{OpenGL graphics} appears in 
 the \texttt{unicon -features} listing.
 
 The OpenGL graphics implementation is toggled on/off by setting/unsetting  
@@ -874,6 +874,16 @@ font names---\texttt{mono}, \texttt{typewriter}, \texttt{sans}, and
 \texttt{serif}---use different base fonts. It is possible for users to load 
 a specific font if needed by providing their own TrueType or OpenType font 
 files. See Section 2.3 (Fonts) for more details.
+
+This FreeType path applies to the OpenGL-based graphics implementation
+described in this report. The classic X11 2D backend
+(\texttt{open(..., "g")} without OpenGL 2D) is separate: when
+\texttt{unicon -features} lists \texttt{Xft}, that backend can draw
+antialiased text with Xft, fontconfig, and FreeType if the window's
+\texttt{aa} attribute is \texttt{on} (the default follows
+\texttt{UNICON\_XFT} and is otherwise off). It does not load
+\texttt{.ttf} files through the OpenGL font API. See the Fonts
+section of the Unicon book and UTR~21 for build options.
 
 \subsubsection{Lines}
 
