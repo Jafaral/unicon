@@ -1245,71 +1245,217 @@ static int bmp_le16(unsigned char *b)
 }
 
 /*
+ * bmp_mask() - find where a bit-field color mask sits: its shift and width.
+ */
+static void bmp_mask(unsigned long m, int *shift, int *bits)
+{
+   *shift = *bits = 0;
+   if (m == 0) return;
+   while (!(m & 1)) { m >>= 1; (*shift)++; }
+   while (m & 1) { m >>= 1; (*bits)++; }
+}
+
+/*
+ * bmp_chan() - scale the bits of a color channel to the range 0 - 255.
+ */
+static int bmp_chan(unsigned long px, int shift, int bits)
+{
+   unsigned long v, max;
+   if (bits == 0) return 0;
+   v = (px >> shift) & ((1UL << bits) - 1);
+   if (bits >= 8) return (int)(v >> (bits - 8));
+   max = (1UL << bits) - 1;
+   return (int)((v * 255 + max / 2) / max);
+}
+
+/*
  * readBMP() - BMP file reader, patterned after readGIF().
  *
- * Reads uncompressed BMP files with 1, 4 or 8 bits per pixel (with a
- * color table) or 24 or 32 bits per pixel.  The file stores pixels as
- * blue, green, red; imd->format says which order the caller wants.  Rows
- * are padded to a multiple of four bytes, and are stored bottom up
- * unless the height is negative.
+ * Reads BMP files with 1, 4 or 8 bits per pixel and a color table,
+ * uncompressed or (4 and 8 bits) run-length encoded, and files with 16,
+ * 24 or 32 bits per pixel, uncompressed or (16 and 32 bits) with color
+ * bit fields.  Both the Windows header and the older OS/2 one are read.
+ * The file stores pixels as blue, green, red; imd->format says which
+ * order the caller wants.  Rows are padded to a multiple of four bytes,
+ * and are stored bottom up unless the height is negative.
  */
 int readBMP(char *filename, int p, struct imgdata *imd)
 {
   FILE *f;
-  unsigned char hdr[54], *row = NULL, *data = NULL;
+  unsigned char hdr[70], *row = NULL, *data = NULL, *rle = NULL;
   int *colortable = NULL;
-  long offbits, hdrsize, stride, i;
-  int width, height, topdown = 0, bitcount, compression, numcolors;
-  int x, y, outbpp;
+  long offbits, hdrsize, stride, i, rlelen = 0;
+  int width, height, topdown = 0, bitcount, compression, numcolors, entsize;
+  int x, y, outbpp, shift[3], bits[3];
+  unsigned long mask[3];
 
   if ((f = fopen(filename, "rb")) == NULL) return Failed;
-  if (fread(hdr, 1, 54, f) < 54 || hdr[0] != 'B' || hdr[1] != 'M') {
+  if (fread(hdr, 1, 26, f) < 26 || hdr[0] != 'B' || hdr[1] != 'M') {
      fclose(f);
      return Failed;
      }
   offbits = bmp_le32(hdr+10);
   hdrsize = bmp_le32(hdr+14);
-  width = (int)bmp_le32(hdr+18);
-  height = (int)bmp_le32(hdr+22);
-  bitcount = bmp_le16(hdr+28);
-  compression = (int)bmp_le32(hdr+30);
-  numcolors = (int)bmp_le32(hdr+46);
-  if (compression != 0) {
-     fprintf(stderr, "warning, can't read compressed bmp's yet\n");
+  if (hdrsize == 12) {                          /* OS/2 BITMAPCOREHEADER */
+     width = bmp_le16(hdr+18);
+     height = (short)bmp_le16(hdr+20);
+     bitcount = bmp_le16(hdr+24);
+     compression = 0;
+     numcolors = 0;
+     entsize = 3;
+     }
+  else {
+     if (hdrsize < 40 || fread(hdr+26, 1, 28, f) < 28) {
+        fclose(f);
+        return Failed;
+        }
+     width = (int)bmp_le32(hdr+18);
+     height = (int)bmp_le32(hdr+22);
+     bitcount = bmp_le16(hdr+28);
+     compression = (int)bmp_le32(hdr+30);
+     numcolors = (int)bmp_le32(hdr+46);
+     entsize = 4;
+     }
+
+  /*
+   * Compression 0 is none, 1 and 2 are run-length encoding of 8 and 4-bit
+   * pixels, and 3 and 6 give the color bit fields (masks) of 16 and 32-bit
+   * pixels, which follow the 40-byte header or are part of a longer one.
+   */
+  if (!((compression == 0) ||
+        (compression == 1 && bitcount == 8) ||
+        (compression == 2 && bitcount == 4) ||
+        ((compression == 3 || compression == 6) &&
+         (bitcount == 16 || bitcount == 32)))) {
+     fprintf(stderr, "warning, can't read this kind of bmp file\n");
      fclose(f);
      return Failed;
      }
   if (height < 0) {
+     /*
+      * RLE rows are stored bottom up.  Negating INT_MIN does not fit
+      * in an int, so that height is refused rather than wrapped.
+      */
+     if (compression == 1 || compression == 2 || height == INT_MIN) {
+        fclose(f);
+        return Failed;
+        }
      height = -height;
      topdown = 1;
      }
-  if (hdrsize < 40 || width <= 0 || height <= 0 ||
+  if (width <= 0 || height <= 0 ||
       (bitcount != 1 && bitcount != 4 && bitcount != 8 &&
-       bitcount != 24 && bitcount != 32)) {
+       bitcount != 16 && bitcount != 24 && bitcount != 32)) {
      fclose(f);
      return Failed;
      }
 
+  if (compression == 3 || compression == 6) {
+     if (fread(hdr+54, 1, 12, f) < 12) {
+        fclose(f);
+        return Failed;
+        }
+     for (i = 0; i < 3; i++)
+        mask[i] = (unsigned long)bmp_le32(hdr + 54 + 4 * i);
+     }
+  else if (bitcount == 16) {                    /* 5 bits each: x1r5g5b5 */
+     mask[0] = 0x7C00; mask[1] = 0x03E0; mask[2] = 0x001F;
+     }
+  else {
+     mask[0] = 0xFF0000; mask[1] = 0xFF00; mask[2] = 0xFF;
+     }
+  for (i = 0; i < 3; i++)                       /* red, green, blue */
+     bmp_mask(mask[i], &shift[i], &bits[i]);
+
   /*
    * The color table follows the header; it has 2^bitcount entries
-   * unless the header says how many are used.
+   * unless the header says how many are used.  OS/2 entries have three
+   * bytes, Windows ones four.
    */
   if (bitcount <= 8) {
      if (numcolors <= 0 || numcolors > (1 << bitcount))
         numcolors = 1 << bitcount;
-     if ((colortable = (int *)malloc(4 * numcolors)) == NULL ||
-         fseek(f, 14 + hdrsize, SEEK_SET) != 0 ||
-         fread(colortable, 4, numcolors, f) < numcolors)
+     if ((colortable = (int *)calloc(numcolors, 4)) == NULL ||
+         hdrsize > LONG_MAX - 14 ||
+         fseek(f, 14 + hdrsize, SEEK_SET) != 0)
         goto bmperr;
+     for (i = 0; i < numcolors; i++)
+        if (fread(colortable + i, 1, entsize, f) < entsize)
+           goto bmperr;
      }
 
   stride = ((long)width * bitcount + 31) / 32 * 4;
   outbpp = (bitcount <= 8) ? 1 : 3;
   if ((row = malloc(stride)) == NULL ||
-      (data = malloc((long)width * height * outbpp)) == NULL ||
+      (data = calloc((long)width * height, outbpp)) == NULL ||
       fseek(f, offbits, SEEK_SET) != 0)
      goto bmperr;
 
+  if (compression == 1 || compression == 2) {
+     /*
+      * Run-length encoded pixels: read them all, then expand them.
+      * A count with a pixel value is a run; a zero count is followed by
+      * 0 (end of row), 1 (end of image), 2 (move right dx and up dy), or
+      * the number of pixels given as they are, padded to two bytes.
+      * Pixels the encoding skips stay 0.
+      */
+     long pos = 0, n;
+     int c, d, k;
+     if (fseek(f, 0, SEEK_END) != 0 || (rlelen = ftell(f) - offbits) <= 0 ||
+         (rle = malloc(rlelen)) == NULL || fseek(f, offbits, SEEK_SET) != 0 ||
+         fread(rle, 1, rlelen, f) < rlelen)
+        goto bmperr;
+     x = y = 0;                                 /* y counts from the bottom */
+     while (pos + 1 < rlelen && y < height) {
+        c = rle[pos++];
+        d = rle[pos++];
+        if (c > 0) {
+           for (k = 0; k < c; k++) {
+              if (x >= 0 && x < width && y >= 0 && y < height)
+                 data[(long)(height - 1 - y) * width + x] =
+                    (compression == 1) ? d : ((k & 1) ? (d & 15) : (d >> 4));
+              if (x < INT_MAX) x++;
+              else x = width;                    /* do not wrap the column */
+              }
+           }
+        else if (d == 0) {                      /* end of row */
+           x = 0;
+           y++;
+           }
+        else if (d == 1)                        /* end of image */
+           break;
+        else if (d == 2) {                      /* move */
+           int dx, dy;
+           if (pos + 1 >= rlelen) break;
+           dx = rle[pos++];
+           dy = rle[pos++];
+           if (x > INT_MAX - dx) x = INT_MAX; else x += dx;
+           if (y > INT_MAX - dy) y = INT_MAX; else y += dy;
+           }
+        else {                                  /* d pixels as they are */
+           n = (compression == 1) ? d : (d + 1) / 2;
+           if (pos + n > rlelen) break;
+           for (k = 0; k < d; k++) {
+              if (x >= 0 && x < width && y >= 0 && y < height)
+                 data[(long)(height - 1 - y) * width + x] =
+                    (compression == 1) ? rle[pos + k] :
+                    ((k & 1) ? (rle[pos + k / 2] & 15) : (rle[pos + k / 2] >> 4));
+              if (x < INT_MAX) x++;
+              else x = width;                    /* do not wrap the column */
+              }
+           pos += n + (n & 1);
+           }
+        }
+     if (imd->is_bottom_up)                     /* turn the rows over */
+        for (y = 0; y < height / 2; y++) {
+           unsigned char *r1 = data + (long)y * width;
+           unsigned char *r2 = data + (long)(height - 1 - y) * width;
+           for (x = 0; x < width; x++) {
+              unsigned char t = r1[x]; r1[x] = r2[x]; r2[x] = t;
+              }
+           }
+     }
+  else
   for (i = 0; i < height; i++) {
      unsigned char *out;
      if (fread(row, 1, stride, f) < stride)
@@ -1330,24 +1476,42 @@ int readBMP(char *filename, int p, struct imgdata *imd)
         case 8:
            memcpy(out, row, width);
            break;
-        default: {                              /* 24 or 32 bits */
-           int n = bitcount / 8;
-           unsigned char *o = out;
-           for (x = 0; x < width; x++, o += 3) {
-              unsigned char *px = row + x * n;  /* blue, green, red */
+        case 24:
+           for (x = 0; x < width; x++, out += 3) {
+              unsigned char *px = row + (long)x * 3; /* blue, green, red */
               if (imd->format == UCOLOR_BGR) {
-                 o[0] = px[0]; o[1] = px[1]; o[2] = px[2];
+                 out[0] = px[0]; out[1] = px[1]; out[2] = px[2];
                  }
               else {
-                 o[0] = px[2]; o[1] = px[1]; o[2] = px[0];
+                 out[0] = px[2]; out[1] = px[1]; out[2] = px[0];
+                 }
+              }
+           break;
+        default: {                              /* 16 or 32 bits */
+           unsigned long px;
+           int r, g, b;
+           for (x = 0; x < width; x++, out += 3) {
+              if (bitcount == 16)
+                 px = (unsigned long)bmp_le16(row + (long)x * 2);
+              else
+                 px = (unsigned long)bmp_le32(row + (long)x * 4);
+              r = bmp_chan(px, shift[0], bits[0]);
+              g = bmp_chan(px, shift[1], bits[1]);
+              b = bmp_chan(px, shift[2], bits[2]);
+              if (imd->format == UCOLOR_BGR) {
+                 out[0] = b; out[1] = g; out[2] = r;
+                 }
+              else {
+                 out[0] = r; out[1] = g; out[2] = b;
                  }
               }
            }
         }
-     if (bitcount <= 8)                         /* stay inside the table */
-        for (x = 0; x < width; x++)
-           if (out[x] >= numcolors) out[x] = 0;
      }
+
+  if (bitcount <= 8)                            /* stay inside the table */
+     for (i = (long)width * height - 1; i >= 0; i--)
+        if (data[i] >= numcolors) data[i] = 0;
 
   imd->width = width;
   imd->height = height;
@@ -1360,12 +1524,14 @@ int readBMP(char *filename, int p, struct imgdata *imd)
   imd->data = data;
   free(colortable);
   free(row);
+  free(rle);
   fclose(f);
   return Succeeded;
 
 bmperr:
   free(colortable);
   free(row);
+  free(rle);
   free(data);
   fclose(f);
   return Failed;
