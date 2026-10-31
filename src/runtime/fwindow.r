@@ -2553,6 +2553,12 @@ function{0,1} ReadImage(argv[argc])
             }
 #endif                                  /* Graphics3D */
 
+         /*
+          * Show a color table from the file as given.  A GIF coerced to
+          * palette p already has the palette's (linear) colors.
+          */
+         if (imd.paltbl && p == 0)
+            linearpal(w, imd.paltbl);
          status = strimage(w, x, y, imd.width, imd.height, imd.paltbl,
                            imd.data, (word)imd.width * (word)imd.height, 0);
          if (status < 0)

@@ -2825,6 +2825,28 @@ int readImage(char *filename, int p, struct imgdata *imd){
    return Failed;
 }
 
+/*
+ * linearpal(w, e) - make a color table read from an image file linear.
+ *
+ * Image files give the colors to be shown, but strimage() gamma corrects
+ * the colors of a palette, which are linear like those of DrawImage()
+ * palettes and Fg().  Converting them first makes strimage() show the
+ * file's own colors, as it does for images without a color table.
+ * Rounding up keeps dark shades from turning darker on the way back.
+ */
+void linearpal(wbp w, struct palentry *e)
+   {
+   int i;
+   double gamma = w->context->gamma;
+
+   for (i = 0; i < DMAXCOLORS; i++)
+      if (e[i].valid) {
+         e[i].clr.red   = ceil(65535 * pow(e[i].clr.red   / 65535.0, gamma));
+         e[i].clr.green = ceil(65535 * pow(e[i].clr.green / 65535.0, gamma));
+         e[i].clr.blue  = ceil(65535 * pow(e[i].clr.blue  / 65535.0, gamma));
+         }
+   }
+
 int  writeImage (wbp w, char *filename, int x, int y, int width, int height){
    int itype;
    itype = image_type(filename);
@@ -3861,6 +3883,8 @@ int wattrib(wbp w, char *s, long len, dptr answer, char * abuf)
          /* first try supported image file formats; then try platform-dependent format */
          r = readImage(val, 0, &ws->initimage);
          if (r == Succeeded) {
+            if (ws->initimage.paltbl)
+               linearpal(w, ws->initimage.paltbl);
             setwidth(w, ws->initimage.width);
             setheight(w, ws->initimage.height);
             }

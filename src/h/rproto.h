@@ -524,6 +524,7 @@ int checkOpenConsole( FILE *w, char *s );
    int readGIF          (char *fname, int p, struct imgdata *d);
 
    int readImage        (char *filename, int p, struct imgdata *imd);
+   void linearpal       (wbp w, struct palentry *e);
    int writeImage       (wbp w, char *filename, int x, int y, int width, int height);
    int  rectargs        (wbp w, int argc, dptr argv, int i,
                            word *px, word *py, word *pw, word *ph);
