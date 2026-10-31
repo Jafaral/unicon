@@ -3091,9 +3091,19 @@ int readImage(char *filename, int p, struct imgdata *imd){
  * Image files give the colors to be shown, but strimage() gamma corrects
  * the colors of a palette, which are linear like those of DrawImage()
  * palettes and Fg().  Converting them first makes strimage() show the
- * file's own colors, as it does for images without a color table.
- * Rounding up keeps dark shades from turning darker on the way back.
+ * file's own colors.  Each component gets the linear value whose gamma
+ * corrected 8-bit value, computed as strimage() does, comes closest;
+ * with a gamma up to about 2.3, that is the file's value exactly.
  */
+static long linear1(long c, double gamma)
+   {
+   long v = c >> 8, l = (long)ceil(65535 * pow(c / 65535.0, gamma));
+   long hi = ((long)(65535 * pow(l / 65535.0, 1.0 / gamma)) >> 8) - v;
+   long lo = l > 0 ?
+      v - ((long)(65535 * pow((l - 1) / 65535.0, 1.0 / gamma)) >> 8) : hi + 1;
+   return (lo < hi) ? l - 1 : l;
+   }
+
 void linearpal(wbp w, struct palentry *e)
    {
    int i;
@@ -3101,10 +3111,97 @@ void linearpal(wbp w, struct palentry *e)
 
    for (i = 0; i < DMAXCOLORS; i++)
       if (e[i].valid) {
-         e[i].clr.red   = ceil(65535 * pow(e[i].clr.red   / 65535.0, gamma));
-         e[i].clr.green = ceil(65535 * pow(e[i].clr.green / 65535.0, gamma));
-         e[i].clr.blue  = ceil(65535 * pow(e[i].clr.blue  / 65535.0, gamma));
+         e[i].clr.red   = linear1(e[i].clr.red, gamma);
+         e[i].clr.green = linear1(e[i].clr.green, gamma);
+         e[i].clr.blue  = linear1(e[i].clr.blue, gamma);
          }
+   }
+
+/*
+ * imgtorgb(w, &x, &y, imd) - turn an image read from a file with a color
+ * table into one with three bytes per pixel, in imd->format order.
+ *
+ * strimage() draws such pixels exactly as given, at any gamma, while the
+ * linear colors of a palette cannot give every dark shade when the gamma
+ * is high.  Transparent pixels take the colors of the window's pixels
+ * under the image placed at (x,y); the part of the image outside the
+ * window is cut off, and x, y, and the size change to match (to a size
+ * of 0 if nothing is left).  With w NULL, an image with transparent
+ * pixels is left alone.  Returns Succeeded or Failed.
+ */
+int imgtorgb(wbp w, int *x, int *y, struct imgdata *imd)
+   {
+   struct palentry *e = imd->paltbl;
+   unsigned char *under = NULL, *out, *o, *s;
+   int i, j, c, trans = 0, cx = 0, cy = 0, cw = imd->width, ch = imd->height;
+   int r = 0, g = 1, b = 2;
+
+   if (e == NULL)
+      return Succeeded;
+   for (i = 0; i < DMAXCOLORS; i++)
+      if (e[i].used && !e[i].valid)
+         trans = 1;
+   if (trans) {
+      wsp ws;
+      if (w == NULL)
+         return Failed;
+      ws = w->window;
+      cx = (*x < 0) ? -*x : 0;                  /* cut to the window */
+      cy = (*y < 0) ? -*y : 0;
+      if (*x + cw > ws->width)  cw = ws->width - *x;
+      if (*y + ch > ws->height) ch = ws->height - *y;
+      cw -= cx;
+      ch -= cy;
+      if (cw <= 0 || ch <= 0) {
+         free(imd->data);
+         free(e);
+         imd->data = NULL;
+         imd->paltbl = NULL;
+         imd->width = imd->height = 0;
+         return Succeeded;
+         }
+      if ((under = malloc((size_t)cw * ch * 3)) == NULL)
+         return Failed;
+      if (!getimstr24(w, *x + cx, *y + cy, cw, ch, under)) {
+         free(under);
+         return Failed;
+         }
+      }
+   if ((out = malloc((size_t)cw * ch * 3)) == NULL) {
+      free(under);
+      return Failed;
+      }
+   if (imd->format == UCOLOR_BGR) {
+      r = 2; b = 0;
+      }
+   o = out;
+   for (j = 0; j < ch; j++) {
+      s = imd->data + (size_t)(j + cy) * imd->width + cx;
+      for (i = 0; i < cw; i++, o += 3) {
+         c = *s++;
+         if (e[c].valid) {
+            o[r] = e[c].clr.red >> 8;
+            o[g] = e[c].clr.green >> 8;
+            o[b] = e[c].clr.blue >> 8;
+            }
+         else {                                 /* RGB from getimstr24() */
+            unsigned char *u = under + ((size_t)j * cw + i) * 3;
+            o[r] = u[0];
+            o[g] = u[1];
+            o[b] = u[2];
+            }
+         }
+      }
+   free(under);
+   free(imd->data);
+   free(e);
+   imd->data = out;
+   imd->paltbl = NULL;
+   imd->width = cw;
+   imd->height = ch;
+   *x += cx;
+   *y += cy;
+   return Succeeded;
    }
 
 int  writeImage (wbp w, char *filename, int x, int y, int width, int height){
@@ -4143,7 +4240,12 @@ int wattrib(wbp w, char *s, long len, dptr answer, char * abuf)
          /* first try supported image file formats; then try platform-dependent format */
          r = readImage(val, 0, &ws->initimage);
          if (r == Succeeded) {
-            if (ws->initimage.paltbl)
+            /*
+             * Show a color table as given; a transparent image keeps
+             * its palette so that the background shows through.
+             */
+            int ix = 0, iy = 0;
+            if (imgtorgb(NULL, &ix, &iy, &ws->initimage) != Succeeded)
                linearpal(w, ws->initimage.paltbl);
             setwidth(w, ws->initimage.width);
             setheight(w, ws->initimage.height);

@@ -2557,10 +2557,20 @@ function{0,1} ReadImage(argv[argc])
           * Show a color table from the file as given.  A GIF coerced to
           * palette p already has the palette's (linear) colors.
           */
-         if (imd.paltbl && p == 0)
-            linearpal(w, imd.paltbl);
-         status = strimage(w, x, y, imd.width, imd.height, imd.paltbl,
+         if (imd.paltbl && p == 0) {
+            int ix = x, iy = y;
+            if (imgtorgb(w, &ix, &iy, &imd) == Succeeded) {
+               x = ix;
+               y = iy;
+               }
+            else
+               linearpal(w, imd.paltbl);
+            }
+         if (imd.width > 0)
+            status = strimage(w, x, y, imd.width, imd.height, imd.paltbl,
                            imd.data, (word)imd.width * (word)imd.height, 0);
+         else
+            status = 0;
          if (status < 0)
             r = RunError;
          free((pointer)imd.paltbl);
