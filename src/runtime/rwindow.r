@@ -3204,6 +3204,64 @@ int imgtorgb(wbp w, int *x, int *y, struct imgdata *imd)
    return Succeeded;
    }
 
+/*
+ * coerceimg(w, imd, p) - map the colors of an image read from a file to
+ * palette p, choosing for each color the key PaletteKey() would.  The
+ * image comes out with one byte per pixel and a color table of the
+ * palette's (linear) colors; transparent pixels stay transparent.
+ * Returns Succeeded, or Failed if memory runs out.
+ */
+int coerceimg(wbp w, struct imgdata *imd, int p)
+   {
+   struct palentry *pal, *e;
+   unsigned char *data, *s;
+   double lin[256], gamma = w->context->gamma;
+   long i, n = (long)imd->width * imd->height;
+   int c = 0, r = 0, b = 2;
+   unsigned long px, lastpx = 0;
+
+   if ((pal = palsetup(p)) == NULL)
+      return Failed;
+   for (i = 0; i < 256; i++)                    /* file colors are shown */
+      lin[i] = pow(i / 255.0, gamma);           /* as given: make linear */
+
+   if ((e = imd->paltbl) != NULL) {
+      for (i = 0; i < DMAXCOLORS; i++)
+         if (e[i].valid) {
+            c = *(unsigned char *)rgbkey(p, lin[e[i].clr.red >> 8],
+               lin[e[i].clr.green >> 8], lin[e[i].clr.blue >> 8]);
+            e[i].clr = pal[c].clr;
+            }
+      return Succeeded;
+      }
+
+   if ((data = malloc(n + 1)) == NULL)
+      return Failed;
+   if ((e = calloc(DMAXCOLORS, sizeof(struct palentry))) == NULL) {
+      free(data);
+      return Failed;
+      }
+   if (imd->format == UCOLOR_BGR) {
+      r = 2; b = 0;
+      }
+   for (i = 0, s = imd->data; i < n; i++, s += 3) {
+      px = ((unsigned long)s[r] << 16) | ((unsigned long)s[1] << 8) | s[b];
+      if (i == 0 || px != lastpx) {
+         c = *(unsigned char *)rgbkey(p, lin[s[r]], lin[s[1]], lin[s[b]]);
+         lastpx = px;
+         }
+      data[i] = c;
+      if (!e[c].used) {
+         e[c].clr = pal[c].clr;
+         e[c].used = e[c].valid = 1;
+         }
+      }
+   free(imd->data);
+   imd->data = data;
+   imd->paltbl = e;
+   return Succeeded;
+   }
+
 int  writeImage (wbp w, char *filename, int x, int y, int width, int height){
    int itype;
    itype = image_type(filename);

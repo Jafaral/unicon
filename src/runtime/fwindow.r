@@ -2534,7 +2534,12 @@ function{0,1} ReadImage(argv[argc])
        * First try to read as one of the supported image file formats.
        * If that doesn't work, try platform-dependent image reading code.
        */
-      r = readImage(filename, p, &imd);
+      r = readImage(filename, 0, &imd);
+      if (r == Succeeded && p && coerceimg(w, &imd, p) != Succeeded) {
+         free((pointer)imd.paltbl);
+         free((pointer)imd.data);
+         runerr(305);
+         }
       if (r == Succeeded) {
 
 #ifdef Graphics3D
@@ -2554,8 +2559,8 @@ function{0,1} ReadImage(argv[argc])
 #endif                                  /* Graphics3D */
 
          /*
-          * Show a color table from the file as given.  A GIF coerced to
-          * palette p already has the palette's (linear) colors.
+          * Show a color table from the file as given.  An image coerced
+          * to palette p has the palette's (linear) colors instead.
           */
          if (imd.paltbl && p == 0) {
             int ix = x, iy = y;

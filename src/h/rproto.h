@@ -526,6 +526,7 @@ int checkOpenConsole( FILE *w, char *s );
    int readImage        (char *filename, int p, struct imgdata *imd);
    void linearpal       (wbp w, struct palentry *e);
    int imgtorgb         (wbp w, int *x, int *y, struct imgdata *imd);
+   int coerceimg        (wbp w, struct imgdata *imd, int p);
    int writeImage       (wbp w, char *filename, int x, int y, int width, int height);
    int  rectargs        (wbp w, int argc, dptr argv, int i,
                            word *px, word *py, word *pw, word *ph);
