@@ -1659,7 +1659,7 @@ function{0,1} Fg(argv[argc])
 
 #ifdef Graphics3D
       if (w->context->is_3D)
-         getmaterials(sbuf1);
+         getmaterials(w, sbuf1);
 #endif
       len = strlen(sbuf1);
       Protect(tmp = alcstr(sbuf1, len), runerr(0));
@@ -2544,6 +2544,8 @@ function{0,1} ReadImage(argv[argc])
 
 #ifdef Graphics3D
          if (is_texture) {
+            if (p)                      /* palette colors are linear */
+               gldisplaypal(w, imd.paltbl);
             if (texhandle >= w->context->display->ntextures)
                r = RunError;
             else

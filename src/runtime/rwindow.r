@@ -4446,35 +4446,35 @@ int wattrib(wbp w, char *s, long len, dptr answer, char * abuf)
         break;
       case A_LIGHT:
       case A_LIGHT0:
-         getlight(0, abuf);
+         getlight(w, 0, abuf);
          MakeStr(abuf, strlen(abuf), answer);
          break;
       case A_LIGHT1:
-        getlight(1, abuf);
+        getlight(w, 1, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT2:
-        getlight(2, abuf);
+        getlight(w, 2, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT3:
-        getlight(3, abuf);
+        getlight(w, 3, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT4:
-        getlight(4, abuf);
+        getlight(w, 4, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT5:
-        getlight(5, abuf);
+        getlight(w, 5, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT6:
-        getlight(6, abuf);
+        getlight(w, 6, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_LIGHT7:
-        getlight(7, abuf);
+        getlight(w, 7, abuf);
         MakeStr(abuf, strlen(abuf), answer);
         break;
       case A_MESHMODE:
@@ -4645,7 +4645,7 @@ int wattrib(wbp w, char *s, long len, dptr answer, char * abuf)
       case A_FG:
 #ifdef Graphics3D
           if (w->context->is_3D)
-            getmaterials(abuf);
+            getmaterials(w, abuf);
          else
 #endif
          getfg(w, abuf);

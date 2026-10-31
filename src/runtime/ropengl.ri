@@ -4,13 +4,63 @@
  */
 int alcinstalltex(int k, wdp wd, GLubyte *tex, int width, int height);
 int bltex(wbp w, int width, int height, int ch, char *s, word len);
-int determinematerial(char *, C_integer, C_integer, C_integer, C_integer);
+int determinematerial(wbp, char *, C_integer, C_integer, C_integer, C_integer);
 int lookup_texture_byname(wbp w, char *name, int len, int type, int curtex);
 int texture(int width, int height, GLubyte *tex, int texmode);
 int texture_24img(wbp w, struct imgdata im);
 int textureimg(wbp w, int width, int height,
                 struct palentry *e, unsigned char *s, word len);
 int init_3dcontext(wcp wc);
+
+/*
+ * Colors in Unicon are linear; 2D windows gamma correct them for the
+ * screen.  These helpers do the same for OpenGL, using the window's gamma,
+ * so that a color looks the same in a 3D window as in a 2D one.  (The
+ * window's own fg and bg, as RED() and friends give them, are already
+ * the colors shown.)
+ */
+
+/*
+ * glcolor(w, r, g, b, a, color) - a linear color (0 - 65535) as an
+ * OpenGL color.  Alpha is not a color and stays as it is.
+ */
+#define GLGAMMA(c, inv) \
+   (((long)(65535 * pow((c) / 65535.0, inv)) >> 8) / (GLfloat)255)
+static void glcolor(wbp w, long r, long g, long b, long a, GLfloat color[4])
+{
+   double inv = 1.0 / w->context->gamma;
+   color[0] = GLGAMMA(r, inv);          /* the same 8-bit value as in 2D */
+   color[1] = GLGAMMA(g, inv);
+   color[2] = GLGAMMA(b, inv);
+   color[3] = a / (GLfloat)65535;
+}
+
+/*
+ * linearcolor(w, color) - the reverse of glcolor(), for reporting colors.
+ */
+static void linearcolor(wbp w, GLfloat color[4])
+{
+   double gamma = w->context->gamma;
+   int i;
+   for (i = 0; i < 3; i++)
+      color[i] = pow(color[i] > 0 ? color[i] : 0.0, gamma);
+}
+
+/*
+ * gldisplaypal(w, e) - gamma correct the linear colors of a palette
+ * (DrawImage() palettes, or an image coerced to one) for a texture.
+ */
+void gldisplaypal(wbp w, struct palentry *e)
+{
+   double inv = 1.0 / w->context->gamma;
+   int i;
+   for (i = 0; i < 256; i++)
+      if (e[i].valid) {
+         e[i].clr.red   = 65535 * pow(e[i].clr.red   / 65535.0, inv);
+         e[i].clr.green = 65535 * pow(e[i].clr.green / 65535.0, inv);
+         e[i].clr.blue  = 65535 * pow(e[i].clr.blue  / 65535.0, inv);
+         }
+}
 
 FILE *wopengl(char *name, struct b_list *lp, dptr attr, int n, int *err_index)
 {
@@ -1395,7 +1445,7 @@ int traversefunctionlist(wbp w)
             if (!cnv:C_integer(d, a))
                return Failed;
 
-            if(!determinematerial(temp, r, g, b, a)) {
+            if(!determinematerial(w, temp, r, g, b, a)) {
                 /*
                         if(!determinematerial(funclist)) {
                 */
@@ -1782,7 +1832,7 @@ int traversefunctionlist(wbp w)
 /*
  * traverse the given list and set material properties
  */
-int determinematerial(char *temp, C_integer r, C_integer g, C_integer b, C_integer a)
+int determinematerial(wbp w, char *temp, C_integer r, C_integer g, C_integer b, C_integer a)
 {
    GLfloat color[4];
 
@@ -1790,10 +1840,7 @@ int determinematerial(char *temp, C_integer r, C_integer g, C_integer b, C_integ
     * must convert from an integer between 0 and 65535
     * to a float between 0.0 and 0.0
     */
-   color[0] = r/(GLfloat)65535;
-   color[1] = g/(GLfloat)65535;
-   color[2] = b/(GLfloat)65535;
-   color[3] = a/(GLfloat)65535;  /* alpha value */
+   glcolor(w, r, g, b, a, color);
 
   /* set the material property */
    if (!strcmp(temp, "ambient"))
@@ -1821,7 +1868,7 @@ int determinematerial(char *temp, C_integer r, C_integer g, C_integer b, C_integ
 /* routines to return an attribute vale */
 
 /* returns the current value of the specified light */
-int getlight(int light, char* buf)
+int getlight(wbp w, int light, char* buf)
 {
    GLfloat pos[4];
    GLfloat amb[4];
@@ -1832,13 +1879,16 @@ int getlight(int light, char* buf)
    glGetLightfv(GL_LIGHT0 + light, GL_AMBIENT, amb);
    glGetLightfv(GL_LIGHT0 + light, GL_DIFFUSE, diff);
    glGetLightfv(GL_LIGHT0 + light, GL_SPECULAR, spec);
+   linearcolor(w, amb);
+   linearcolor(w, diff);
+   linearcolor(w, spec);
 
    sprintf(buf, "position %.2f,%.2f,%.2f; ambient %.2f,%.2f,%.2f; diffuse %.2f,%.2f,%.2f; specular %.2f,%.2f,%.2f",  pos[0], pos[1], pos[2], amb[0], amb[1], amb[2],  diff[0], diff[1], diff[2], spec[0], spec[1], spec[2]);
    return Succeeded;
 }
 
 /* returns the current material properties */
-int getmaterials(char* buf)
+int getmaterials(wbp w, char* buf)
 {
    GLfloat amb[4];
    GLfloat diff[4];
@@ -1852,6 +1902,10 @@ int getmaterials(char* buf)
    glGetMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
    glGetMaterialfv(GL_FRONT, GL_SPECULAR, spec);
    glGetMaterialfv(GL_FRONT, GL_SHININESS, &shine);
+   linearcolor(w, emis);
+   linearcolor(w, amb);
+   linearcolor(w, diff);
+   linearcolor(w, spec);
 
    sprintf(buf, "ambient %.2f,%.2f,%.2f; diffuse %.2f,%.2f,%.2f; specular %.2f,%.2f,%.2f; emission %.2f,%.2f,%.2f; shininess %.2f", amb[0], amb[1], amb[2],  diff[0], diff[1], diff[2], spec[0], spec[1], spec[2], emis[0], emis[1], emis[2], shine);
    return Succeeded;
@@ -1928,10 +1982,7 @@ int setmaterials(wbp w, char* s)
          /* determine the icon color */
          if(parsecolor(w,sbuf2, &rd, &gr, &bl, &al)== Failed)
             return Failed;
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535; /* alpha value */
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the property */
          glMaterialfv(GL_FRONT, GL_AMBIENT, color);
@@ -1954,10 +2005,7 @@ int setmaterials(wbp w, char* s)
             return Failed;
 
          /* convert values to floats between 0.0 and 1.0 */
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the property */
          glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
@@ -1980,10 +2028,7 @@ int setmaterials(wbp w, char* s)
           */
          if(parsecolor(w, sbuf2, &rd, &gr,&bl,&al)==Failed)
             return Failed;
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the property */
          glMaterialfv(GL_FRONT, GL_SPECULAR, color);
@@ -2025,10 +2070,7 @@ int setmaterials(wbp w, char* s)
           */
          if(parsecolor(w, sbuf2, &rd, &gr,&bl,&al)==Failed)
             return Failed;
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the emission color */
          glMaterialfv(GL_FRONT, GL_EMISSION, color);
@@ -2042,10 +2084,7 @@ int setmaterials(wbp w, char* s)
          if(parsecolor(w, s, &rd, &gr, &bl, &al)==Failed)
             return Failed;
          i = strlen(s);
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
          glColor4f(color[0], color[1], color[2], color[3]);
          glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
          MakeStr("diffuse", 7, &material);
@@ -2129,10 +2168,7 @@ int setlight(wbp w, char* s, int light)
          if(parsecolor(w, s3, &rd, &gr, &bl, &al) ==Failed)
               return Failed;
 
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the ambient light value */
          glLightfv(light, GL_AMBIENT, color);
@@ -2155,10 +2191,7 @@ int setlight(wbp w, char* s, int light)
             between 0.0 and 1.0 */
          if(parsecolor(w, s3, &rd, &gr, &bl,&al) == Failed)
               return Failed;
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
 
          /* set the diffuse value of the light */
          glLightfv(light, GL_DIFFUSE, color);
@@ -2179,10 +2212,7 @@ int setlight(wbp w, char* s, int light)
          /* convert to appropriate values */
          if (parsecolor(w, s3, &rd, &gr, &bl, &al) == Failed)
             return Failed;
-         color[0] = rd/(GLfloat)65535;
-         color[1] = gr/(GLfloat)65535;
-         color[2] = bl/(GLfloat)65535;
-         color[3] = al/(GLfloat)65535;
+         glcolor(w, rd, gr, bl, al, color);
          glLightfv(light, GL_SPECULAR, color);
          s2 = s2 + i;
          if (*s2 != ';' && *s2 != '\0') return Failed;
@@ -2378,6 +2408,7 @@ int settexcoords(wbp w, char* s)
 int imagestr(wbp w, char* str)
 {
    struct palentry *e;
+   struct palentry pal[256];
    int c, i, width, height, row, p;
    word nchars;
    unsigned char *t, *z, *s;
@@ -2463,7 +2494,10 @@ int imagestr(wbp w, char* str)
 
    height = nchars/width;
 
-   i = textureimg(w, width, height, e, s, (word)(z-s));
+   /* the palette's colors are linear: gamma correct a copy */
+   memcpy(pal, e, sizeof(pal));
+   gldisplaypal(w, pal);
+   i = textureimg(w, width, height, pal, s, (word)(z-s));
    if (i == Succeeded)
       return Succeeded;
    else
