@@ -2481,7 +2481,7 @@ function{0,1} ReadImage(argv[argc])
       if (is_texture){
          warg=1;
          imd.format = UCOLOR_RGB;
-         imd.is_bottom_up = 1;
+         imd.is_bottom_up = 0;
          }
       else
 #endif                                  /* Graphics3D */
@@ -2539,9 +2539,17 @@ function{0,1} ReadImage(argv[argc])
 
 #ifdef Graphics3D
          if (is_texture) {
-            if (texhandle > w->context->display->ntextures)
+            if (texhandle >= w->context->display->ntextures)
+               r = RunError;
+            else
+               r = TexReadImage(w, texhandle, x, y, &imd);
+            free((pointer)imd.paltbl);
+            free((pointer)imd.data);
+            if (r == RunError)
                runerr(102, argv[warg]);
-            return C_integer (word) TexReadImage(w, texhandle, x, y, &imd);
+            if (r != Succeeded)
+               fail;
+            return nulldesc;
             }
 #endif                                  /* Graphics3D */
 

@@ -3516,31 +3516,44 @@ int TexDrawPoint(wbp w, int texhandle, int x, int y)
 int TexReadImage(wbp w, int texhandle, int x, int y, struct imgdata *imd)
 {
    wcp wc=w->context;
-   int wd, ht, l, nextLineOffset, i, j;
+   int wd, ht, i, j, c;
+   word l;
    GLubyte *tex;
    unsigned char *s;
+   struct palentry *e = imd->paltbl;
 
    tex = wc->display->stex[texhandle].tex;
    wd  = wc->display->stex[texhandle].width;
    ht  = wc->display->stex[texhandle].height;
 
-   /*  check for width and height.  the old texture with the new image  */
-   if (wd<x+imd->width || ht<y+imd->height)
+   /*  the image must fit inside the texture  */
+   if (x < 0 || y < 0 || wd<x+imd->width || ht<y+imd->height)
       return Failed;
 
-   s = imd->data ;  /* point to the image data*/
-
-   l = (ht-y-imd->height)*wd*3 + ( x)*3; /* first byte in texture data to be updated */
-   nextLineOffset = (wd-imd->width)*3;
-
+   /*
+    * The image data is top row first, with three bytes (RGB) per pixel,
+    * or one byte per pixel indexing the color table e.  Texture rows go
+    * bottom up.  Transparent pixels leave the texture as it was.
+    */
+   s = imd->data;
    for (i=0; i<imd->height; i++) {
-      for (j=0; j<imd->width; j++) {
-         tex[l] = (GLubyte) *s++;
-         tex[l+1] = (GLubyte) *s++;
-         tex[l+2] = (GLubyte) *s++;
-         l+=3;
+      l = ((word)(ht-1-y-i)*wd + x)*3;
+      for (j=0; j<imd->width; j++, l+=3) {
+         if (e) {
+            c = *s++;
+            if (!e[c].valid)
+               continue;
+            tex[l]   = e[c].clr.red >> 8;
+            tex[l+1] = e[c].clr.green >> 8;
+            tex[l+2] = e[c].clr.blue >> 8;
+            }
+         else {
+            tex[l]   = s[0];
+            tex[l+1] = s[1];
+            tex[l+2] = s[2];
+            s += 3;
+            }
          }
-      l += nextLineOffset;
       }
 
    TEXUPDATE(w, wc, texhandle, tex, wd, ht);
