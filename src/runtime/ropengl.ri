@@ -3560,6 +3560,29 @@ int TexReadImage(wbp w, int texhandle, int x, int y, struct imgdata *imd)
    return Succeeded;
 }
 
+/*
+ * clipcopy() - clip a copy of a width x height area at (x,y), in a
+ * source of size sw x sh, to (xt,yt) in a destination of size dw x dh.
+ * A negative width or height extends the area to the left or up.
+ * Parts outside either side are dropped, moving the other side along.
+ * Returns zero if nothing is left to copy.
+ */
+static int clipcopy(int *x, int *y, int *width, int *height, int *xt, int *yt,
+                    int sw, int sh, int dw, int dh)
+{
+   if (*width < 0)  { *x += *width;  *xt += *width;  *width = -*width; }
+   if (*height < 0) { *y += *height; *yt += *height; *height = -*height; }
+   if (*x < 0)  { *xt -= *x;  *width += *x;   *x = 0; }
+   if (*y < 0)  { *yt -= *y;  *height += *y;  *y = 0; }
+   if (*xt < 0) { *x -= *xt;  *width += *xt;  *xt = 0; }
+   if (*yt < 0) { *y -= *yt;  *height += *yt; *yt = 0; }
+   if (*x + *width > sw)   *width = sw - *x;
+   if (*y + *height > sh)  *height = sh - *y;
+   if (*xt + *width > dw)  *width = dw - *xt;
+   if (*yt + *height > dh) *height = dh - *yt;
+   return (*width > 0 && *height > 0);
+}
+
 int copyareaTexToTex(wbp w, int texhandle, int dest_texhandle,
                      int x, int y, int width, int height, /* box to copy */
                      int xt, int yt)    /* dest loc */
@@ -3577,6 +3600,9 @@ int copyareaTexToTex(wbp w, int texhandle, int dest_texhandle,
    int tws3 = srcwd * 3;
    int twd3 = txw * 3;
    GLubyte b;
+
+   if (!clipcopy(&x, &y, &width, &height, &xt, &yt, srcwd, srcht, txw, txh))
+      return Failed;
 
    for(j=0; j < height; j++){
       srcl = (srcht-y-j-1)*tws3 + x * 3;
@@ -3608,14 +3634,12 @@ int copyareaToTex2D(wbp w2d, GLubyte *tex, int x, int y,
 {
    struct imgmem imem;
    int i, j, l, twd3;
-   LinearColor clr;
    unsigned long c;
 #ifdef XWindows
    wdp wd = w2d->window->display;
    Display *stddpy = wd->display;
    Visual *vis = w2d->window->vis;
    XColor clrcell;
-/*   wclrp cp, lastcp = wd->colors; */
    TRUECOLOR_DECLARE_AND_INIT_RGB_VARS(vis->red_mask, vis->green_mask,vis->blue_mask);
 #endif                                  /* XWindows */
 
@@ -3642,66 +3666,48 @@ int copyareaToTex2D(wbp w2d, GLubyte *tex, int x, int y,
            l = l + 3;
            }
         }
+      getpixel_term(w2d, &imem);
       return Succeeded;
       }
 #endif
 
+   /*
+    * Other displays: ask for each pixel's color as shown.  Texture rows
+    * go bottom up.
+    */
    for(j=0; j < height; j++){
-        l = (yt+j)*twd3 + xt * 3;
-        for(i=0; i < width; i++) {
+      l = (txh-1-yt-j)*twd3 + xt * 3;
+      for(i=0; i < width; i++) {
 #ifdef XWindows
-           clrcell.pixel = XGetPixel(imem.im, i, j);
-/*         rv = 0xff000000;
-           if  (lastcp->c == c){
-              tex[l] = lastcp ->r>>8;
-              tex[l+1] = lastcp->g>>8;
-              tex[l+2] = lastcp->b>>8;
-              l = l + 3;
-              continue;
-              }
-           else
-              for (cp = wd->colors ; cp < wd->colors + wd->numColors; cp++) {
-                 if (cp->c == c) {
-                    lastcp = cp;
-                    tex[l] = cp->r>>8;
-                    tex[l+1] = cp->g>>8;
-                    tex[l+2] = cp->b>>8;
-                    l = l + 3;
-                    continue;
-                    }
-                 }
-           if (rv == 0xff000000) {
-*/
-              XQueryColor(stddpy, wd->cmap, &clrcell);
-              clr = lcolor(w2d, clrcell);
-              tex[l] = clr.red>>8;
-              tex[l+1] = clr.green>>8;
-              tex[l+2] = clr.blue>>8;
-              l = l + 3;
-/*            } */
-#else
-           {
-           char *s2, strout[50];
-           long rv;
+         clrcell.pixel = XGetPixel(imem.im, i, j);
+         XQueryColor(stddpy, wd->cmap, &clrcell);
+         tex[l] = clrcell.red >> 8;
+         tex[l+1] = clrcell.green >> 8;
+         tex[l+2] = clrcell.blue >> 8;
+#else                                   /* XWindows */
+         char *s2, strout[50];
+         long rv;
 
-           if (getpixel(w2d, i, height-j-1, &rv, strout, &imem) == Failed)
-               return Failed;
+         if (getpixel(w2d, x + i, y + j, &rv, strout, &imem) == Failed) {
+            getpixel_term(w2d, &imem);
+            return Failed;
+            }
 
-           s2 = strout;
-           /* parse string to get pixel values */
-           while(isspace(*s2)) s2++;
-           tex[l] = atoi(s2)/256;
-           while(isdigit(*s2)) s2++;
-           s2++;
-           tex[l+1] = atoi(s2)/256;
-           while (isdigit(*s2)) s2++;
-           s2++;
-           tex[l+2] = atoi(s2)/256;
-           l = l + 3;
-           }
-#endif
-        }
+         /* parse string to get pixel values */
+         s2 = strout;
+         while(isspace(*s2)) s2++;
+         tex[l] = atoi(s2)/256;
+         while(isdigit(*s2)) s2++;
+         s2++;
+         tex[l+1] = atoi(s2)/256;
+         while (isdigit(*s2)) s2++;
+         s2++;
+         tex[l+2] = atoi(s2)/256;
+#endif                                  /* XWindows */
+         l = l + 3;
+         }
       }
+   getpixel_term(w2d, &imem);
    return Succeeded;
 }
 
@@ -3853,26 +3859,8 @@ int TexCopyArea(wbp w, wbp w2, int texhandle, int x, int y, int width,
    wd  = wc->display->stex[texhandle].width;
    ht  = wc->display->stex[texhandle].height;
 
-   /* if width/height is negative, flip it and readjust x and y accroridngly */
-   if (width < 0){  x+= width;  xt+=width;  width=-width;   }
-   if (height < 0){ y+= height; yt+=height; height=-height; }
-
-
-   if (x+width<0 || x>wwd || y+height<0 || y>wht) return Failed;
-   if (xt+width<0 || xt>=wd || yt+height<0 || yt>=ht) return Failed;
-
-   if (x<0){ width+=x; x=0;}
-   if (xt<0){width+=xt; xt=0;}
-   if (y<0){ height+=y; y=0;}
-   if (yt<0){ height+=yt; yt=0;}
-
-   if (x+width > wwd ) width=wwd-x;
-   if (xt+width > wd ) width=wd-xt;
-
-   if (y+height > wht ) height=wht-y;
-   if (yt+height >= ht ) height=ht-y-1;
-
-   if (width<=0 || height<=0) return Failed;
+   if (!clipcopy(&x, &y, &width, &height, &xt, &yt, wwd, wht, wd, ht))
+      return Failed;
 
    if (w->context->is_3D){
       y = wht-y - height;
