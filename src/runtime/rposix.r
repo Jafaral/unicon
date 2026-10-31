@@ -2699,10 +2699,174 @@ int sock_peek_key_nth(int fd, int i, dptr key)
 }
 */
 
+/*
+ * Finish a TCP connect on an already-created socket.
+ * Returns 1 with s connected, or 0 with s closed.
+ */
+static int sock_connect_sa(int s, struct sockaddr *sa, int len, int timeout)
+{
+   int rc, saveflags;
+
+   if (timeout > 0) {
+#if UNIX
+      /* Save existing flags for restore later */
+      saveflags = fcntl(s, F_GETFL, 0);
+      if (saveflags < 0) {
+         sock_close(s);
+         return 0;
+      }
+      /* Turn on non-blocking flag - this will make connect
+         return immediately.  */
+      if (fcntl(s, F_SETFL, saveflags|O_NONBLOCK) < 0) {
+         sock_close(s);
+         return 0;
+      }
+#endif                                  /* UNIX */
+#if NT
+      /* Turn on non-blocking flag so connect will return immediately. */
+      unsigned long imode = 1;
+      if (ioctlsocket(s, FIONBIO, &imode) < 0) {
+         errno = WSAGetLastError();
+         sock_close(s);
+         return 0;
+      }
+#endif                                  /* NT */
+   }
+
+   /* A blocking connect() can take a long time; let GC proceed. */
+   {
+   int connect_errno;
+   DEC_NARTHREADS;
+   rc = connect(s, sa, len);
+   connect_errno = errno;
+   INC_NARTHREADS_CONTROLLED;
+   errno = connect_errno;
+   }
+
+   if (timeout > 0) {
+#if UNIX
+      /* Reset the old flags, but avoiding overwriting the value of errno */
+      int connect_err = errno;
+      if (fcntl(s, F_SETFL, saveflags) < 0) {
+         sock_close(s);
+         return 0;
+      }
+      errno = connect_err;
+
+      if (rc < 0 && errno == EINPROGRESS) {
+         /* The connect is in progress, so select() must be used to wait. */
+         fd_set ws, es;
+         struct timeval tv;
+         int sc, cc;
+         unsigned int cclen;
+
+         tv.tv_sec = timeout / 1000;
+         tv.tv_usec = 1000 * (timeout % 1000);
+         FD_ZERO(&ws);
+         FD_SET(s, &ws);
+         FD_ZERO(&es);
+         FD_SET(s, &es);
+         errno = 0;
+         DEC_NARTHREADS;
+         sc = select(FD_SETSIZE, NULL, &ws, &es, &tv);
+         cc = errno;
+         INC_NARTHREADS_CONTROLLED;
+         errno = cc;
+         /*
+          * A result of 0 means timeout; in this case errno will be zero too,
+          * and that can be used to distinguish from another error condition.
+          */
+         if (sc <= 0) {
+            sock_close(s);
+            return 0;
+            }
+
+         /* Get the error code of the connect */
+         cclen = sizeof(cc);
+         if (getsockopt(s, SOL_SOCKET, SO_ERROR, &cc, &cclen) < 0) {
+            sock_close(s);
+            return 0;
+         }
+
+         if (cc != 0) {
+            /* There was an error, so set errno and fail */
+            errno = cc;
+            sock_close(s);
+            return 0;
+         }
+
+         return 1;
+      }
+#endif                                  /* UNIX */
+#if NT
+      /* Turn off non-blocking flag */
+      int connect_err = WSAGetLastError();
+      unsigned long imode = 0;
+      if (ioctlsocket(s, FIONBIO, &imode) < 0) {
+         errno = WSAGetLastError();
+         sock_close(s);
+         return 0;
+      }
+      errno = connect_err;
+
+      if (rc < 0 && errno == WSAEWOULDBLOCK) {
+         /* The connect is in progress, so select() must be used to wait. */
+         fd_set ws, es;
+         struct timeval tv;
+         int sc, cc, cclen;
+
+         tv.tv_sec = timeout / 1000;
+         tv.tv_usec = 1000 * (timeout % 1000);
+         FD_ZERO(&ws);
+         FD_SET(s, &ws);
+         FD_ZERO(&es);
+         FD_SET(s, &es);
+         WSASetLastError(0);
+         DEC_NARTHREADS;
+         sc = select(FD_SETSIZE, NULL, &ws, &es, &tv);
+         cc = errno;
+         INC_NARTHREADS_CONTROLLED;
+         errno = cc;
+         /* A result of 0 means timeout; in this case WSAGetLastError() will return zero,
+            and that can be used to distinguish from another error condition. */
+         if (sc <= 0) {
+            errno = WSAGetLastError();
+            sock_close(s);
+            return 0;
+         }
+
+         /* Get the error code of the connect */
+         cclen = sizeof(cc);
+         if (getsockopt(s, SOL_SOCKET, SO_ERROR, (char*)&cc, &cclen) < 0) {
+            errno = WSAGetLastError();
+            sock_close(s);
+            return 0;
+         }
+
+         if (cc != 0) {
+            /* There was an error, so set errno and fail */
+            errno = cc;
+            sock_close(s);
+            return 0;
+         }
+
+         return 1;
+      }
+#endif                                  /* NT */
+   }
+
+   if (rc < 0) {
+      sock_close(s);
+      return 0;
+   }
+
+   return 1;
+}
+
 int sock_connect(char *fn, int sock_type, int timeout, int af_fam,
                  dptr attr, int nattr)
 {
-  int saveflags, rc, s, len, ipproto = 0, stype, sproto;
+  int rc, s, len, ipproto = 0, stype, sproto;
    struct sockaddr *sa;
    char *p, fname[BUFSIZ];
    struct addrinfo *res, *res0, *saddrinfo;
@@ -2762,6 +2926,31 @@ int sock_connect(char *fn, int sock_type, int timeout, int af_fam,
 
       if (!res0)
         return 0;
+
+      /*
+       * TCP: try every address.  getaddrinfo() often lists ::1 ahead of
+       * 127.0.0.1 for "localhost", and a server bound to 127.0.0.1 is
+       * not reached if the first refused address is the only one tried.
+       */
+      if (sock_type != SOCK_T_DGRAM && sock_type != SOCK_T_RAW) {
+         for (res = res0; res; res = res->ai_next) {
+            s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+            if (s < 0)
+               continue;
+            if (!apply_sock_attrs(s, 1, attr, nattr, NULL, NULL, 0) ||
+                !apply_sock_attrs(s, 0, attr, nattr, NULL, NULL, 0)) {
+               sock_close(s);
+               freeaddrinfo(res0);
+               return 0;
+               }
+            if (sock_connect_sa(s, res->ai_addr, res->ai_addrlen, timeout)) {
+               freeaddrinfo(res0);
+               return s;
+               }
+            }
+         freeaddrinfo(res0);
+         return 0;
+         }
 
       s = -1;
       for (res = res0; res; res = res->ai_next) {
@@ -2895,159 +3084,8 @@ int sock_connect(char *fn, int sock_type, int timeout, int af_fam,
       return s;
       }
 
-   if (timeout > 0) {
-#if UNIX
-      /* Save existing flags for restore later */
-      saveflags = fcntl(s, F_GETFL, 0);
-      if (saveflags < 0) {
-         sock_close(s);
-         return 0;
-      }
-      /* Turn on non-blocking flag - this will make connect
-         return immediately.  */
-      if (fcntl(s, F_SETFL, saveflags|O_NONBLOCK) < 0) {
-         sock_close(s);
-         return 0;
-      }
-#endif                                  /* UNIX */
-#if NT
-      /* Turn on non-blocking flag so connect will return immediately. */
-      unsigned long imode = 1;
-      if (ioctlsocket(s, FIONBIO, &imode) < 0) {
-         errno = WSAGetLastError();
-         sock_close(s);
-         return 0;
-      }
-#endif                                  /* NT */
-   }
-
-   /* A blocking connect() can take a long time; let GC proceed. */
-   {
-   int connect_errno;
-   DEC_NARTHREADS;
-   rc = connect(s, sa, len);
-   connect_errno = errno;
-   INC_NARTHREADS_CONTROLLED;
-   errno = connect_errno;
-   }
-
-   if (timeout > 0) {
-#if UNIX
-      /* Reset the old flags, but avoiding overwriting the value of errno */
-      int connect_err = errno;
-      if (fcntl(s, F_SETFL, saveflags) < 0) {
-         sock_close(s);
-         return 0;
-      }
-      errno = connect_err;
-
-      if (rc < 0 && errno == EINPROGRESS) {
-         /* The connect is in progress, so select() must be used to wait. */
-         fd_set ws, es;
-         struct timeval tv;
-         int sc, cc;
-         unsigned int cclen;
-
-         tv.tv_sec = timeout / 1000;
-         tv.tv_usec = 1000 * (timeout % 1000);
-         FD_ZERO(&ws);
-         FD_SET(s, &ws);
-         FD_ZERO(&es);
-         FD_SET(s, &es);
-         errno = 0;
-         DEC_NARTHREADS;
-         sc = select(FD_SETSIZE, NULL, &ws, &es, &tv);
-         cc = errno;
-         INC_NARTHREADS_CONTROLLED;
-         errno = cc;
-         /*
-          * A result of 0 means timeout; in this case errno will be zero too,
-          * and that can be used to distinguish from another error condition.
-          */
-         if (sc <= 0) {
-            sock_close(s);
-            return 0;
-            }
-
-         /* Get the error code of the connect */
-         cclen = sizeof(cc);
-         if (getsockopt(s, SOL_SOCKET, SO_ERROR, &cc, &cclen) < 0) {
-            sock_close(s);
-            return 0;
-         }
-
-         if (cc != 0) {
-            /* There was an error, so set errno and fail */
-            errno = cc;
-            sock_close(s);
-            return 0;
-         }
-
-         return s;
-      }
-#endif                                  /* UNIX */
-#if NT
-      /* Turn off non-blocking flag */
-      int connect_err = WSAGetLastError();
-      unsigned long imode = 0;
-      if (ioctlsocket(s, FIONBIO, &imode) < 0) {
-         errno = WSAGetLastError();
-         sock_close(s);
-         return 0;
-      }
-      errno = connect_err;
-
-      if (rc < 0 && errno == WSAEWOULDBLOCK) {
-         /* The connect is in progress, so select() must be used to wait. */
-         fd_set ws, es;
-         struct timeval tv;
-         int sc, cc, cclen;
-
-         tv.tv_sec = timeout / 1000;
-         tv.tv_usec = 1000 * (timeout % 1000);
-         FD_ZERO(&ws);
-         FD_SET(s, &ws);
-         FD_ZERO(&es);
-         FD_SET(s, &es);
-         WSASetLastError(0);
-         DEC_NARTHREADS;
-         sc = select(FD_SETSIZE, NULL, &ws, &es, &tv);
-         cc = errno;
-         INC_NARTHREADS_CONTROLLED;
-         errno = cc;
-         /* A result of 0 means timeout; in this case WSAGetLastError() will return zero,
-            and that can be used to distinguish from another error condition. */
-         if (sc <= 0) {
-            errno = WSAGetLastError();
-            sock_close(s);
-            return 0;
-         }
-
-         /* Get the error code of the connect */
-         cclen = sizeof(cc);
-         if (getsockopt(s, SOL_SOCKET, SO_ERROR, (char*)&cc, &cclen) < 0) {
-            errno = WSAGetLastError();
-            sock_close(s);
-            return 0;
-         }
-
-         if (cc != 0) {
-            /* There was an error, so set errno and fail */
-            errno = cc;
-            sock_close(s);
-            return 0;
-         }
-
-         return s;
-      }
-#endif                                  /* NT */
-   }
-
-   if (rc < 0) {
-      sock_close(s);
+   if (!sock_connect_sa(s, sa, len, timeout))
       return 0;
-   }
-
    return s;
 }
 
