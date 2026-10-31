@@ -2278,57 +2278,53 @@ int writeBMP(wbp w, char *filename, int x, int y, int width, int height)
 
 static int bmpwrite(wbp w, char *filename, int x, int y, int width, int height)
    {
-   int i, a[6], stride;
+   int i, j, a[6];
    short sh[2];
-   long len;
-   struct palentry paltbl[DMAXCOLORS];
+   long stride;
+   unsigned char *row, *s, *o;
 
-   len = (long)width * (long)height;    /* total length of data */
-   stride = (width + 3) / 4 * 4;        /* bytes per row in the file */
+   stride = ((long)width * 3 + 3) / 4 * 4;      /* bytes per row in the file */
 
    if (!(gf_f = fopen(filename, "wb")))
       return Failed;
-   if (!(gf_string = (unsigned char*)malloc((msize)len)))
+   if (!(gf_string = (unsigned char*)malloc((msize)stride * (height + 1))))
       return RunError;
-
-   for (i = 0; i < DMAXCOLORS; i++)
-      paltbl[i].used = paltbl[i].valid = paltbl[i].transpt = 0;
-   if (!getimstr(w, x, y, width, height, paltbl, gf_string))
+   if (!getimstr24(w, x, y, width, height, gf_string + stride))
       return RunError;
 
    fprintf(gf_f, "BM");
-   a[0] = 54 + 4 * 256 + stride * height;
+   a[0] = 54 + stride * height;                 /* file size */
    a[1] = 0;
-   a[2] = 54 + 4 * 256;
-   a[3] = 40;
+   a[2] = 54;                                   /* offset of the pixels */
+   a[3] = 40;                                   /* size of the info header */
    a[4] = width;
    a[5] = height;
    if (fwrite(a, 4, 6, gf_f) < 6) return Failed;
-   sh[0] = 1;
-   sh[1] = 8;
+   sh[0] = 1;                                   /* planes */
+   sh[1] = 24;                                  /* bits per pixel */
    if (fwrite(sh, 2, 2, gf_f) < 2) return Failed;
-   a[0] = 0;
+   a[0] = 0;                                    /* no compression */
    a[1] = stride * height;
    a[2] = a[3] = 3938; /* presumably, hardwire to assume 100dpi */
-   a[4] = 256; /* colors used */
+   a[4] = 0; /* colors used */
    a[5] = 0; /* colors important */
    if (fwrite(a, 4, 6, gf_f) < 6) return Failed;
 
-   for (i=0; i<256; i++) {
-      unsigned char c[4];                       /* blue, green, red, 0 */
-      c[0] = paltbl[i].clr.blue >> 8;
-      c[1] = paltbl[i].clr.green >> 8;
-      c[2] = paltbl[i].clr.red >> 8;
-      c[3] = 0;
-      if (fwrite(c, 4, 1, gf_f) < 1) return Failed;
-      }
-   /* rows go bottom up, each padded to a multiple of four bytes */
+   /*
+    * getimstr24() gives RGB rows top down, after the first stride bytes
+    * of the buffer, which holds each row as it is written: blue, green,
+    * red, padded to a multiple of four bytes, bottom row first.
+    */
+   row = gf_string;
+   memset(row, 0, stride);
    for (i = height - 1; i >= 0; i--) {
-      static unsigned char pad[3];
-      if (fwrite(gf_string + (long)i * width, 1, width, gf_f) < width)
-         return Failed;
-      if (stride > width &&
-          fwrite(pad, 1, stride - width, gf_f) < stride - width)
+      s = gf_string + stride + (long)i * width * 3;
+      for (j = 0, o = row; j < width; j++, s += 3, o += 3) {
+         o[0] = s[2];
+         o[1] = s[1];
+         o[2] = s[0];
+         }
+      if (fwrite(row, 1, stride, gf_f) < stride)
          return Failed;
       }
    return Succeeded;
