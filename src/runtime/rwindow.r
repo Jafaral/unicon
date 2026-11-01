@@ -1384,12 +1384,45 @@ int readBMP(char *filename, int p, struct imgdata *imd)
            goto bmperr;
      }
 
-  stride = ((long)width * bitcount + 31) / 32 * 4;
   outbpp = (bitcount <= 8) ? 1 : 3;
-  if ((row = malloc(stride)) == NULL ||
-      (data = calloc((long)width * height, outbpp)) == NULL ||
-      fseek(f, offbits, SEEK_SET) != 0)
-     goto bmperr;
+
+  /*
+   * Refuse sizes whose pixels cannot fit in memory, and uncompressed
+   * pixels the file is too short to hold: a damaged header should not
+   * make us allocate gigabytes.  On Windows a long is 32 bits, so
+   * width * bitcount is computed in 64 bits.  Otherwise the stride
+   * wraps (an 8-bit row can come out a few bytes long) while the copy
+   * below still uses width.
+   */
+  {
+     long long rowbytes, pixbytes, off, need;
+     long flen;
+
+     rowbytes = ((long long)width * bitcount + 31) / 32 * 4;
+     pixbytes = (long long)width * height * outbpp;
+     /* bmp_le32 sign-extends a 32-bit offset when long is 32 bits */
+     off = (long long)(unsigned long)offbits;
+     if (rowbytes < 4 || rowbytes > LONG_MAX ||
+         pixbytes <= 0 || pixbytes > LONG_MAX / 2 ||
+         off > LONG_MAX ||
+         (bitcount == 8 && rowbytes < width))
+        goto bmperr;
+     stride = (long)rowbytes;
+     offbits = (long)off;
+
+     if (compression != 1 && compression != 2) {
+        if (fseek(f, 0, SEEK_END) != 0 || (flen = ftell(f)) < 0 ||
+            rowbytes > (LLONG_MAX - off) / height)
+           goto bmperr;
+        need = off + rowbytes * (long long)height;
+        if (need > flen)
+           goto bmperr;
+        }
+     if ((row = malloc((size_t)stride)) == NULL ||
+         (data = calloc((size_t)pixbytes, 1)) == NULL ||
+         fseek(f, offbits, SEEK_SET) != 0)
+        goto bmperr;
+     }
 
   if (compression == 1 || compression == 2) {
      /*
