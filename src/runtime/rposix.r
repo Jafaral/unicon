@@ -2700,8 +2700,44 @@ int sock_peek_key_nth(int fd, int i, dptr key)
 */
 
 /*
+ * Milliseconds since an arbitrary epoch, for a single connect deadline
+ * shared by every resolved address. On Windows this is GetTickCount64,
+ * declared by windows.h; see sys.h for the older-header fallback.
+ */
+static long long sock_now_ms(void)
+{
+#if UNIX
+   /*
+    * Monotonic: a wall-clock step between addresses would give the
+    * next attempt extra time, or skip it before the timeout elapsed.
+    * #host so the C compiler, not rtt, sees whether CLOCK_MONOTONIC
+    * exists. rtt does not include the system headers that define it.
+    */
+#if HAVE_CLOCK_GETTIME
+#host #ifdef CLOCK_MONOTONIC
+   struct timespec ts;
+   if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+      return (long long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#host #endif
+#endif                                  /* HAVE_CLOCK_GETTIME */
+   {
+   struct timeval tv;
+   if (gettimeofday(&tv, NULL) < 0)
+      return 0;
+   return (long long)tv.tv_sec * 1000 + tv.tv_usec / 1000;
+   }
+#elif NT
+   return (long long)GetTickCount64();
+#else                                   /* UNIX */
+   return 0;
+#endif                                  /* UNIX */
+}
+
+/*
  * Finish a TCP connect on an already-created socket.
  * Returns 1 with s connected, or 0 with s closed.
+ * timeout is milliseconds; 0 waits without a limit. A timed-out select
+ * sets errno to ETIMEDOUT.
  */
 static int sock_connect_sa(int s, struct sockaddr *sa, int len, int timeout)
 {
@@ -2773,10 +2809,12 @@ static int sock_connect_sa(int s, struct sockaddr *sa, int len, int timeout)
          INC_NARTHREADS_CONTROLLED;
          errno = cc;
          /*
-          * A result of 0 means timeout; in this case errno will be zero too,
-          * and that can be used to distinguish from another error condition.
+          * A result of 0 is a timeout. select() leaves errno at 0, so set
+          * ETIMEDOUT. A negative result keeps select()'s errno.
           */
          if (sc <= 0) {
+            if (sc == 0)
+               errno = ETIMEDOUT;
             sock_close(s);
             return 0;
             }
@@ -2827,10 +2865,9 @@ static int sock_connect_sa(int s, struct sockaddr *sa, int len, int timeout)
          cc = errno;
          INC_NARTHREADS_CONTROLLED;
          errno = cc;
-         /* A result of 0 means timeout; in this case WSAGetLastError() will return zero,
-            and that can be used to distinguish from another error condition. */
+         /* A result of 0 is a timeout. A negative result keeps the Winsock error. */
          if (sc <= 0) {
-            errno = WSAGetLastError();
+            errno = (sc == 0) ? ETIMEDOUT : WSAGetLastError();
             sock_close(s);
             return 0;
          }
@@ -2931,9 +2968,25 @@ int sock_connect(char *fn, int sock_type, int timeout, int af_fam,
        * TCP: try every address.  getaddrinfo() often lists ::1 ahead of
        * 127.0.0.1 for "localhost", and a server bound to 127.0.0.1 is
        * not reached if the first refused address is the only one tried.
+       * timeout is one deadline for the whole attempt, not a fresh wait
+       * per address. 0 still means block with no limit.
        */
       if (sock_type != SOCK_T_DGRAM && sock_type != SOCK_T_RAW) {
+         long long t0 = 0;
+         if (timeout > 0)
+            t0 = sock_now_ms();
          for (res = res0; res; res = res->ai_next) {
+            int slice = timeout;
+            if (timeout > 0) {
+               long long elapsed = sock_now_ms() - t0;
+               if (elapsed < 0)
+                  elapsed = 0;
+               if (elapsed >= timeout) {
+                  errno = ETIMEDOUT;
+                  break;
+                  }
+               slice = (int)(timeout - elapsed);
+               }
             s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
             if (s < 0)
                continue;
@@ -2943,7 +2996,7 @@ int sock_connect(char *fn, int sock_type, int timeout, int af_fam,
                freeaddrinfo(res0);
                return 0;
                }
-            if (sock_connect_sa(s, res->ai_addr, res->ai_addrlen, timeout)) {
+            if (sock_connect_sa(s, res->ai_addr, res->ai_addrlen, slice)) {
                freeaddrinfo(res0);
                return s;
                }
@@ -6148,7 +6201,7 @@ dptr u_read(dptr f, int n, int fstatus, dptr d)
         if (fstatus & Fs_Encrypt) {
            SSL *ssl = BlkD(*f,File)->fd.ssl;
            DEC_NARTHREADS;
-           tally = SSL_read(ssl, buf, n);
+           tally = ossl_read(ssl, buf, n);
            err = errno;
            INC_NARTHREADS_CONTROLLED;
            errno = err;
@@ -6333,7 +6386,7 @@ tryagain:
          if (fstatus & Fs_Socket) {
 #if HAVE_LIBSSL
            if (fstatus & Fs_Encrypt) {
-              tally = SSL_read(BlkD(*f,File)->fd.ssl, StrLoc(*d) +  i*bufsize, bufsize);
+              tally = ossl_read(BlkD(*f,File)->fd.ssl, StrLoc(*d) +  i*bufsize, bufsize);
               if (tally <= 0) {
                 set_ssl_connection_errortext(BlkD(*f,File)->fd.ssl, tally);
                 strtotal += bufsize;
