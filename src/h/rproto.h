@@ -720,6 +720,7 @@ int checkOpenConsole( FILE *w, char *s );
       int       textwidth               (wbp w, char *s, int n);
       void      ensure_xftdraw          (wbp w);
       char     *convert_spec            (char *s);
+      void      xft_fit_fixed           (Display *dpy, int scr);
 #endif                                  /* HAVE_LIBXFT */
 
    #endif                               /* XWindows */

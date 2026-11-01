@@ -18,6 +18,15 @@
 
 int unicon_xft;
 
+/*
+ * The classic core "fixed" font has 6x13 cells, and layouts (ivib's, the
+ * gui package's) are sized for it.  An unsized "fixed" is opened at the
+ * largest pixel size whose cells fit in 6x13, found once per process.
+ */
+#define FIXED_CELL_W 6
+#define FIXED_CELL_H 13
+static int xft_fixed_px;
+
 static int xft_ready;
 
 static int xft_env_on(char *s)
@@ -109,8 +118,10 @@ char *convert_spec(char *s)
     * Unicon font sizes are pixel heights, matching the XLFD pixel
     * field. XFT_SIZE is points and comes out larger on a normal display.
     */
-   if (size > 0)
-      XftPatternAddDouble(p, XFT_PIXEL_SIZE, (double)size);
+   if (size <= 0)
+      size = strcmp(family, "fixed") ? DEFAULTFONTSIZE :
+         (xft_fixed_px > 0 ? xft_fixed_px : FIXED_CELL_H);
+   XftPatternAddDouble(p, XFT_PIXEL_SIZE, (double)size);
 
    if (flags & FONTFLAG_MEDIUM)
       XftPatternAddInteger(p, XFT_WEIGHT, XFT_WEIGHT_MEDIUM);
@@ -155,6 +166,32 @@ char *convert_spec(char *s)
    XftNameUnparse(p, res, sizeof(res) - 1);
    XftPatternDestroy(p);
    return res;
+}
+
+/*
+ * Find the pixel size an unsized "fixed" is opened at (see above).
+ */
+void xft_fit_fixed(Display *dpy, int scr)
+{
+   char spec[32], name[256];
+   XftFont *f;
+   int px, fits;
+
+   if (xft_fixed_px > 0)
+      return;
+   for (px = FIXED_CELL_H; px > 8; px--) {
+      sprintf(spec, "fixed,%d", px);
+      strncpy(name, convert_spec(spec), sizeof(name) - 1);
+      name[sizeof(name) - 1] = '\0';
+      if ((f = XftFontOpenName(dpy, scr, name)) == NULL)
+         break;
+      fits = f->max_advance_width <= FIXED_CELL_W &&
+             f->ascent + f->descent <= FIXED_CELL_H;
+      XftFontClose(dpy, f);
+      if (fits)
+         break;
+      }
+   xft_fixed_px = px;
 }
 
 void ensure_xftdraw(wbp w)
