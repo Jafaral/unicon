@@ -1224,6 +1224,15 @@ void set_ssl_context_errortext(int err, char* errtext);
 int ssl_dtls_accept(SSL *ssl, int fd);
 int ssl_dtls_connect(SSL *ssl, int fd);
 int sock_udp_connect_saved(int fd);
+/*
+ * SSL_* wrappers that stop a peer reset from raising SIGPIPE and killing
+ * the process before the call can return an error.
+ */
+int ossl_connect(SSL *ssl);
+int ossl_accept(SSL *ssl);
+int ossl_shutdown(SSL *ssl);
+int ossl_read(SSL *ssl, void *buf, int num);
+int ossl_write(SSL *ssl, const void *buf, int num);
 
 struct CryptoFile *crypto_open_material(dptr target, int israw, dptr attr,
                                         int nattr, int *rc);
