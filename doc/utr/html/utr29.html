@@ -222,7 +222,13 @@ Datagram I/O matches UDP.
 , 
 <code>msg</code>
 , 
+<code>type</code>
+ (
+<code>&quot;data&quot;</code>
+), 
 <code>saddr</code>
+, 
+<code>sport</code>
 , 
 <code>daddr</code>
 , and (for IPv4 raw datagrams that include a header) 
@@ -583,6 +589,17 @@ IP protocol number from
 </tr>
 <tr>
 <td>
+<code>pktinfo</code>
+</td>
+<td>
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+; UDP/multicast only
+</td>
+</tr>
+<tr>
+<td>
 <code>ttl</code>
 </td>
 <td>
@@ -676,8 +693,10 @@ write(r.addr, &quot;  &quot;, *r.msg, &quot; bytes&quot;)
  peeks with 
 <code>MSG_PEEK</code>
  into a 2K buffer, then consumes with 
+<code>recvmsg</code>
+ (
 <code>recvfrom</code>
-. If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a 
+ on Windows). If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a 
 <code>posix_message</code>
 : 
 <code>addr</code>
@@ -691,13 +710,25 @@ write(r.addr, &quot;  &quot;, *r.msg, &quot; bytes&quot;)
 <code>daddr</code>
  use the usual IP-header names: on an IPv4 raw receive they are the header source and destination; on UDP, 
 <code>saddr</code>
- is the numeric peer address and 
+/
+<code>sport</code>
+ are the numeric peer and 
 <code>daddr</code>
- is unpopulated. When the receive buffer starts with an IPv4 header, 
+/
+<code>dport</code>
+/
+<code>ttl</code>
+ are null unless the socket has 
+<code>pktinfo=yes</code>
+ (attribute readable as 
+<code>f[&quot;pktinfo&quot;]</code>
+). When the receive buffer starts with an IPv4 header, 
 <code>ttl</code>
  and 
 <code>proto</code>
- are that header's hop limit and protocol; otherwise those fields are null.
+ are that header's hop limit and protocol; otherwise those fields are null. The rule is that fields that cost nothing (the header is already in the buffer) are always filled, and 
+<code>pktinfo</code>
+ adds the ones that need the kernel's help.
 </p>
 <p>
 On many IPv4 stacks a raw receive buffer starts with the IP header, then the protocol message. Linux ICMP is the usual example. Strip it before decoding ICMP or IGMP (
@@ -705,10 +736,16 @@ On many IPv4 stacks a raw receive buffer starts with the IP header, then the pro
 ). IPv6 raw sockets typically deliver the upper layer only; there is no IPv6 header-strip helper yet.
 </p>
 <p>
+<code>receive(f, ms)</code>
+ waits at most 
+<code>ms</code>
+ milliseconds (0 does not wait) and fails with 
+<code>&amp;errno</code>
+ 
+<code>ETIMEDOUT</code>
+ when nothing arrives. 
 <code>select()</code>
- works on the handle. Session wrappers use it to implement timeouts around 
-<code>receive()</code>
-.
+ also works on the handle, for waiting on several at once.
 </p>
 <p>
 As with UDP, 

@@ -296,7 +296,11 @@ Output:
 </code></pre>
 <p>
 <code>r.addr</code>
- is the sender (host plus an ephemeral port).
+ is the sender (numeric host plus an ephemeral port); 
+<code>r.saddr</code>
+ and 
+<code>r.sport</code>
+ give the two parts separately.
 </p>
 <p>
 A wildcard bind plus explicit joins is the other shape:
@@ -637,6 +641,20 @@ IP protocol number:
  or 
 <code>&amp;null</code>
 ; typical on raw sockets
+</td>
+</tr>
+<tr>
+<td>
+<code>pktinfo</code>
+</td>
+<td>
+<code>&quot;yes&quot;</code>
+ or 
+<code>&amp;null</code>
+; when set, 
+<code>receive()</code>
+ fills 
+<code>daddr</code>
 </td>
 </tr>
 </tbody>

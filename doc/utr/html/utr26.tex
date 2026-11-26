@@ -112,7 +112,7 @@ All stream I/O funnels through one dispatch point: \texttt{u\_\allowbreak{}read(
 The close hook in \texttt{fsys.\allowbreak{}r} frees SSL resources directly. SSH files follow the same convention -- leaking a channel or session means not calling \texttt{close()}, the same as any other file.
 
 
-\texttt{receive()} already returns a general-purpose \texttt{posix\_\allowbreak{}message} record (\texttt{addr}, \texttt{msg}, \texttt{saddr}, \texttt{daddr}, \texttt{ttl}, \texttt{proto}) for UDP and raw datagrams. SSH reuses that type for an ordered stdout/stderr/exit-status event stream, using \texttt{addr} and \texttt{msg} (\hyperref[utr26-sec-receive]{section 8.3}).
+\texttt{receive()} already returns a general-purpose \texttt{posix\_\allowbreak{}message} record (\texttt{addr}, \texttt{msg}, \texttt{saddr}, \texttt{daddr}, \texttt{ttl}, \texttt{proto}, \texttt{sport}, \texttt{dport}, \texttt{type}) for UDP and raw datagrams. SSH reuses that record for an ordered stdout/stderr/exit-status event stream, using \texttt{type} and \texttt{msg} (\hyperref[utr26-sec-receive]{section 8.3}).
 
 
 \texttt{stat(f)} already \texttt{type\_\allowbreak{}case}s on its argument (string path versus open file). SFTP extends both branches (\hyperref[utr26-sec-sftp-meta]{section 11.3}). \texttt{remove()} and \texttt{rename()} gain an optional leading session argument, matching the existing Unicon idiom that many functions take an optional leading file or window (\texttt{write("hello")} versus \texttt{write(f,\allowbreak{}~"hello")}).
@@ -318,10 +318,10 @@ Stream \texttt{reads()} see stdout only. When stdout and stderr must stay in arr
 s := open("user@host", "hc", "key=/home/user/.ssh/id_ed25519",
           "cmd=echo out; echo err 1>&2; exit 3") | stop(&errortext)
 while m := receive(s) do
-   case m.addr of \{
-      "stdout" : writes(&output, m.msg)
-      "stderr" : writes(&errout, m.msg)
-      "exit"   : write(&errout, "[exit ", trim(m.msg), "]")
+   case m.type of \{
+      "stdout"     : writes(&output, m.msg)
+      "stderr"     : writes(&errout, m.msg)
+      "exitstatus" : write(&errout, "[exit ", trim(m.msg), "]")
       \}
 close(s)
 \end{Verbatim}
@@ -550,22 +550,25 @@ Preferring callback state over libssh's blocking \texttt{get\_\allowbreak{}exit\
 A command can produce interleaved stdout and stderr where the caller needs to know \emph{when} an stderr message occurred relative to stdout. Neither \texttt{reads()} (stdout only) nor \texttt{c["stderr"]} (a separate peek) can preserve that.
 
 
-\texttt{receive(c)} on an SSH channel yields the next queued event as a \texttt{posix\_\allowbreak{}message} whose \texttt{addr} is \texttt{"stdout"}, \texttt{"stderr"}, or \texttt{"exit"} and whose \texttt{msg} is the payload. The exit status is kept as a \textbf{string} so \texttt{receive()}'s return type stays uniform across every kind of file it can be called on; Unicon's \texttt{=} already coerces numeric strings.
+\texttt{receive(c)} on an SSH channel yields the next queued event as a \texttt{posix\_\allowbreak{}message} whose \texttt{type} is \texttt{"stdout"}, \texttt{"stderr"}, or \texttt{"exitstatus"} (the name of the \texttt{c["exitstatus"]} peek) and whose \texttt{msg} is the payload; \texttt{addr} and the other fields are \texttt{\&null}. The exit status is kept as a \textbf{string} so \texttt{receive()}'s return type stays uniform across every kind of file it can be called on; Unicon's \texttt{=} already coerces numeric strings.
+
+
+Every record \texttt{receive()} returns has \texttt{type} and \texttt{msg}, so one \texttt{case~m.\allowbreak{}type~of} loop covers datagrams (\texttt{"data"}) and channel events alike. Note the three different "types" at hand: \texttt{type(m)} is \texttt{"posix\_\allowbreak{}message"} for every message, \texttt{m.\allowbreak{}type} is the kind of message, and \texttt{c["type"]} is the kind of file (\texttt{"channel"}).
 
 \begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 c := open(s, "hc", "cmd=process_records")
 while m := receive(c) do
-   case m.addr of \{
-      "stdout" : write("OUT: " || m.msg)
-      "stderr" : write("ERR: " || m.msg)
-      "exit"   : write("done, status " || m.msg)
+   case m.type of \{
+      "stdout"     : write("OUT: " || m.msg)
+      "stderr"     : write("ERR: " || m.msg)
+      "exitstatus" : write("done, status " || m.msg)
       \}
 \end{Verbatim}
 \end{uscribeshaded}
 
 
-\texttt{receive()} fails once the channel is exhausted.
+\texttt{receive()} fails once the channel is exhausted. \texttt{receive(c,\allowbreak{}~ms)} waits at most \texttt{ms} milliseconds for the next event (0 does not wait) and fails with \texttt{\&errno} \texttt{ETIMEDOUT} when none arrives in time.
 
 \subsection{8.4 Arrival-order queue}
 \label{utr26-sec-queue}

@@ -179,7 +179,7 @@ hello-multicast
 \end{uscribeshaded}
 
 
-\texttt{r.\allowbreak{}addr} is the sender (host plus an ephemeral port).
+\texttt{r.\allowbreak{}addr} is the sender (numeric host plus an ephemeral port); \texttt{r.\allowbreak{}saddr} and \texttt{r.\allowbreak{}sport} give the two parts separately.
 
 
 A wildcard bind plus explicit joins is the other shape:
@@ -310,6 +310,7 @@ Name & Value \\
 \texttt{rcvbuf} / \texttt{sndbuf} & Buffer sizes in bytes (integers) \\
 \texttt{proto} & IP protocol number: \texttt{1} (ICMP), \texttt{2} (IGMP), \texttt{89} \\
 \texttt{hdrincl} & \texttt{"yes"} or \texttt{\&null}; typical on raw sockets \\
+\texttt{pktinfo} & \texttt{"yes"} or \texttt{\&null}; when set, \texttt{receive()} fills \texttt{daddr} \\
 \end{longtable}
 
 \begin{uscribeshaded}

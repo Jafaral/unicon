@@ -403,8 +403,14 @@ The close hook in
 <code>ttl</code>
 , 
 <code>proto</code>
-) for UDP and raw datagrams. SSH reuses that type for an ordered stdout/stderr/exit-status event stream, using 
-<code>addr</code>
+, 
+<code>sport</code>
+, 
+<code>dport</code>
+, 
+<code>type</code>
+) for UDP and raw datagrams. SSH reuses that record for an ordered stdout/stderr/exit-status event stream, using 
+<code>type</code>
  and 
 <code>msg</code>
  (
@@ -1117,10 +1123,10 @@ Stream
 <pre><code class="language-unicon">s := open(&quot;user@host&quot;, &quot;hc&quot;, &quot;key=/home/user/.ssh/id_ed25519&quot;,
           &quot;cmd=echo out; echo err 1&gt;&amp;2; exit 3&quot;) | stop(&amp;errortext)
 while m := receive(s) do
-   case m.addr of {
-      &quot;stdout&quot; : writes(&amp;output, m.msg)
-      &quot;stderr&quot; : writes(&amp;errout, m.msg)
-      &quot;exit&quot;   : write(&amp;errout, &quot;[exit &quot;, trim(m.msg), &quot;]&quot;)
+   case m.type of {
+      &quot;stdout&quot;     : writes(&amp;output, m.msg)
+      &quot;stderr&quot;     : writes(&amp;errout, m.msg)
+      &quot;exitstatus&quot; : write(&amp;errout, &quot;[exit &quot;, trim(m.msg), &quot;]&quot;)
       }
 close(s)
 </code></pre>
@@ -1656,16 +1662,22 @@ when
  on an SSH channel yields the next queued event as a 
 <code>posix_message</code>
  whose 
-<code>addr</code>
+<code>type</code>
  is 
 <code>&quot;stdout&quot;</code>
 , 
 <code>&quot;stderr&quot;</code>
 , or 
-<code>&quot;exit&quot;</code>
- and whose 
+<code>&quot;exitstatus&quot;</code>
+ (the name of the 
+<code>c[&quot;exitstatus&quot;]</code>
+ peek) and whose 
 <code>msg</code>
- is the payload. The exit status is kept as a 
+ is the payload; 
+<code>addr</code>
+ and the other fields are 
+<code>&amp;null</code>
+. The exit status is kept as a 
 <strong>
 string
 </strong>
@@ -1675,17 +1687,48 @@ string
 <code>=</code>
  already coerces numeric strings.
 </p>
+<p>
+Every record 
+<code>receive()</code>
+ returns has 
+<code>type</code>
+ and 
+<code>msg</code>
+, so one 
+<code>case m.type of</code>
+ loop covers datagrams (
+<code>&quot;data&quot;</code>
+) and channel events alike. Note the three different &quot;types&quot; at hand: 
+<code>type(m)</code>
+ is 
+<code>&quot;posix_message&quot;</code>
+ for every message, 
+<code>m.type</code>
+ is the kind of message, and 
+<code>c[&quot;type&quot;]</code>
+ is the kind of file (
+<code>&quot;channel&quot;</code>
+).
+</p>
 <pre><code class="language-unicon">c := open(s, &quot;hc&quot;, &quot;cmd=process_records&quot;)
 while m := receive(c) do
-   case m.addr of {
-      &quot;stdout&quot; : write(&quot;OUT: &quot; || m.msg)
-      &quot;stderr&quot; : write(&quot;ERR: &quot; || m.msg)
-      &quot;exit&quot;   : write(&quot;done, status &quot; || m.msg)
+   case m.type of {
+      &quot;stdout&quot;     : write(&quot;OUT: &quot; || m.msg)
+      &quot;stderr&quot;     : write(&quot;ERR: &quot; || m.msg)
+      &quot;exitstatus&quot; : write(&quot;done, status &quot; || m.msg)
       }
 </code></pre>
 <p>
 <code>receive()</code>
- fails once the channel is exhausted.
+ fails once the channel is exhausted. 
+<code>receive(c, ms)</code>
+ waits at most 
+<code>ms</code>
+ milliseconds for the next event (0 does not wait) and fails with 
+<code>&amp;errno</code>
+ 
+<code>ETIMEDOUT</code>
+ when none arrives in time.
 </p>
 <h3 id="sec-queue">
 8.4 Arrival-order queue

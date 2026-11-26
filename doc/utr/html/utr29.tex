@@ -88,7 +88,7 @@ The rest of Unicon networking already treats \texttt{open()} as the constructor 
 \textbf{The runtime does not build protocol payloads.} Writes send whatever bytes the caller supplies. Receives return whatever the kernel delivered, often including an IPv4 header on Linux. \texttt{import~net} and \texttt{PacketSpec} (or hand-assembled strings) fill that gap.
 
 
-\textbf{Datagram I/O matches UDP.} Raw sockets are not connected. \texttt{writes()} uses \texttt{sendto(2)} with the destination saved at \texttt{open()}. Incoming packets use \texttt{receive()}, which returns a record with \texttt{addr}, \texttt{msg}, \texttt{saddr}, \texttt{daddr}, and (for IPv4 raw datagrams that include a header) \texttt{ttl} and \texttt{proto}. Those extra fields are also available as \texttt{r.\allowbreak{}ttl} / \texttt{r.\allowbreak{}saddr}. Use \texttt{receive()}, not \texttt{read()} / \texttt{reads()}.
+\textbf{Datagram I/O matches UDP.} Raw sockets are not connected. \texttt{writes()} uses \texttt{sendto(2)} with the destination saved at \texttt{open()}. Incoming packets use \texttt{receive()}, which returns a record with \texttt{addr}, \texttt{msg}, \texttt{type} (\texttt{"data"}), \texttt{saddr}, \texttt{sport}, \texttt{daddr}, and (for IPv4 raw datagrams that include a header) \texttt{ttl} and \texttt{proto}. Those extra fields are also available as \texttt{r.\allowbreak{}ttl} / \texttt{r.\allowbreak{}saddr}. Use \texttt{receive()}, not \texttt{read()} / \texttt{reads()}.
 
 
 \textbf{Two layers for callers.} Session wrappers (\texttt{Ping}, \texttt{Igmp}) hide mode letters for the common cases. PacketSpec classes are there when the program must craft or classify bytes itself.
@@ -216,6 +216,7 @@ Name & Peek value \\
 \endlastfoot
 \texttt{proto} & IP protocol number from \texttt{proto=}: \texttt{1} (\texttt{icmp}), \\
 \texttt{hdrincl} & \texttt{"yes"} or \texttt{\&null} (not \texttt{"no"}) \\
+\texttt{pktinfo} & \texttt{"yes"} or \texttt{\&null}; UDP/multicast only \\
 \texttt{ttl} & Hop limit (integer), e.g. \texttt{64} \\
 \texttt{iface} & Outbound / join interface, e.g. \texttt{127.\allowbreak{}0.\allowbreak{}0.\allowbreak{}1} \\
 \texttt{groups} & List of joined groups, e.g. \texttt{239.\allowbreak{}1.\allowbreak{}1.\allowbreak{}1}; unpopulated \\
@@ -248,13 +249,13 @@ write(r.addr, "  ", *r.msg, " bytes")
 \texttt{writes()} calls \texttt{sock\_\allowbreak{}write()}, which for \texttt{SOCK\_\allowbreak{}RAW} (and UDP) does \texttt{sendto} to the \texttt{addrinfo} saved at \texttt{open()}. There is no \texttt{connect(2)}. Changing the destination means opening another handle (or, with \texttt{hdrincl=yes}, putting the destination in a supplied IP header).
 
 
-\texttt{receive()} peeks with \texttt{MSG\_\allowbreak{}PEEK} into a 2K buffer, then consumes with \texttt{recvfrom}. If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a \texttt{posix\_\allowbreak{}message}: \texttt{addr} is the peer (often \texttt{a.\allowbreak{}b.\allowbreak{}c.\allowbreak{}d:0} for raw IPv4), \texttt{msg} is the byte string. \texttt{saddr} / \texttt{daddr} use the usual IP-header names: on an IPv4 raw receive they are the header source and destination; on UDP, \texttt{saddr} is the numeric peer address and \texttt{daddr} is unpopulated. When the receive buffer starts with an IPv4 header, \texttt{ttl} and \texttt{proto} are that header's hop limit and protocol; otherwise those fields are null.
+\texttt{receive()} peeks with \texttt{MSG\_\allowbreak{}PEEK} into a 2K buffer, then consumes with \texttt{recvmsg} (\texttt{recvfrom} on Windows). If the peek fills 2K, the consume uses a 64K buffer so a large datagram is not truncated. The result is a \texttt{posix\_\allowbreak{}message}: \texttt{addr} is the peer (often \texttt{a.\allowbreak{}b.\allowbreak{}c.\allowbreak{}d:0} for raw IPv4), \texttt{msg} is the byte string. \texttt{saddr} / \texttt{daddr} use the usual IP-header names: on an IPv4 raw receive they are the header source and destination; on UDP, \texttt{saddr}/\texttt{sport} are the numeric peer and \texttt{daddr}/\texttt{dport}/\texttt{ttl} are null unless the socket has \texttt{pktinfo=yes} (attribute readable as \texttt{f["pktinfo"]}). When the receive buffer starts with an IPv4 header, \texttt{ttl} and \texttt{proto} are that header's hop limit and protocol; otherwise those fields are null. The rule is that fields that cost nothing (the header is already in the buffer) are always filled, and \texttt{pktinfo} adds the ones that need the kernel's help.
 
 
 On many IPv4 stacks a raw receive buffer starts with the IP header, then the protocol message. Linux ICMP is the usual example. Strip it before decoding ICMP or IGMP (\hyperref[utr29-sec-packetspec]{section 7}). IPv6 raw sockets typically deliver the upper layer only; there is no IPv6 header-strip helper yet.
 
 
-\texttt{select()} works on the handle. Session wrappers use it to implement timeouts around \texttt{receive()}.
+\texttt{receive(f,\allowbreak{}~ms)} waits at most \texttt{ms} milliseconds (0 does not wait) and fails with \texttt{\&errno} \texttt{ETIMEDOUT} when nothing arrives. \texttt{select()} also works on the handle, for waiting on several at once.
 
 
 As with UDP, \texttt{read()} / \texttt{reads()} are the wrong verbs for datagrams. Use \texttt{receive()}.
