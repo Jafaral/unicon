@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian) (preloaded format=pdflatex 2026.11.27)  27 NOV 2026 05:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian) (preloaded format=pdflatex 2026.11.27)  27 NOV 2026 17:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -512,13 +512,13 @@ E\T1/cmr/m/n/12 ). Un-closed \T1/cmtt/m/n/12 ( \T1/cmr/m/n/12 is \T1/cmtt/m/n/1
 2 unterminated macro invocation\T1/cmr/m/n/12 .
  []
 
-[11]
+[11] [12]
 Overfull \hbox (3.54831pt too wide) in paragraph at lines 510--511
 []\T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmtt/m/n/12 $define ass
 ert(...) \T1/cmr/m/n/12 re-places the builtin; \T1/cmtt/m/n/12 macros.
  []
 
-[12]
+
 Overfull \hbox (14.00311pt too wide) in paragraph at lines 513--514
 []\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/macros.icn\T1/cmr/m/n/12 ;
  \T1/cmtt/m/n/12 macros_multiline_line.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macr
@@ -532,9 +532,9 @@ s_define_continuation.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macros_
  []
 
 
-Overfull \hbox (2.52838pt too wide) in paragraph at lines 513--514
-\T1/cmtt/m/n/12 unicon/data/macros_bad_*.icn\T1/cmr/m/n/12 , in-clud-ing \T1/cm
-tt/m/n/12 macros_bad_define_eof*.icn\T1/cmr/m/n/12 ,
+Overfull \hbox (0.6525pt too wide) in paragraph at lines 513--514
+\T1/cmr/m/n/12 neg-a-tives un-der \T1/cmtt/m/n/12 tests/unicon/data/macros_bad_
+*.icn\T1/cmr/m/n/12 , in-clud-ing \T1/cmtt/m/n/12 macros_
  []
 
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
@@ -568,7 +568,7 @@ Overfull \hbox (98.07224pt too wide) in paragraph at lines 537--538
 \T1/cmtt/m/n/12 [file:line] assertion failed (expr)|  
  []
 
-[13]
+ignored error: Infinite glue shrinkage found in box being split [13]
 Overfull \hbox (26.03966pt too wide) in paragraph at lines 557--558
 \T1/cmtt/m/n/12 assert \T1/cmr/m/n/12 pro-ce-dure must \T1/cmtt/m/n/12 $undef a
 ssert\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmt
@@ -589,7 +589,7 @@ akefile\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 &error \T1/cmr/m/n/12 con-ver-sion), \T
 1/cmtt/m/n/12 runerr219_
  []
 
-
+[17]
 Overfull \hbox (4.44527pt too wide) in paragraph at lines 691--692
 []\T1/cmtt/m/n/12 preproc_error(msg) \T1/cmr/m/n/12 builds \T1/cmtt/m/n/12 File
  ...; Line N # $directive: ...\T1/cmr/m/n/12 , in-
@@ -602,7 +602,7 @@ pushes a \T1/cmtt/m/n/12 ParseError \T1/cmr/m/n/12 onto \T1/cmtt/m/n/12 parsing
 Errors\T1/cmr/m/n/12 . 
  []
 
-[17] [18]
+[18]
 Overfull \hbox (10.13985pt too wide) in paragraph at lines 746--747
 \T1/cmr/m/n/12 After \T1/cmtt/m/n/12 preproc_command := preproc_word()\T1/cmr/m
 /n/12 , the \T1/cmtt/m/n/12 case preproc_command of
@@ -614,13 +614,13 @@ Overfull \hbox (109.59045pt too wide) in paragraph at lines 760--761
  and \T1/cmtt/m/n/12 preproc_error("unknown preprocessor directive")
  []
 
-
+[19]
 Underfull \hbox (badness 4779) in paragraph at lines 789--790
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
 
-[19] [20] (./utr24.aux)
+[20] (./utr24.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
@@ -635,7 +635,7 @@ Here is how much of TeX's memory you used:
  41110 multiletter control sequences out of 15000+600000
  638153 words of font info for 59 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1417b,623s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,1471b,623s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.60
 0pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.
 600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt109
@@ -648,7 +648,7 @@ ec/ecrm1200.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr24.pdf (22 pages, 154731 bytes).
+Output written on utr24.pdf (22 pages, 155099 bytes).
 PDF statistics:
  648 PDF objects out of 1000 (max. 8388607)
  230 compressed objects within 3 object streams

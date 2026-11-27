@@ -444,10 +444,13 @@ one empty argument.
 The replacement may continue on following lines if each
 continued line ends with ``\`` as the very last character.
 ``preproc_scan_define_value()`` splices those lines before it
-scans quotes or comments, as the C preprocessor does: the
+scans the value's quotes, as the C preprocessor does: the
 ``\`` and newline are dropped, and every other character is
 kept, so a quoted literal may span the join. A ``\`` with
 anything after it, including a space, is not a continuation.
+A ``#`` comment ends the line, so a ``\`` at the end of a
+comment does not continue it. A ``#`` inside quotes is not a
+comment.
 Leading space is skipped before the first line of the body
 only, and trailing space and any comment are removed from the
 final value, as in C, where whitespace around the replacement
@@ -496,8 +499,13 @@ opaque (commas and parens inside quotes do not split). A
 part of the argument. A quoted literal continues onto the next
 line only with a trailing ``_``; a quote left open at the end
 of any other line is ``unterminated string in macro
-invocation``. Errors in a multiline call are reported at the
-line where the call starts, and a call cannot run past the end
+invocation``. A triple-quoted string that starts on a
+continued line is rewritten before that scan, as it would be
+on the line the call started on
+(``macros_triple_call.icn``). One that never closes is
+``unterminated triple-quoted string``. Errors in a multiline
+call are reported at the line where the call starts, and a
+call cannot run past the end
 of the file it starts in. ``preproc_subst_fmacro()``
 replaces whole identifiers in the body, not substrings, and
 does not substitute inside strings. The result is rescanned,
@@ -585,6 +593,7 @@ Tests: ``tests/unicon/macros.icn``;
 ``macros_define_multiline_line.icn``,
 ``macros_define_continuation.icn``,
 ``macros_call_backslash_literal.icn``,
+``macros_triple_call.icn``,
 ``assert_lines.icn`` (``&line`` after multiline calls, commas in
 brackets, comments inside a call); negatives under
 ``tests/unicon/data/macros_bad_*.icn``, including

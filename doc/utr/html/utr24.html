@@ -974,11 +974,17 @@ The replacement may continue on following lines if each continued line ends with
 <code>\</code>
  as the very last character. 
 <code>preproc_scan_define_value()</code>
- splices those lines before it scans quotes or comments, as the C preprocessor does: the 
+ splices those lines before it scans the value's quotes, as the C preprocessor does: the 
 <code>\</code>
  and newline are dropped, and every other character is kept, so a quoted literal may span the join. A 
 <code>\</code>
- with anything after it, including a space, is not a continuation. Leading space is skipped before the first line of the body only, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So 
+ with anything after it, including a space, is not a continuation. A 
+<code>#</code>
+ comment ends the line, so a 
+<code>\</code>
+ at the end of a comment does not continue it. A 
+<code>#</code>
+ inside quotes is not a comment. Leading space is skipped before the first line of the body only, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So 
 <code>$define X 1</code>
  and 
 <code>$define X 1  # c</code>
@@ -1053,6 +1059,10 @@ Arguments split on top-level commas. Nesting of
 <code>_</code>
 ; a quote left open at the end of any other line is 
 <code>unterminated string in macro invocation</code>
+. A triple-quoted string that starts on a continued line is rewritten before that scan, as it would be on the line the call started on (
+<code>macros_triple_call.icn</code>
+). One that never closes is 
+<code>unterminated triple-quoted string</code>
 . Errors in a multiline call are reported at the line where the call starts, and a call cannot run past the end of the file it starts in. 
 <code>preproc_subst_fmacro()</code>
  replaces whole identifiers in the body, not substrings, and does not substitute inside strings. The result is rescanned, so 
@@ -1184,6 +1194,8 @@ Tests:
 <code>macros_define_continuation.icn</code>
 , 
 <code>macros_call_backslash_literal.icn</code>
+, 
+<code>macros_triple_call.icn</code>
 , 
 <code>assert_lines.icn</code>
  (
