@@ -198,7 +198,9 @@ Assertions.
 <code>__debug__</code>
  / 
 <code>__test__</code>
-, and to nothing otherwise.
+, and to 
+<code>(&amp;null)</code>
+ otherwise.
 </p>
 <h2 id="sec-arch">
 3. Architecture
@@ -269,7 +271,9 @@ Table of predefined symbols (
 <code>__test__</code>
  is enabled there, 
 <code>__debug__</code>
- is defaulted.
+ is implied (
+<code>preproc_imply_debug()</code>
+).
 </p>
 <h3 id="sec-state">
 3.2 State
@@ -435,12 +439,13 @@ Blocks object-like fallback after a failed
 </tr>
 <tr>
 <td>
-<code>preproc_assert_uid</code>
+<code>preproc_debug_implied</code>
 </td>
 <td>
-Suffix for unique temporaries in 
-<code>assert</code>
- expansions.
+Set when 
+<code>__debug__</code>
+ exists only because 
+<code>__test__</code>
 </td>
 </tr>
 </tbody>
@@ -485,25 +490,31 @@ Each line from
 </p>
 <ul>
 <li>
+<p>
 <code>#line</code>
  (optional spaces, GCC form) goes to 
 <code>preproc_scan_directive()</code>
 .
+</p>
 </li>
 <li>
+<p>
 <code>$</code>
  followed by a character in 
 <code>nonpunctuation</code>
  (letters, digits, space, tab, form feed, carriage return) goes to 
 <code>preproc_scan_directive()</code>
 .
+</p>
 </li>
 <li>
+<p>
 Otherwise 
 <code>&amp;pos := 1</code>
  and the line goes to 
 <code>preproc_scan_text()</code>
 .
+</p>
 </li>
 </ul>
 <p>
@@ -581,6 +592,7 @@ When the region is active,
 </p>
 <ol start="1">
 <li>
+<p>
 Rewrites 
 <code>&quot;&quot;&quot;</code>
  ... 
@@ -588,15 +600,19 @@ Rewrites
  via 
 <code>preproc_rewrite_triple_strings()</code>
  before identifier scans, so the body is never treated as directives or macros.
+</p>
 </li>
 <li>
+<p>
 If either symbol table is non-empty, scans for 
 <code>#</code>
 , strings, and identifiers. Otherwise it emits the line after 
 <code>preproc_sync_lines()</code>
 .
+</p>
 </li>
 <li>
+<p>
 Looks up function-like macros before object-like. A name in 
 <code>preproc_fun_table</code>
  is a call only if 
@@ -606,8 +622,10 @@ Looks up function-like macros before object-like. A name in
  after optional space; otherwise 
 <code>&amp;pos</code>
  is restored and the name may still match an object-like macro.
+</p>
 </li>
 <li>
+<p>
 Rescans replacements through 
 <code>preproc_scan_text(done_set)</code>
 . 
@@ -615,6 +633,7 @@ Rescans replacements through
  is 
 <code>&amp;null</code>
 , a string, or a set of names on the current expansion chain; it blocks infinite recursion.
+</p>
 </li>
 </ol>
 <p>
@@ -953,7 +972,7 @@ Zero parameters are legal (
 <p>
 The replacement may continue on following lines if each continued line ends with 
 <code>\</code>
- as the very last character (no trim). 
+ as the very last character (checked before any trim). 
 <code>preproc_scan_define_value()</code>
  and 
 <code>preproc_define_value_next_line()</code>
@@ -961,13 +980,19 @@ The replacement may continue on following lines if each continued line ends with
 <code>\</code>
  and newline are dropped; other spaces are kept. A 
 <code>\</code>
- with trailing spaces is not a continuation. Leading space is skipped only before the first line of the body. The same 
+ with trailing spaces is not a continuation. Leading space is skipped before the first line of the body, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So 
+<code>$define X 1</code>
+ and 
+<code>$define X 1  # c</code>
+ are the same definition. The same 
 <code>\</code>
  rule applies to object-like 
 <code>$define</code>
  values (
 <code>macros_define_continuation.icn</code>
-). EOF after a splice is 
+). Continuation lines come from the same file: end of file, including the end of an 
+<code>$include</code>
+ file, after a splice is 
 <code>unterminated $define (line continuation)</code>
 .
 </p>
@@ -1004,11 +1029,27 @@ A call
  splice.
 </p>
 <p>
-Arguments split on top-level commas, with parenthesis depth, and with 
+Arguments split on top-level commas. Nesting of 
+<code>( )</code>
+, 
+<code>[ ]</code>
+ and 
+<code>{ }</code>
+ is tracked, so 
+<code>M(L[1,2])</code>
+ and 
+<code>M([1,2])</code>
+ pass one argument, and 
 <code>&quot;...&quot;</code>
  / 
 <code>'...'</code>
- opaque (commas and parens inside quotes do not split). 
+ are opaque (commas and parens inside quotes do not split). A 
+<code>#</code>
+ comment inside a call ends that physical line and is not part of the argument. A quoted literal continues onto the next line only with a trailing 
+<code>_</code>
+; a quote left open at the end of any other line is 
+<code>unterminated string in macro invocation</code>
+. Errors in a multiline call are reported at the line where the call starts, and a call cannot run past the end of the file it starts in. 
 <code>preproc_subst_fmacro()</code>
  replaces whole identifiers in the body, not substrings, and does not substitute inside strings. The result is rescanned, so 
 <code>TWICE</code>
@@ -1044,13 +1085,14 @@ Empty arguments (
 .
 </p>
 <p>
-Call continuation anchors 
-<code>preproc_print_line</code>
- to the first physical line of the call (
 <code>preproc_ml_anchor</code>
-). 
+ records the first physical line of a multiline call. 
+<code>preproc_scan_text()</code>
+ syncs to that line before emitting the expansion, so 
 <code>&amp;line</code>
- inside the expansion is that line; the next source line after the call skips the continuation rows. 
+ inside it is that line, and afterwards sets 
+<code>preproc_print_line</code>
+ to the anchor plus the number of newlines the expansion kept (for example a newline in the middle of an argument). The next source line after the call then skips the continuation rows. 
 <code>$define</code>
  
 <code>\</code>
@@ -1138,11 +1180,17 @@ Tests:
 <code>macros_define_continuation.icn</code>
 , 
 <code>macros_call_backslash_literal.icn</code>
-; negatives under 
+, 
+<code>assert_lines.icn</code>
+ (
+<code>&amp;line</code>
+ after multiline calls, commas in brackets, comments inside a call); negatives under 
 <code>tests/unicon/data/macros_bad_*.icn</code>
- and 
+, including 
 <code>macros_bad_define_eof*.icn</code>
-.
+, a continuation at the end of an 
+<code>$include</code>
+ file and an unterminated string argument.
 </p>
 <h2 id="sec-assert">
 7. Built-in 
@@ -1166,7 +1214,9 @@ Tests:
 <code>preproc_subst_fmacro()</code>
 : 
 <code>preproc_expand_fmacro_call()</code>
- builds a Unicon fragment from the argument text. Arity is one or two: 
+ hands the arguments to 
+<code>preproc_expand_builtin_assert()</code>
+, which builds a Unicon fragment from their text. Arity is one or two: 
 <code>assert(expr)</code>
  or 
 <code>assert(expr, label)</code>
@@ -1185,13 +1235,15 @@ Semantics follow Unicon success and failure, not Boolean truth:
 <code>expr</code>
  to fail. 
 <code>assert</code>
- is alternation (
-<code>expr | { ... }</code>
-); 
+ is 
+<code>(if not (expr) then ... else &amp;null)</code>
+ and 
 <code>assert_not</code>
  is 
-<code>if (expr) then { ... }</code>
-.
+<code>(if (expr) then ... else &amp;null)</code>
+, so 
+<code>expr</code>
+ is evaluated once and never resumed.
 </p>
 <table>
 <thead>
@@ -1245,7 +1297,9 @@ Release
 neither
 </td>
 <td>
-Expands to nothing (
+Expands to 
+<code>(&amp;null)</code>
+ (
 <code>assert_strip.icn</code>
 ).
 </td>
@@ -1263,57 +1317,108 @@ If both
 <code>preproc_new()</code>
  and a later 
 <code>$define __test__</code>
- both default 
+ both imply 
 <code>__debug__</code>
- when it is absent.
-</p>
-<p>
-These macros are standalone statements. Disabled expansion is empty, so expression positions such as 
-<code>if assert(...)</code>
- are not supported.
-</p>
-<p>
-The debug payload is the quoted expression text, then 
-<code>char(30)</code>
- and the label if the label is non-empty (
-<code>AssertRunerrSep</code>
- in 
-<code>errmsg.r</code>
-). 
-<code>assert_not</code>
- prefixes 
-<code>char(29)</code>
- so the traceback can print 
-<code>assert_not(</code>
-. Error 219 is 
-<code>assertion failed</code>
- (
-<code>data.r</code>
-). 
-<code>errmsg.r</code>
- skips the ordinary 
-<code>Run-time error 219</code>
- banner and the offending- value line; it prints 
-<code>[file:line] assertion failed: ...</code>
+ when it is absent. An implied 
+<code>__debug__</code>
+ is replaced without error by an explicit 
+<code>$define __debug__</code>
+ (or a file's own definition compiled with 
+<code>-D__test__</code>
+), and is removed again by 
+<code>$undef __test__</code>
 .
 </p>
 <p>
-If the label expression fails, the assertion diagnostic still runs: the expansion does 
-<code>lbl := ((label) | &quot;&quot;)</code>
+These macros are meant as statements. Every expansion is one parenthesized expression that produces 
+<code>&amp;null</code>
+ when the check passes, in all three modes, so it can stand wherever a statement can, including a 
+<code>then</code>
+ or 
+<code>else</code>
+ branch.
+</p>
+<p>
+The debug payload is 
+<code>char(28)</code>
+ for 
+<code>assert</code>
+ or 
+<code>char(29)</code>
+ for 
+<code>assert_not</code>
+, then the quoted expression text, then 
+<code>char(30)</code>
+ and the label if there is one (
+<code>AssertMarker</code>
+, 
+<code>AssertNotMarker</code>
+ and 
+<code>AssertRunerrSep</code>
+ in 
+<code>errmsg.r</code>
+). Error 219 is 
+<code>assertion failed</code>
  (
+<code>data.r</code>
+). For a marked payload 
+<code>errmsg.r</code>
+ skips the ordinary 
+<code>Run-time error 219</code>
+ banner and the offending-value line; it prints 
+<code>[file:line] assertion failed: ...</code>
+, and the traceback (
+<code>rdebug.r</code>
+) prints 
+<code>assert(...)</code>
+ or 
+<code>assert_not(...)</code>
+. A plain 
+<code>runerr(219, x)</code>
+ without a marker is reported like any other run-time error. When 
+<code>&amp;error</code>
+ converts an assert failure, 
+<code>&amp;errortext</code>
+ is the full message and 
+<code>&amp;errorvalue</code>
+ is its 
+<code>expr, label</code>
+ part.
+</p>
+<p>
+The label is evaluated only when the check fails. A label that fails or is 
+<code>&amp;null</code>
+ is left out (
 <code>assert_failing_label.icn</code>
 ).
 </p>
 <p>
-Each expansion increments 
-<code>preproc_assert_uid</code>
- so generated temporaries (
-<code>__preproc_assert_N_lbl</code>
-) do not collide -- icont has no block-local variables in expression-level 
-<code>{...}</code>
- compounds. The fragment is rescanned so nested macros in the inserted code expand.
+The fragment is rescanned so macros in the arguments expand, including a nested 
+<code>assert</code>
+: the expansion never names 
+<code>assert</code>
+ itself, so the name is dropped from 
+<code>done_set</code>
+ for the rescan.
 </p>
 <p>
+The builtin names are left alone where they are not calls: in a 
+<code>procedure</code>
+ or 
+<code>method</code>
+ heading, and after 
+<code>.</code>
+, so 
+<code>method assert(...)</code>
+ and 
+<code>obj.assert(...)</code>
+ work. Plain 
+<code>assert(...)</code>
+ calls still expand, so a program with its own 
+<code>assert</code>
+ procedure must 
+<code>$undef assert</code>
+. 
 <code>$undef assert</code>
  then 
 <code>$define assert(...)</code>
@@ -1362,25 +1467,34 @@ Under
 <code>__test__</code>
 , failure writes a diagnostic and 
 <code>fail</code>
-s, so later statements still run:
+s out of the procedure that holds the assert. The caller keeps going, so later checks still run when each check is in its own procedure:
 </p>
 <pre><code class="language-unicon">$define __test__
 procedure main()
-   assert(1 = 2, &quot;keep going&quot;)
-   write(&quot;after fail&quot;)
-   assert(1 = 1)
+   check1()
+   write(&quot;after check1&quot;)
+   check2()
    write(&quot;done&quot;)
+end
+procedure check1()
+   assert(1 = 2, &quot;keep going&quot;)
+   write(&quot;not reached&quot;)
+end
+procedure check2()
+   assert(1 = 1)
 end
 </code></pre>
 <p>
 Output:
 </p>
-<pre><code class="language-text">[assert_ex.icn:3] assertion failed (1 = 2) keep going
-after fail
+<pre><code class="language-text">[assert_ex.icn:9] assertion failed (1 = 2) keep going
+after check1
 done
 </code></pre>
 <p>
-With neither symbol, the calls vanish. The asserts below would fail at run time if they were still present, so reaching 
+With neither symbol, each call becomes 
+<code>(&amp;null)</code>
+. The asserts below would fail at run time if they were still checked, so reaching 
 <code>write()</code>
  is the proof they were stripped:
 </p>
@@ -1408,6 +1522,30 @@ Tests:
 <code>assert_failing_label.icn</code>
 , 
 <code>assert_not_failing.icn</code>
+, 
+<code>assert_release.icn</code>
+ (assert as a then-part), 
+<code>assert_user_defs.icn</code>
+ (an 
+<code>assert</code>
+ method and procedure heading), 
+<code>assert_test_debug_defs.icn</code>
+ (explicit and implied 
+<code>__debug__</code>
+), 
+<code>assert_cmdline_test.icn</code>
+ and 
+<code>assert_cmdline_errconv.icn</code>
+ (
+<code>-D__test__</code>
+ and 
+<code>-D__debug__</code>
+ set in 
+<code>tests/unicon/Makefile</code>
+, 
+<code>&amp;error</code>
+ conversion), 
+<code>runerr219_plain.icn</code>
 , matching 
 <code>stand/*.std</code>
 . Builtin override is in 
@@ -1500,9 +1638,13 @@ Assertions
 <code>preproc_file_stack</code>
 , and removes the path from 
 <code>preproc_include_set</code>
-. String continuation, triple-quoted bodies, and macro arguments that need another physical line all call 
+. String continuation and triple-quoted bodies that need another physical line call 
 <code>preproc_read()</code>
- again.
+ again. 
+<code>$define</code>
+ continuations and multiline macro calls use 
+<code>preproc_read_same_file()</code>
+, which fails at the end of the current file instead of returning to the including file.
 </p>
 <p>
 <code>preproc_quote_string(s)</code>
@@ -1758,45 +1900,6 @@ Bob Alexander. &quot;Preprocessor for Jcon&quot;. Basis for Unicon's preproce.ic
 </li>
 <li id="cite-jeffery-ib-preproc" value="5">
 Clinton Jeffery. &quot;The Unicon Compiler&quot;. Course notes, doc/ib/p3-unicon.tex, section &quot;The Unicon Preprocessor&quot;.
-</li>
-<li id="cite-libssh" value="6">
-The libssh Project. &quot;libssh -- The SSH Library&quot;. https://www.libssh.org/. 2026.
-</li>
-<li id="cite-jeffery-utr13" value="7">
-Clinton Jeffery. &quot;The Unicon Messaging Facilities&quot;. doc/utr/utr13.odt.
-</li>
-<li id="cite-openssl" value="8">
-The OpenSSL Project. &quot;OpenSSL -- Cryptography and SSL/TLS Toolkit&quot;. https://www.openssl.org/. 2026.
-</li>
-<li id="cite-algharaibeh-utr26" value="9">
-Jafar Al-Gharaibeh. &quot;Native SSH and SFTP Support in Unicon&quot;. doc/utr/utr26.rst. 2026.
-</li>
-<li id="cite-rfc2104" value="10">
-H. Krawczyk and M. Bellare and R. Canetti. &quot;HMAC: Keyed-Hashing for Message Authentication&quot;. RFC 2104. 1997.
-</li>
-<li id="cite-rfc1112" value="11">
-S. Deering. &quot;Host Extensions for IP Multicasting&quot;. RFC 1112. 1989.
-</li>
-<li id="cite-algharaibeh-utr29" value="12">
-Jafar Al-Gharaibeh. &quot;Raw Sockets and Packet Layouts in Unicon&quot;. doc/utr/utr29.rst. 2026.
-</li>
-<li id="cite-rfc4607" value="13">
-H. Holbrook and B. Cain. &quot;Source-Specific Multicast for IP&quot;. RFC 4607. 2006.
-</li>
-<li id="cite-algharaibeh-utr28" value="14">
-Jafar Al-Gharaibeh. &quot;Multicast and Socket Attributes in Unicon&quot;. doc/utr/utr28.rst. 2026.
-</li>
-<li id="cite-rfc792" value="15">
-J. Postel. &quot;Internet Control Message Protocol&quot;. RFC 792. 1981.
-</li>
-<li id="cite-rfc2236" value="16">
-W. Fenner. &quot;Internet Group Management Protocol, Version 2&quot;. RFC 2236. 1997.
-</li>
-<li id="cite-rfc3376" value="17">
-B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. &quot;Internet Group Management Protocol, Version 3&quot;. RFC 3376. 2002.
-</li>
-<li id="cite-rfc1071" value="18">
-R. Braden and D. Borman and C. Partridge. &quot;Computing the Internet Checksum&quot;. RFC 1071. 1988.
 </li>
 </ol></div>
 <footer class="footer" role="contentinfo">

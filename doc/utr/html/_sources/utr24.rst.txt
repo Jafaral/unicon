@@ -75,7 +75,7 @@ may span lines.
 **Assertions.** Debug and test builds need a check that
 disappears entirely in release. Built-in ``assert`` /
 ``assert_not`` expand to runtime tests under ``__debug__`` /
-``__test__``, and to nothing otherwise.
+``__test__``, and to ``(&null)`` otherwise.
 
 .. _sec-arch:
 
@@ -112,7 +112,8 @@ extensions in this report.
 ``preproc_new()`` initializes; ``preproc_done()`` clears large
 tables so they are not retained across compilations.
 ``preproc_install_builtin_macros()`` runs from ``preproc_new()``.
-If ``__test__`` is enabled there, ``__debug__`` is defaulted.
+If ``__test__`` is enabled there, ``__debug__`` is implied
+(``preproc_imply_debug()``).
 
 .. _sec-state:
 
@@ -158,8 +159,9 @@ Object-like ``$define`` symbols live only in
    * - ``preproc_fmacro_parse_error``
      - Blocks object-like fallback after a failed
        function-like ``$define`` parse.
-   * - ``preproc_assert_uid``
-     - Suffix for unique temporaries in ``assert`` expansions.
+   * - ``preproc_debug_implied``
+     - Set when ``__debug__`` exists only because ``__test__``
+       implied it.
 
 .. _sec-driver:
 
@@ -264,10 +266,12 @@ and trailing-``_`` continuation (``preproc_read()``, adjusting
        ``preproc_scan_define_fmacro()``, or object-like value
        via ``preproc_scan_define_value()``. Redefinition is
        checked within the same kind. Defining one kind clears
-       the other. ``__test__`` can imply ``__debug__``.
+       the other. ``__test__`` implies ``__debug__``; an
+       explicit ``$define __debug__`` replaces an implied one.
    * - ``undef``
      - Removes the name from both tables and from the builtin
-       override set.
+       override set. ``$undef __test__`` also removes an implied
+       ``__debug__``.
    * - ``ifdef`` / ``ifndef``
      - Pushes ``preproc_if_state``; sets state from
        ``preproc_defined(sym)`` (``ifndef`` inverted). In an
@@ -438,14 +442,20 @@ between ``(`` and ``)`` is zero arguments (``ZERO( )``), not
 one empty argument.
 
 The replacement may continue on following lines if each
-continued line ends with ``\`` as the very last character (no
-trim). ``preproc_scan_define_value()`` and
+continued line ends with ``\`` as the very last character
+(checked before any trim). ``preproc_scan_define_value()`` and
 ``preproc_define_value_next_line()`` splice those lines:
 the ``\`` and newline are dropped; other spaces are kept.
 A ``\`` with trailing spaces is not a continuation. Leading
-space is skipped only before the first line of the body. The
-same ``\`` rule applies to object-like ``$define`` values
-(``macros_define_continuation.icn``). EOF after a splice is
+space is skipped before the first line of the body, and
+trailing space and any comment are removed from the final
+value, as in C, where whitespace around the replacement list
+is not part of it. So ``$define X 1`` and ``$define X 1  # c``
+are the same definition. The same ``\`` rule applies to
+object-like ``$define`` values
+(``macros_define_continuation.icn``). Continuation lines come
+from the same file: end of file, including the end of an
+``$include`` file, after a splice is
 ``unterminated $define (line continuation)``.
 
 .. code-block:: unicon
@@ -471,9 +481,17 @@ A backslash inside a call is ordinary argument text
 (``macros_call_backslash_literal.icn``), not a ``$define``
 splice.
 
-Arguments split on top-level commas, with parenthesis depth,
-and with ``"..."`` / ``'...'`` opaque (commas and parens
-inside quotes do not split). ``preproc_subst_fmacro()``
+Arguments split on top-level commas. Nesting of ``( )``,
+``[ ]`` and ``{ }`` is tracked, so ``M(L[1,2])`` and
+``M([1,2])`` pass one argument, and ``"..."`` / ``'...'`` are
+opaque (commas and parens inside quotes do not split). A
+``#`` comment inside a call ends that physical line and is not
+part of the argument. A quoted literal continues onto the next
+line only with a trailing ``_``; a quote left open at the end
+of any other line is ``unterminated string in macro
+invocation``. Errors in a multiline call are reported at the
+line where the call starts, and a call cannot run past the end
+of the file it starts in. ``preproc_subst_fmacro()``
 replaces whole identifiers in the body, not substrings, and
 does not substitute inside strings. The result is rescanned,
 so ``TWICE`` and chains such as ``A`` -> ``E`` expand in one
@@ -489,10 +507,13 @@ the name on ``$define`` but the parameter list is malformed,
 ``preproc_fmacro_parse_error`` is set so the line is not
 treated as a bad object-like ``$define``.
 
-Call continuation anchors ``preproc_print_line`` to the first
-physical line of the call (``preproc_ml_anchor``). ``&line``
-inside the expansion is that line; the next source line after
-the call skips the continuation rows.
+``preproc_ml_anchor`` records the first physical line of a
+multiline call. ``preproc_scan_text()`` syncs to that line
+before emitting the expansion, so ``&line`` inside it is that
+line, and afterwards sets ``preproc_print_line`` to the anchor
+plus the number of newlines the expansion kept (for example a
+newline in the middle of an argument). The next source line
+after the call then skips the continuation rows.
 ``$define`` ``\`` splicing does not adjust
 ``preproc_print_line``. ``&line`` in a multiline body is the
 invocation line, not each physical line of the definition
@@ -556,9 +577,12 @@ Tests: ``tests/unicon/macros.icn``;
 ``macros_multiline_line.icn``,
 ``macros_define_multiline_line.icn``,
 ``macros_define_continuation.icn``,
-``macros_call_backslash_literal.icn``; negatives under
-``tests/unicon/data/macros_bad_*.icn`` and
-``macros_bad_define_eof*.icn``.
+``macros_call_backslash_literal.icn``,
+``assert_lines.icn`` (``&line`` after multiline calls, commas in
+brackets, comments inside a call); negatives under
+``tests/unicon/data/macros_bad_*.icn``, including
+``macros_bad_define_eof*.icn``, a continuation at the end of an
+``$include`` file and an unterminated string argument.
 
 .. _sec-assert:
 
@@ -570,15 +594,17 @@ Tests: ``tests/unicon/macros.icn``;
 ``preproc_fmacro`` records and marks them in
 ``preproc_builtin_fun_table``. Expansion is not
 ``preproc_subst_fmacro()``: ``preproc_expand_fmacro_call()``
-builds a Unicon fragment from the argument text. Arity is one
+hands the arguments to ``preproc_expand_builtin_assert()``,
+which builds a Unicon fragment from their text. Arity is one
 or two: ``assert(expr)`` or ``assert(expr, label)``. Any other
 count is ``wrong number of args in macro call``.
 
 Semantics follow Unicon success and failure, not Boolean
 truth: ``assert(expr)`` expects ``expr`` to succeed;
 ``assert_not(expr)`` expects ``expr`` to fail. ``assert`` is
-alternation (``expr | { ... }``); ``assert_not`` is
-``if (expr) then { ... }``.
+``(if not (expr) then ... else &null)`` and ``assert_not`` is
+``(if (expr) then ... else &null)``, so ``expr`` is evaluated
+once and never resumed.
 
 .. list-table::
    :header-rows: 1
@@ -594,43 +620,57 @@ alternation (``expr | { ... }``); ``assert_not`` is
    * - Testing
      - ``$define __test__`` or ``-D__test__``
      - ``write`` of ``[file:line] assertion failed (expr)``
-       and the label, then ``fail``. Later statements in
-       ``main`` still run (``assert_testing.icn``). Defining
-       ``__test__`` also enables ``__debug__`` so the
-       condition is compiled.
+       and the label, then ``fail``, which fails out of the
+       enclosing procedure. Its caller goes on, so a driver
+       that calls one procedure per check sees every check
+       (``assert_testing.icn``). Defining ``__test__`` also
+       implies ``__debug__``.
    * - Release
      - neither
-     - Expands to nothing (``assert_strip.icn``).
+     - Expands to ``(&null)`` (``assert_strip.icn``).
 
 If both ``__test__`` and ``__debug__`` are defined, the testing
 path (``fail``) wins. ``preproc_new()`` and a later
-``$define __test__`` both default ``__debug__`` when it is
-absent.
+``$define __test__`` both imply ``__debug__`` when it is
+absent. An implied ``__debug__`` is replaced without error by
+an explicit ``$define __debug__`` (or a file's own definition
+compiled with ``-D__test__``), and is removed again by
+``$undef __test__``.
 
-These macros are standalone statements. Disabled expansion is
-empty, so expression positions such as ``if assert(...)`` are
-not supported.
+These macros are meant as statements. Every expansion is one
+parenthesized expression that produces ``&null`` when the check
+passes, in all three modes, so it can stand wherever a
+statement can, including a ``then`` or ``else`` branch.
 
-The debug payload is the quoted expression text, then
-``char(30)`` and the label if the label is non-empty
-(``AssertRunerrSep`` in ``errmsg.r``). ``assert_not`` prefixes
-``char(29)`` so the traceback can print ``assert_not(``. Error
-219 is ``assertion failed`` (``data.r``). ``errmsg.r`` skips
-the ordinary ``Run-time error 219`` banner and the offending-
-value line; it prints ``[file:line] assertion failed: ...``.
+The debug payload is ``char(28)`` for ``assert`` or
+``char(29)`` for ``assert_not``, then the quoted expression
+text, then ``char(30)`` and the label if there is one
+(``AssertMarker``, ``AssertNotMarker`` and ``AssertRunerrSep``
+in ``errmsg.r``). Error 219 is ``assertion failed``
+(``data.r``). For a marked payload ``errmsg.r`` skips the
+ordinary ``Run-time error 219`` banner and the offending-value
+line; it prints ``[file:line] assertion failed: ...``, and the
+traceback (``rdebug.r``) prints ``assert(...)`` or
+``assert_not(...)``. A plain ``runerr(219, x)`` without a marker
+is reported like any other run-time error. When ``&error``
+converts an assert failure, ``&errortext`` is the full message
+and ``&errorvalue`` is its ``expr, label`` part.
 
-If the label expression fails, the assertion diagnostic still
-runs: the expansion does ``lbl := ((label) | "")``
-(``assert_failing_label.icn``).
+The label is evaluated only when the check fails. A label that
+fails or is ``&null`` is left out (``assert_failing_label.icn``).
 
-Each expansion increments ``preproc_assert_uid`` so generated
-temporaries (``__preproc_assert_N_lbl``) do not collide --
-icont has no block-local variables in expression-level
-``{...}`` compounds. The fragment is rescanned so nested
-macros in the inserted code expand.
+The fragment is rescanned so macros in the arguments expand,
+including a nested ``assert``: the expansion never names
+``assert`` itself, so the name is dropped from ``done_set`` for
+the rescan.
 
-``$undef assert`` then ``$define assert(...)`` replaces the
-builtin like any user function-like macro.
+The builtin names are left alone where they are not calls: in a
+``procedure`` or ``method`` heading, and after ``.``, so
+``method assert(...)`` and ``obj.assert(...)`` work. Plain
+``assert(...)`` calls still expand, so a program with its own
+``assert`` procedure must ``$undef assert``. ``$undef assert``
+then ``$define assert(...)`` replaces the builtin like any
+user function-like macro.
 
 .. code-block:: unicon
 
@@ -666,28 +706,37 @@ Output::
       main()
       assert_not(1 = 1) from line 3 in assert_ex.icn
 
-Under ``__test__``, failure writes a diagnostic and ``fail``s,
-so later statements still run:
+Under ``__test__``, failure writes a diagnostic and ``fail``s
+out of the procedure that holds the assert. The caller keeps
+going, so later checks still run when each check is in its own
+procedure:
 
 .. code-block:: unicon
 
    $define __test__
    procedure main()
-      assert(1 = 2, "keep going")
-      write("after fail")
-      assert(1 = 1)
+      check1()
+      write("after check1")
+      check2()
       write("done")
+   end
+   procedure check1()
+      assert(1 = 2, "keep going")
+      write("not reached")
+   end
+   procedure check2()
+      assert(1 = 1)
    end
 
 Output::
 
-   [assert_ex.icn:3] assertion failed (1 = 2) keep going
-   after fail
+   [assert_ex.icn:9] assertion failed (1 = 2) keep going
+   after check1
    done
 
-With neither symbol, the calls vanish. The asserts below would
-fail at run time if they were still present, so reaching
-``write()`` is the proof they were stripped:
+With neither symbol, each call becomes ``(&null)``. The asserts
+below would fail at run time if they were still checked, so
+reaching ``write()`` is the proof they were stripped:
 
 .. code-block:: unicon
 
@@ -706,7 +755,13 @@ Output::
 Tests: ``assert_debugging.icn`` (passing cases, then a
 failing assert five frames down), ``assert_testing.icn``,
 ``assert_strip.icn``, ``assert_failing_label.icn``,
-``assert_not_failing.icn``, matching ``stand/*.std``.
+``assert_not_failing.icn``, ``assert_release.icn`` (assert as a
+then-part), ``assert_user_defs.icn`` (an ``assert`` method and
+procedure heading), ``assert_test_debug_defs.icn`` (explicit and
+implied ``__debug__``), ``assert_cmdline_test.icn`` and
+``assert_cmdline_errconv.icn`` (``-D__test__`` and ``-D__debug__``
+set in ``tests/unicon/Makefile``, ``&error`` conversion),
+``runerr219_plain.icn``, matching ``stand/*.std``.
 Builtin override is in ``macros.icn``.
 
 .. list-table::
@@ -729,7 +784,9 @@ Builtin override is in ``macros.icn``.
        ``preproc_expand_fmacro_call()``
    * - Assertions
      - ``preproc_install_builtin_macros()``,
-       special cases in ``preproc_expand_fmacro_call()``;
+       ``preproc_expand_builtin_assert()``,
+       ``preproc_builtin_not_call()``,
+       ``preproc_imply_debug()``;
        runtime ``runerr(219)`` in ``errmsg.r``, ``rdebug.r``
 
 .. _sec-support:
@@ -753,9 +810,12 @@ next line from ``read()`` or from a list "file." On EOF it
 checks ``preproc_if_stack`` depth against
 ``preproc_nest_level``, closes the file, pops
 ``preproc_file_stack``, and removes the path from
-``preproc_include_set``. String continuation, triple-quoted
-bodies, and macro arguments that need another physical line
-all call ``preproc_read()`` again.
+``preproc_include_set``. String continuation and
+triple-quoted bodies that need another physical line call
+``preproc_read()`` again. ``$define`` continuations and
+multiline macro calls use ``preproc_read_same_file()``, which
+fails at the end of the current file instead of returning to
+the including file.
 
 ``preproc_quote_string(s)`` escapes arbitrary text for a Unicon
 string literal. ``preproc_istring()`` / ``preproc_istring_radix()``
@@ -796,8 +856,8 @@ if that copy is still shipped; it does not currently match.
        ``preproc_scan_macro_args()``.
    * - Built-in special function macro
      - ``preproc_install_builtin_macros()``,
-       ``preproc_builtin_fun_table``, a branch in
-       ``preproc_expand_fmacro_call()``; ``$undef`` must drop
+       ``preproc_builtin_fun_table``,
+       ``preproc_expand_builtin_assert()``; ``$undef`` must drop
        the builtin marker.
    * - Source syntax rewritten to plain Unicon
      - A phase in ``preproc_scan_text()``. Must respect

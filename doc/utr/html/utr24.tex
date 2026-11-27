@@ -6,9 +6,27 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{fancyvrb}
+\IfFileExists{fvextra.sty}{%
+  \usepackage{fvextra}%
+  \fvset{breaklines=true,breakanywhere=true}%
+}{}
+\IfFileExists{framed.sty}{%
+  \usepackage{framed}%
+  \definecolor{shadecolor}{RGB}{240,243,246}%
+  \newenvironment{uscribeshaded}{\shaded}{\endshaded}%
+}{%
+  \newenvironment{uscribeshaded}{}{}%
+}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{array}
 \IfFileExists{multirow.sty}{\usepackage{multirow}}{}
+\IfFileExists{caption.sty}{%
+  \usepackage{caption}%
+  \newcommand{\uscribecaptionstar}[1]{\caption*{##1}}%
+}{%
+  \newcommand{\uscribecaptionstar}[1]{{\centering\small ##1\par}}%
+}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 \begin{document}
 \begin{titlepage}
@@ -45,7 +63,7 @@ Moscow, ID, 83844, USA
 \section{1. Introduction}
 \label{utr24-sec-intro}
 
-This report describes the Unicon source preprocessor: how a file plus includes becomes the token stream the compiler scans, what the \texttt{\$} directives do, and the three extensions added in \texttt{uni/unicon/preproce.icn} -- triple-quoted strings, function-like macros, and built-in \texttt{assert} / \texttt{assert\_not}. It is formatted as a Unicon Technical Report [1]. The language-facing command list lives in \emph{Programming with Unicon} [2] (language reference, "Preprocessor") and UTR \#8 [3]; that text still states that \texttt{\$define} does not take arguments. Automated tests live under \texttt{tests/unicon/} (\texttt{triple\_strings.icn}, \texttt{macros*.icn}, \texttt{assert\_*.icn}). \texttt{unicon~-E} writes preprocessed source.
+This report describes the Unicon source preprocessor: how a file plus includes becomes the token stream the compiler scans, what the \texttt{\$} directives do, and the three extensions added in \texttt{uni/\allowbreak{}unicon/\allowbreak{}preproce.\allowbreak{}icn} -- triple-quoted strings, function-like macros, and built-in \texttt{assert} / \texttt{assert\_\allowbreak{}not}. It is formatted as a Unicon Technical Report [1]. The language-facing command list lives in \emph{Programming with Unicon} [2] (language reference, "Preprocessor") and UTR \#8 [3]; that text still states that \texttt{\$define} does not take arguments. Automated tests live under \texttt{tests/\allowbreak{}unicon/\allowbreak{}} (\texttt{triple\_\allowbreak{}strings.\allowbreak{}icn}, \texttt{macros*.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}*.\allowbreak{}icn}). \texttt{unicon~-\allowbreak{}E} writes preprocessed source.
 
 
 The preprocessor is not optional. Every compilation runs it.
@@ -62,22 +80,22 @@ The Jcon baseline provided object-like \texttt{\$define}, \texttt{\$include}, \t
 Three gaps in that baseline are filled here:
 
 
-\textbf{Multiline string literals.} Unicon string literals are one physical line unless continued with a trailing \texttt{\_}. A triple-quoted form lets a literal span lines, including text that looks like comments or \texttt{\$} directives, without changing the lexer grammar.
+\textbf{Multiline string literals.} Unicon string literals are one physical line unless continued with a trailing \texttt{\_\allowbreak{}}. A triple-quoted form lets a literal span lines, including text that looks like comments or \texttt{\$} directives, without changing the lexer grammar.
 
 
 \textbf{Parameterized macros.} Object-like \texttt{\$define} cannot abstract repeated call-shaped text. Function-like \texttt{\$define} adds a parameter list and a replacement body, with C-style \texttt{\textbackslash{}} continuation on the definition and call arguments that may span lines.
 
 
-\textbf{Assertions.} Debug and test builds need a check that disappears entirely in release. Built-in \texttt{assert} / \texttt{assert\_not} expand to runtime tests under \texttt{\_\_debug\_\_} / \texttt{\_\_test\_\_}, and to nothing otherwise.
+\textbf{Assertions.} Debug and test builds need a check that disappears entirely in release. Built-in \texttt{assert} / \texttt{assert\_\allowbreak{}not} expand to runtime tests under \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} / \texttt{\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}}, and to \texttt{(\&null)} otherwise.
 
 \section{3. Architecture}
 \label{utr24-sec-arch}
 
-Canonical source is \texttt{uni/unicon/preproce.icn}. \texttt{uni/parser/preproce.icn} is a shorter, separate copy used by the standalone parser toolkit; it does not include the extensions in this report.
+Canonical source is \texttt{uni/\allowbreak{}unicon/\allowbreak{}preproce.\allowbreak{}icn}. \texttt{uni/\allowbreak{}parser/\allowbreak{}preproce.\allowbreak{}icn} is a shorter, separate copy used by the standalone parser toolkit; it does not include the extensions in this report.
 
 \subsection{3.1 Public procedures}
 \label{utr24-sec-public}
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Procedure & Role \\
 \hline
@@ -90,20 +108,20 @@ Procedure & Role \\
 \endfoot
 \hline
 \endlastfoot
-\texttt{preprocessor(fname,~predefined\_syms)} & Main entry. Initializes state, loops over input, emits \\
-\texttt{preproc(dummy,~args)} & Wrapper: \texttt{suspend~preprocessor(args[1],~predefs())}. \\
-\texttt{predefs()} & Table of predefined symbols (\texttt{\_UNIX}, \texttt{\_\_DATE\_\_}, \\
+\texttt{preprocessor(fname,\allowbreak{}~predefined\_\allowbreak{}syms)} & Main entry. Initializes state, loops over input, emits \\
+\texttt{preproc(dummy,\allowbreak{}~args)} & Wrapper: \texttt{suspend~preprocessor(args[1],\allowbreak{}~predefs())}. \\
+\texttt{predefs()} & Table of predefined symbols (\texttt{\_\allowbreak{}UNIX}, \texttt{\_\allowbreak{}\_\allowbreak{}DATE\_\allowbreak{}\_\allowbreak{}}, \\
 \end{longtable}
 
 
-\texttt{preproc\_new()} initializes; \texttt{preproc\_done()} clears large tables so they are not retained across compilations. \texttt{preproc\_install\_builtin\_macros()} runs from \texttt{preproc\_new()}. If \texttt{\_\_test\_\_} is enabled there, \texttt{\_\_debug\_\_} is defaulted.
+\texttt{preproc\_\allowbreak{}new()} initializes; \texttt{preproc\_\allowbreak{}done()} clears large tables so they are not retained across compilations. \texttt{preproc\_\allowbreak{}install\_\allowbreak{}builtin\_\allowbreak{}macros()} runs from \texttt{preproc\_\allowbreak{}new()}. If \texttt{\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} is enabled there, \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} is implied (\texttt{preproc\_\allowbreak{}imply\_\allowbreak{}debug()}).
 
 \subsection{3.2 State}
 \label{utr24-sec-state}
 
-\texttt{record~preproc\_fmacro(params,~body)} holds a function-like macro: parameter names in order and replacement text. Object-like \texttt{\$define} symbols live only in \texttt{preproc\_sym\_table}.
+\texttt{record~preproc\_\allowbreak{}fmacro(params,\allowbreak{}~body)} holds a function-like macro: parameter names in order and replacement text. Object-like \texttt{\$define} symbols live only in \texttt{preproc\_\allowbreak{}sym\_\allowbreak{}table}.
 
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Global & Purpose \\
 \hline
@@ -116,21 +134,21 @@ Global & Purpose \\
 \endfoot
 \hline
 \endlastfoot
-\texttt{preproc\_sym\_table} & Object-like macros: symbol to replacement string. \\
-\texttt{preproc\_fun\_table} & Function-like macros: symbol to \texttt{preproc\_fmacro}. \\
-\texttt{preproc\_builtin\_fun\_table} & Names expanded specially (\texttt{assert}, \texttt{assert\_not}). \\
-\texttt{preproc\_if\_stack}, \texttt{preproc\_if\_state} & Conditional compilation. \\
-\texttt{preproc\_file\_stack}, \texttt{preproc\_file}, \texttt{preproc\_filename}, \texttt{preproc\_line} & Include stack and current input position. \\
-\texttt{preproc\_include\_set}, \texttt{preproc\_include\_name} & Included paths; circular includes are errors. \\
-\texttt{preproc\_print\_line}, \texttt{preproc\_print\_filename} & Last emitted position, for \texttt{\#line}. \\
-\texttt{preproc\_ml\_anchor} & First physical line of a multiline macro call. \\
-\texttt{preproc\_nest\_level} & \texttt{\$if} depth at include start; paired on EOF unwind. \\
-\texttt{preproc\_word\_chars} & Identifier characters: letters, digits, \texttt{\_}. \\
-\texttt{preproc\_command} & Current directive name, for diagnostics. \\
-\texttt{preproc\_err\_count} & Errors reported. \\
-\texttt{preproc\_dollar\_or\_pound} & Whether the directive started with \texttt{\#} or \texttt{\$}. \\
-\texttt{preproc\_fmacro\_parse\_error} & Blocks object-like fallback after a failed \\
-\texttt{preproc\_assert\_uid} & Suffix for unique temporaries in \texttt{assert} expansions. \\
+\texttt{preproc\_\allowbreak{}sym\_\allowbreak{}table} & Object-like macros: symbol to replacement string. \\
+\texttt{preproc\_\allowbreak{}fun\_\allowbreak{}table} & Function-like macros: symbol to \texttt{preproc\_\allowbreak{}fmacro}. \\
+\texttt{preproc\_\allowbreak{}builtin\_\allowbreak{}fun\_\allowbreak{}table} & Names expanded specially (\texttt{assert}, \texttt{assert\_\allowbreak{}not}). \\
+\texttt{preproc\_\allowbreak{}if\_\allowbreak{}stack}, \texttt{preproc\_\allowbreak{}if\_\allowbreak{}state} & Conditional compilation. \\
+\texttt{preproc\_\allowbreak{}file\_\allowbreak{}stack}, \texttt{preproc\_\allowbreak{}file}, \texttt{preproc\_\allowbreak{}filename}, \texttt{preproc\_\allowbreak{}line} & Include stack and current input position. \\
+\texttt{preproc\_\allowbreak{}include\_\allowbreak{}set}, \texttt{preproc\_\allowbreak{}include\_\allowbreak{}name} & Included paths; circular includes are errors. \\
+\texttt{preproc\_\allowbreak{}print\_\allowbreak{}line}, \texttt{preproc\_\allowbreak{}print\_\allowbreak{}filename} & Last emitted position, for \texttt{\#line}. \\
+\texttt{preproc\_\allowbreak{}ml\_\allowbreak{}anchor} & First physical line of a multiline macro call. \\
+\texttt{preproc\_\allowbreak{}nest\_\allowbreak{}level} & \texttt{\$if} depth at include start; paired on EOF unwind. \\
+\texttt{preproc\_\allowbreak{}word\_\allowbreak{}chars} & Identifier characters: letters, digits, \texttt{\_\allowbreak{}}. \\
+\texttt{preproc\_\allowbreak{}command} & Current directive name, for diagnostics. \\
+\texttt{preproc\_\allowbreak{}err\_\allowbreak{}count} & Errors reported. \\
+\texttt{preproc\_\allowbreak{}dollar\_\allowbreak{}or\_\allowbreak{}pound} & Whether the directive started with \texttt{\#} or \texttt{\$}. \\
+\texttt{preproc\_\allowbreak{}fmacro\_\allowbreak{}parse\_\allowbreak{}error} & Blocks object-like fallback after a failed \\
+\texttt{preproc\_\allowbreak{}debug\_\allowbreak{}implied} & Set when \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} exists only because \texttt{\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} \\
 \end{longtable}
 
 \subsection{3.3 Driver}
@@ -138,27 +156,38 @@ Global & Purpose \\
 
 \texttt{preprocessor()} is a generator. The translator drains it into \texttt{yyin}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 every yyin ||:= preprocessor(fname, uni_predefs) do
    yyin ||:= "\\n"
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-in \texttt{uni/unicon/unicon.icn}. \texttt{uni\_predefs} is \texttt{predefs()} plus \texttt{-D} options. After the generator finishes, a non-zero \texttt{preproc\_err\_count} or a non-empty \texttt{parsingErrors} aborts before \texttt{yyparse()}.
+in \texttt{uni/\allowbreak{}unicon/\allowbreak{}unicon.\allowbreak{}icn}. \texttt{uni\_\allowbreak{}predefs} is \texttt{predefs()} plus \texttt{-\allowbreak{}D} options. After the generator finishes, a non-zero \texttt{preproc\_\allowbreak{}err\_\allowbreak{}count} or a non-empty \texttt{parsingErrors} aborts before \texttt{yyparse()}.
 
 
-Each line from \texttt{preproc\_read()} is scanned under \texttt{line~?~\{~...~\}}. After leading \texttt{preproc\_space()}:
+Each line from \texttt{preproc\_\allowbreak{}read()} is scanned under \texttt{line~?~\{~.\allowbreak{}.\allowbreak{}.\allowbreak{}~\}}. After leading \texttt{preproc\_\allowbreak{}space()}:
 
 \begin{itemize}
 \item 
-\texttt{\#line} (optional spaces, GCC form) goes to \texttt{preproc\_scan\_directive()}.
+
+\texttt{\#line} (optional spaces, GCC form) goes to \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}directive()}.
+
+
 \item 
-\texttt{\$} followed by a character in \texttt{nonpunctuation} (letters, digits, space, tab, form feed, carriage return) goes to \texttt{preproc\_scan\_directive()}.
+
+\texttt{\$} followed by a character in \texttt{nonpunctuation} (letters, digits, space, tab, form feed, carriage return) goes to \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}directive()}.
+
+
 \item 
-Otherwise \texttt{\&pos~:=~1} and the line goes to \texttt{preproc\_scan\_text()}.
+
+Otherwise \texttt{\&pos~:=~1} and the line goes to \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()}.
+
+
 \end{itemize}
 
-Unicon directives are \texttt{\$}-prefixed. A \texttt{\#} that is not \texttt{\#line} is not a directive. With macros loaded, \texttt{preproc\_scan\_text()} treats \texttt{\#} outside strings as a comment to end of line. Do not rely on C-style \texttt{\#define} at column 0.
+Unicon directives are \texttt{\$}-prefixed. A \texttt{\#} that is not \texttt{\#line} is not a directive. With macros loaded, \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()} treats \texttt{\#} outside strings as a comment to end of line. Do not rely on C-style \texttt{\#define} at column 0.
 
 
 There is no second pass over the same line.
@@ -166,35 +195,47 @@ There is no second pass over the same line.
 \subsection{3.4 Conditional compilation}
 \label{utr24-sec-ifstate}
 
-\texttt{/preproc\_if\_state} is Unicon's null test. After \texttt{\$ifdef}, the true branch sets \texttt{preproc\_if\_state} to null (emit); the false branch sets \texttt{"false"} or \texttt{"off"} (skip). So \texttt{/preproc\_if\_state} means the current region is active (or there is no \texttt{\$ifdef}). \texttt{\textbackslash{}preproc\_if\_state} is the nonnull test.
+\texttt{/\allowbreak{}preproc\_\allowbreak{}if\_\allowbreak{}state} is Unicon's null test. After \texttt{\$ifdef}, the true branch sets \texttt{preproc\_\allowbreak{}if\_\allowbreak{}state} to null (emit); the false branch sets \texttt{"false"} or \texttt{"off"} (skip). So \texttt{/\allowbreak{}preproc\_\allowbreak{}if\_\allowbreak{}state} means the current region is active (or there is no \texttt{\$ifdef}). \texttt{\textbackslash{}preproc\_\allowbreak{}if\_\allowbreak{}state} is the nonnull test.
 
 
-\texttt{\$define}, \texttt{\$undef}, \texttt{\$include}, and text expansion run only when \texttt{/preproc\_if\_state} succeeds. \texttt{preproc\_scan\_text()} returns without emitting in skipped regions -- no triple-string rewrite, no macro expansion. \texttt{\$ifdef} / \texttt{\$ifndef} / \texttt{\$else} / \texttt{\$endif} still run in skipped regions so nested conditionals stay balanced. A bare \texttt{if} token inside skipped text is mapped to \texttt{\$if}, which pushes state and forces \texttt{"off"}.
+\texttt{\$define}, \texttt{\$undef}, \texttt{\$include}, and text expansion run only when \texttt{/\allowbreak{}preproc\_\allowbreak{}if\_\allowbreak{}state} succeeds. \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()} returns without emitting in skipped regions -- no triple-string rewrite, no macro expansion. \texttt{\$ifdef} / \texttt{\$ifndef} / \texttt{\$else} / \texttt{\$endif} still run in skipped regions so nested conditionals stay balanced. A bare \texttt{if} token inside skipped text is mapped to \texttt{\$if}, which pushes state and forces \texttt{"off"}.
 
 \subsection{3.5 Text scan order}
 \label{utr24-sec-text-order}
 
-When the region is active, \texttt{preproc\_scan\_text()}:
+When the region is active, \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()}:
 
 \begin{enumerate}
 \item 
-Rewrites \texttt{"""} ... \texttt{"""} via \texttt{preproc\_rewrite\_triple\_strings()} before identifier scans, so the body is never treated as directives or macros.
+
+Rewrites \texttt{"""} ... \texttt{"""} via \texttt{preproc\_\allowbreak{}rewrite\_\allowbreak{}triple\_\allowbreak{}strings()} before identifier scans, so the body is never treated as directives or macros.
+
+
 \item 
-If either symbol table is non-empty, scans for \texttt{\#}, strings, and identifiers. Otherwise it emits the line after \texttt{preproc\_sync\_lines()}.
+
+If either symbol table is non-empty, scans for \texttt{\#}, strings, and identifiers. Otherwise it emits the line after \texttt{preproc\_\allowbreak{}sync\_\allowbreak{}lines()}.
+
+
 \item 
-Looks up function-like macros before object-like. A name in \texttt{preproc\_fun\_table} is a call only if \texttt{preproc\_expand\_fmacro\_call()} sees \texttt{(} after optional space; otherwise \texttt{\&pos} is restored and the name may still match an object-like macro.
+
+Looks up function-like macros before object-like. A name in \texttt{preproc\_\allowbreak{}fun\_\allowbreak{}table} is a call only if \texttt{preproc\_\allowbreak{}expand\_\allowbreak{}fmacro\_\allowbreak{}call()} sees \texttt{(} after optional space; otherwise \texttt{\&pos} is restored and the name may still match an object-like macro.
+
+
 \item 
-Rescans replacements through \texttt{preproc\_scan\_text(done\_set)}. \texttt{done\_set} is \texttt{\&null}, a string, or a set of names on the current expansion chain; it blocks infinite recursion.
+
+Rescans replacements through \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text(done\_\allowbreak{}set)}. \texttt{done\_\allowbreak{}set} is \texttt{\&null}, a string, or a set of names on the current expansion chain; it blocks infinite recursion.
+
+
 \end{enumerate}
 
-String literals \texttt{"..."} / \texttt{'...'} are skipped with escape and trailing-\texttt{\_} continuation (\texttt{preproc\_read()}, adjusting \texttt{preproc\_print\_line}).
+String literals \texttt{".\allowbreak{}.\allowbreak{}.\allowbreak{}"} / \texttt{'.\allowbreak{}.\allowbreak{}.\allowbreak{}'} are skipped with escape and trailing-\texttt{\_\allowbreak{}} continuation (\texttt{preproc\_\allowbreak{}read()}, adjusting \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line}).
 
 \section{4. Directives}
 \label{utr24-sec-directives}
 
-\texttt{preproc\_scan\_directive()} reads the command with \texttt{preproc\_word()}. Unknown names in an active region call \texttt{preproc\_error("unknown~preprocessor~directive")}.
+\texttt{preproc\_\allowbreak{}scan\_\allowbreak{}directive()} reads the command with \texttt{preproc\_\allowbreak{}word()}. Unknown names in an active region call \texttt{preproc\_\allowbreak{}error("unknown~preprocessor~directive")}.
 
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Command & Behavior \\
 \hline
@@ -207,13 +248,13 @@ Command & Behavior \\
 \endfoot
 \hline
 \endlastfoot
-\texttt{define} & Function-like \texttt{name(params...)~body} via \\
+\texttt{define} & Function-like \texttt{name(params.\allowbreak{}.\allowbreak{}.\allowbreak{})~body} via \\
 \texttt{undef} & Removes the name from both tables and from the builtin \\
-\texttt{ifdef} / \texttt{ifndef} & Pushes \texttt{preproc\_if\_state}; sets state from \\
+\texttt{ifdef} / \texttt{ifndef} & Pushes \texttt{preproc\_\allowbreak{}if\_\allowbreak{}state}; sets state from \\
 \texttt{\$if} & Placeholder for \texttt{if} tokens inside excluded code: \\
 \texttt{else} / \texttt{endif} & Pop, toggle, or close the branch; error on mismatch. \\
-\texttt{include} & Quoted or bare filename via \texttt{preproc\_qword()}; circular \\
-\texttt{line} & Sets \texttt{preproc\_filename} / \texttt{preproc\_line} from a \\
+\texttt{include} & Quoted or bare filename via \texttt{preproc\_\allowbreak{}qword()}; circular \\
+\texttt{line} & Sets \texttt{preproc\_\allowbreak{}filename} / \texttt{preproc\_\allowbreak{}line} from a \\
 \texttt{error} & User error; message to end of line or \texttt{\#}. \\
 \texttt{ITRACE} & Sets \texttt{\&trace} from an integer. \\
 \texttt{C} & Accumulates lines until \texttt{\$Cend}; passes the text to \\
@@ -222,9 +263,10 @@ Command & Behavior \\
 \section{5. Triple-quoted multiline strings}
 \label{utr24-sec-triple}
 
-Delimiters \texttt{"""} ... \texttt{"""} mark a string whose body may span physical lines. The preprocessor collects raw text -- including lines that look like comments or \texttt{\$} directives -- and rewrites the region to an ordinary quoted literal. The lexer grammar in \texttt{uni/parser} is unchanged.
+Delimiters \texttt{"""} ... \texttt{"""} mark a string whose body may span physical lines. The preprocessor collects raw text -- including lines that look like comments or \texttt{\$} directives -- and rewrites the region to an ordinary quoted literal. The lexer grammar in \texttt{uni/\allowbreak{}parser} is unchanged.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local x
    x := """line one
@@ -232,19 +274,23 @@ line two"""
    write(x)
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 line one
 line two
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-The opener may sit on the same line as code or alone on a following line. Indentation and newlines in the body are kept. Multiline bodies do not shift \texttt{\&line} for surrounding statements (\texttt{triple\_strings.icn}).
+The opener may sit on the same line as code or alone on a following line. Indentation and newlines in the body are kept. Multiline bodies do not shift \texttt{\&line} for surrounding statements (\texttt{triple\_\allowbreak{}strings.\allowbreak{}icn}).
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local x
    x := """
@@ -261,11 +307,13 @@ $endif
    write("[", x, "]")
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 [
 $ifdef __debug__
 inside triple
@@ -275,28 +323,30 @@ escaped triple: """ inside
 contains """ literally
 [ends-with-backslash\\]
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-Inside \texttt{"..."} or \texttt{'...'}, a \texttt{"""} sequence is copied through and does not start this mode. To put three double quotes in a triple-quoted body, write \texttt{\textbackslash{}"\textbackslash{}"\textbackslash{}"} (backslash before each quote). The four-character form \texttt{\textbackslash{}"""} is not an escape, so a body may end with a single \texttt{\textbackslash{}}.
+Inside \texttt{".\allowbreak{}.\allowbreak{}.\allowbreak{}"} or \texttt{'.\allowbreak{}.\allowbreak{}.\allowbreak{}'}, a \texttt{"""} sequence is copied through and does not start this mode. To put three double quotes in a triple-quoted body, write \texttt{\textbackslash{}"\textbackslash{}"\textbackslash{}"} (backslash before each quote). The four-character form \texttt{\textbackslash{}"""} is not an escape, so a body may end with a single \texttt{\textbackslash{}}.
 
 
 \texttt{\$ifdef} / \texttt{\$endif} and \texttt{\#} comments inside the body are string content. Continuation lines pulled for an open triple are never scanned as directives.
 
 
-\texttt{preproc\_rewrite\_triple\_strings()} runs at the start of \texttt{preproc\_scan\_text()}, only in an active region, and only if the current line contains \texttt{"""}. Outside quotes it still honors \texttt{\#} as a comment to end of that physical line. After an opener, it accumulates a body until the closer; if the line ends first, it appends a newline, \texttt{preproc\_read()}s the next line, and continues. An unclosed delimiter at EOF is \texttt{unterminated~triple-quoted~string}.
+\texttt{preproc\_\allowbreak{}rewrite\_\allowbreak{}triple\_\allowbreak{}strings()} runs at the start of \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()}, only in an active region, and only if the current line contains \texttt{"""}. Outside quotes it still honors \texttt{\#} as a comment to end of that physical line. After an opener, it accumulates a body until the closer; if the line ends first, it appends a newline, \texttt{preproc\_\allowbreak{}read()}s the next line, and continues. An unclosed delimiter at EOF is \texttt{unterminated~triple-\allowbreak{}quoted~string}.
 
 
-The body is turned into one ordinary string with \texttt{preproc\_quote\_string()}: named Unicon escapes for specials (including DEL as \texttt{\textbackslash{}d}), backslash and quote escaped, other C0 bytes as three-digit octal via \texttt{preproc\_octal\_escape()}. \texttt{triple\_strings.icn} checks that a DEL byte in a triple string survives compilation (\texttt{ord} 127).
+The body is turned into one ordinary string with \texttt{preproc\_\allowbreak{}quote\_\allowbreak{}string()}: named Unicon escapes for specials (including DEL as \texttt{\textbackslash{}d}), backslash and quote escaped, other C0 bytes as three-digit octal via \texttt{preproc\_\allowbreak{}octal\_\allowbreak{}escape()}. \texttt{triple\_\allowbreak{}strings.\allowbreak{}icn} checks that a DEL byte in a triple string survives compilation (\texttt{ord} 127).
 
 
-Tests: \texttt{tests/unicon/triple\_strings.icn}, \texttt{tests/unicon/stand/triple\_strings.std}.
+Tests: \texttt{tests/\allowbreak{}unicon/\allowbreak{}triple\_\allowbreak{}strings.\allowbreak{}icn}, \texttt{tests/\allowbreak{}unicon/\allowbreak{}stand/\allowbreak{}triple\_\allowbreak{}strings.\allowbreak{}std}.
 
 \section{6. Function-like macros}
 \label{utr24-sec-fmacros}
 
-Function-like macros extend object-like \texttt{\$define} with a parameter list and a replacement body. Nested calls, zero arguments, and commas inside quoted arguments are supported (\texttt{macros.icn}):
+Function-like macros extend object-like \texttt{\$define} with a parameter list and a replacement body. Nested calls, zero arguments, and commas inside quoted arguments are supported (\texttt{macros.\allowbreak{}icn}):
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define SUM(a,b) ((a) + (b))
 $define TWICE(x) SUM(x,x)
 $define ZERO() 0
@@ -306,20 +356,24 @@ procedure main()
    write(ZERO())
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 5
 10
 0
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Quoted commas and parentheses do not split arguments. A call may continue on the next line without \texttt{\textbackslash{}}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define ID(x) x
 $define WRAP3(a,b,c) ((a) || "|" || (b) || "|" || (c))
 $define SUM(a,b) ((a) + (b))
@@ -330,26 +384,30 @@ procedure main()
       2))
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 a,b
 a,b|c(d)|e
 3
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-On \texttt{\$define}, \texttt{(} must follow the name immediately. \texttt{\$define~SUM~(a,b)~...} is object-like: the value starts at the space. At a call site, space before \texttt{(} is allowed (\texttt{preproc\_opt\_space()}), so a body may write \texttt{SUM~(x,y)}.
+On \texttt{\$define}, \texttt{(} must follow the name immediately. \texttt{\$define~SUM~(a,\allowbreak{}b)~.\allowbreak{}.\allowbreak{}.\allowbreak{}} is object-like: the value starts at the space. At a call site, space before \texttt{(} is allowed (\texttt{preproc\_\allowbreak{}opt\_\allowbreak{}space()}), so a body may write \texttt{SUM~(x,\allowbreak{}y)}.
 
 
 Zero parameters are legal (\texttt{ZERO()}). Whitespace-only between \texttt{(} and \texttt{)} is zero arguments (\texttt{ZERO(~)}), not one empty argument.
 
 
-The replacement may continue on following lines if each continued line ends with \texttt{\textbackslash{}} as the very last character (no trim). \texttt{preproc\_scan\_define\_value()} and \texttt{preproc\_define\_value\_next\_line()} splice those lines: the \texttt{\textbackslash{}} and newline are dropped; other spaces are kept. A \texttt{\textbackslash{}} with trailing spaces is not a continuation. Leading space is skipped only before the first line of the body. The same \texttt{\textbackslash{}} rule applies to object-like \texttt{\$define} values (\texttt{macros\_define\_continuation.icn}). EOF after a splice is \texttt{unterminated~\$define~(line~continuation)}.
+The replacement may continue on following lines if each continued line ends with \texttt{\textbackslash{}} as the very last character (checked before any trim). \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}define\_\allowbreak{}value()} and \texttt{preproc\_\allowbreak{}define\_\allowbreak{}value\_\allowbreak{}next\_\allowbreak{}line()} splice those lines: the \texttt{\textbackslash{}} and newline are dropped; other spaces are kept. A \texttt{\textbackslash{}} with trailing spaces is not a continuation. Leading space is skipped before the first line of the body, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So \texttt{\$define~X~1} and \texttt{\$define~X~1~~\#~c} are the same definition. The same \texttt{\textbackslash{}} rule applies to object-like \texttt{\$define} values (\texttt{macros\_\allowbreak{}define\_\allowbreak{}continuation.\allowbreak{}icn}). Continuation lines come from the same file: end of file, including the end of an \texttt{\$include} file, after a splice is \texttt{unterminated~\$define~(line~continuation)}.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define GREETING "hello " || \\
 "there"
 $define SUMCONT(a,b) ((a) + \\
@@ -359,28 +417,32 @@ procedure main()
    write(SUMCONT(2, 3))
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 hello there
 5
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-A call \texttt{NAME(arg1,~...)} may span physical lines without \texttt{\textbackslash{}}. \texttt{preproc\_scan\_macro\_args()} pulls more lines via \texttt{preproc\_macro\_arg\_next\_line()} until the closing \texttt{)}. A backslash inside a call is ordinary argument text (\texttt{macros\_call\_backslash\_literal.icn}), not a \texttt{\$define} splice.
+A call \texttt{NAME(arg1,\allowbreak{}~.\allowbreak{}.\allowbreak{}.\allowbreak{})} may span physical lines without \texttt{\textbackslash{}}. \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}macro\_\allowbreak{}args()} pulls more lines via \texttt{preproc\_\allowbreak{}macro\_\allowbreak{}arg\_\allowbreak{}next\_\allowbreak{}line()} until the closing \texttt{)}. A backslash inside a call is ordinary argument text (\texttt{macros\_\allowbreak{}call\_\allowbreak{}backslash\_\allowbreak{}literal.\allowbreak{}icn}), not a \texttt{\$define} splice.
 
 
-Arguments split on top-level commas, with parenthesis depth, and with \texttt{"..."} / \texttt{'...'} opaque (commas and parens inside quotes do not split). \texttt{preproc\_subst\_fmacro()} replaces whole identifiers in the body, not substrings, and does not substitute inside strings. The result is rescanned, so \texttt{TWICE} and chains such as \texttt{A} -> \texttt{E} expand in one pipeline. \texttt{done\_set} blocks expanding the same name again on that chain.
+Arguments split on top-level commas. Nesting of \texttt{(~)}, \texttt{[~]} and \texttt{\{~\}} is tracked, so \texttt{M(L[1,\allowbreak{}2])} and \texttt{M([1,\allowbreak{}2])} pass one argument, and \texttt{".\allowbreak{}.\allowbreak{}.\allowbreak{}"} / \texttt{'.\allowbreak{}.\allowbreak{}.\allowbreak{}'} are opaque (commas and parens inside quotes do not split). A \texttt{\#} comment inside a call ends that physical line and is not part of the argument. A quoted literal continues onto the next line only with a trailing \texttt{\_\allowbreak{}}; a quote left open at the end of any other line is \texttt{unterminated~string~in~macro~invocation}. Errors in a multiline call are reported at the line where the call starts, and a call cannot run past the end of the file it starts in. \texttt{preproc\_\allowbreak{}subst\_\allowbreak{}fmacro()} replaces whole identifiers in the body, not substrings, and does not substitute inside strings. The result is rescanned, so \texttt{TWICE} and chains such as \texttt{A} -> \texttt{E} expand in one pipeline. \texttt{done\_\allowbreak{}set} blocks expanding the same name again on that chain.
 
 
-Empty arguments (\texttt{SUM(1,)}) are \texttt{empty~macro~argument}. Duplicate parameter names are \texttt{duplicate~parameter~name~in~\$define}. Arity must match (\texttt{wrong~number~of~args~in~macro~call~to~NAME}). Unclosed \texttt{(} is \texttt{unterminated~macro~invocation}. If \texttt{(} follows the name on \texttt{\$define} but the parameter list is malformed, \texttt{preproc\_fmacro\_parse\_error} is set so the line is not treated as a bad object-like \texttt{\$define}.
+Empty arguments (\texttt{SUM(1,\allowbreak{})}) are \texttt{empty~macro~argument}. Duplicate parameter names are \texttt{duplicate~parameter~name~in~\$define}. Arity must match (\texttt{wrong~number~of~args~in~macro~call~to~NAME}). Unclosed \texttt{(} is \texttt{unterminated~macro~invocation}. If \texttt{(} follows the name on \texttt{\$define} but the parameter list is malformed, \texttt{preproc\_\allowbreak{}fmacro\_\allowbreak{}parse\_\allowbreak{}error} is set so the line is not treated as a bad object-like \texttt{\$define}.
 
 
-Call continuation anchors \texttt{preproc\_print\_line} to the first physical line of the call (\texttt{preproc\_ml\_anchor}). \texttt{\&line} inside the expansion is that line; the next source line after the call skips the continuation rows. \texttt{\$define} \texttt{\textbackslash{}} splicing does not adjust \texttt{preproc\_print\_line}. \texttt{\&line} in a multiline body is the invocation line, not each physical line of the definition (\texttt{macros\_define\_multiline\_line.icn}).
+\texttt{preproc\_\allowbreak{}ml\_\allowbreak{}anchor} records the first physical line of a multiline call. \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()} syncs to that line before emitting the expansion, so \texttt{\&line} inside it is that line, and afterwards sets \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line} to the anchor plus the number of newlines the expansion kept (for example a newline in the middle of an argument). The next source line after the call then skips the continuation rows. \texttt{\$define} \texttt{\textbackslash{}} splicing does not adjust \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line}. \texttt{\&line} in a multiline body is the invocation line, not each physical line of the definition (\texttt{macros\_\allowbreak{}define\_\allowbreak{}multiline\_\allowbreak{}line.\allowbreak{}icn}).
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define ASLINE(x) x
 
 procedure main()
@@ -390,23 +452,27 @@ procedure main()
    write(&line)
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 4
 5
 7
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 (The call starts on line 5; line 6 is the continuation; the next statement is line 7.)
 
 
-A function-like name is defined for \texttt{\$ifdef}. \texttt{\$undef} removes it. A name is either function-like or object-like, not both; \texttt{\$define} updates one table and clears the other. Redefinition of a function-like name is an error unless \texttt{preproc\_same\_fmacro()} finds the same parameters and body.
+A function-like name is defined for \texttt{\$ifdef}. \texttt{\$undef} removes it. A name is either function-like or object-like, not both; \texttt{\$define} updates one table and clears the other. Redefinition of a function-like name is an error unless \texttt{preproc\_\allowbreak{}same\_\allowbreak{}fmacro()} finds the same parameters and body.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define SUM(a,b) ((a) + (b))
 $ifdef SUM
 $define HAS_SUM 1
@@ -424,30 +490,33 @@ procedure main()
    write(STILL)
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 1
 0
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-\texttt{\$undef~assert} then \texttt{\$define~assert(...)} replaces the builtin; \texttt{macros.icn} does this for both \texttt{assert} and \texttt{assert\_not}.
+\texttt{\$undef~assert} then \texttt{\$define~assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} replaces the builtin; \texttt{macros.\allowbreak{}icn} does this for both \texttt{assert} and \texttt{assert\_\allowbreak{}not}.
 
 
-Tests: \texttt{tests/unicon/macros.icn}; \texttt{macros\_multiline\_line.icn}, \texttt{macros\_define\_multiline\_line.icn}, \texttt{macros\_define\_continuation.icn}, \texttt{macros\_call\_backslash\_literal.icn}; negatives under \texttt{tests/unicon/data/macros\_bad\_*.icn} and \texttt{macros\_bad\_define\_eof*.icn}.
+Tests: \texttt{tests/\allowbreak{}unicon/\allowbreak{}macros.\allowbreak{}icn}; \texttt{macros\_\allowbreak{}multiline\_\allowbreak{}line.\allowbreak{}icn}, \texttt{macros\_\allowbreak{}define\_\allowbreak{}multiline\_\allowbreak{}line.\allowbreak{}icn}, \texttt{macros\_\allowbreak{}define\_\allowbreak{}continuation.\allowbreak{}icn}, \texttt{macros\_\allowbreak{}call\_\allowbreak{}backslash\_\allowbreak{}literal.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}lines.\allowbreak{}icn} (\texttt{\&line} after multiline calls, commas in brackets, comments inside a call); negatives under \texttt{tests/\allowbreak{}unicon/\allowbreak{}data/\allowbreak{}macros\_\allowbreak{}bad\_\allowbreak{}*.\allowbreak{}icn}, including \texttt{macros\_\allowbreak{}bad\_\allowbreak{}define\_\allowbreak{}eof*.\allowbreak{}icn}, a continuation at the end of an \texttt{\$include} file and an unterminated string argument.
 
-\section{7. Built-in \texttt{assert} and \texttt{assert\_not}}
+\section{7. Built-in \texttt{assert} and \texttt{assert\_\allowbreak{}not}}
 \label{utr24-sec-assert}
 
-\texttt{preproc\_install\_builtin\_macros()} registers \texttt{assert} and \texttt{assert\_not} in \texttt{preproc\_fun\_table} as placeholder \texttt{preproc\_fmacro} records and marks them in \texttt{preproc\_builtin\_fun\_table}. Expansion is not \texttt{preproc\_subst\_fmacro()}: \texttt{preproc\_expand\_fmacro\_call()} builds a Unicon fragment from the argument text. Arity is one or two: \texttt{assert(expr)} or \texttt{assert(expr,~label)}. Any other count is \texttt{wrong~number~of~args~in~macro~call}.
+\texttt{preproc\_\allowbreak{}install\_\allowbreak{}builtin\_\allowbreak{}macros()} registers \texttt{assert} and \texttt{assert\_\allowbreak{}not} in \texttt{preproc\_\allowbreak{}fun\_\allowbreak{}table} as placeholder \texttt{preproc\_\allowbreak{}fmacro} records and marks them in \texttt{preproc\_\allowbreak{}builtin\_\allowbreak{}fun\_\allowbreak{}table}. Expansion is not \texttt{preproc\_\allowbreak{}subst\_\allowbreak{}fmacro()}: \texttt{preproc\_\allowbreak{}expand\_\allowbreak{}fmacro\_\allowbreak{}call()} hands the arguments to \texttt{preproc\_\allowbreak{}expand\_\allowbreak{}builtin\_\allowbreak{}assert()}, which builds a Unicon fragment from their text. Arity is one or two: \texttt{assert(expr)} or \texttt{assert(expr,\allowbreak{}~label)}. Any other count is \texttt{wrong~number~of~args~in~macro~call}.
 
 
-Semantics follow Unicon success and failure, not Boolean truth: \texttt{assert(expr)} expects \texttt{expr} to succeed; \texttt{assert\_not(expr)} expects \texttt{expr} to fail. \texttt{assert} is alternation (\texttt{expr~|~\{~...~\}}); \texttt{assert\_not} is \texttt{if~(expr)~then~\{~...~\}}.
+Semantics follow Unicon success and failure, not Boolean truth: \texttt{assert(expr)} expects \texttt{expr} to succeed; \texttt{assert\_\allowbreak{}not(expr)} expects \texttt{expr} to fail. \texttt{assert} is \texttt{(if~not~(expr)~then~.\allowbreak{}.\allowbreak{}.\allowbreak{}~else~\&null)} and \texttt{assert\_\allowbreak{}not} is \texttt{(if~(expr)~then~.\allowbreak{}.\allowbreak{}.\allowbreak{}~else~\&null)}, so \texttt{expr} is evaluated once and never resumed.
 
-\begin{longtable}{lll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*3)*1/3+2\tabcolsep*(1-1)\relax}}
 \hline
 Mode & Enable & On failure \\
 \hline
@@ -460,30 +529,31 @@ Mode & Enable & On failure \\
 \endfoot
 \hline
 \endlastfoot
-Debugging & \texttt{\$define~\_\_debug\_\_} or \texttt{-D\_\_debug\_\_} & \texttt{runerr(219,~payload)}. The process stops. Traceback \\
-Testing & \texttt{\$define~\_\_test\_\_} or \texttt{-D\_\_test\_\_} & \texttt{write} of \texttt{[file:line]~assertion~failed~(expr)} \\
-Release & neither & Expands to nothing (\texttt{assert\_strip.icn}). \\
+Debugging & \texttt{\$define~\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} or \texttt{-\allowbreak{}D\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} & \texttt{runerr(219,\allowbreak{}~payload)}. The process stops. Traceback \\
+Testing & \texttt{\$define~\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} or \texttt{-\allowbreak{}D\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} & \texttt{write} of \texttt{[file:line]~assertion~failed~(expr)} \\
+Release & neither & Expands to \texttt{(\&null)} (\texttt{assert\_\allowbreak{}strip.\allowbreak{}icn}). \\
 \end{longtable}
 
 
-If both \texttt{\_\_test\_\_} and \texttt{\_\_debug\_\_} are defined, the testing path (\texttt{fail}) wins. \texttt{preproc\_new()} and a later \texttt{\$define~\_\_test\_\_} both default \texttt{\_\_debug\_\_} when it is absent.
+If both \texttt{\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} and \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} are defined, the testing path (\texttt{fail}) wins. \texttt{preproc\_\allowbreak{}new()} and a later \texttt{\$define~\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} both imply \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} when it is absent. An implied \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} is replaced without error by an explicit \texttt{\$define~\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} (or a file's own definition compiled with \texttt{-\allowbreak{}D\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}}), and is removed again by \texttt{\$undef~\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}}.
 
 
-These macros are standalone statements. Disabled expansion is empty, so expression positions such as \texttt{if~assert(...)} are not supported.
+These macros are meant as statements. Every expansion is one parenthesized expression that produces \texttt{\&null} when the check passes, in all three modes, so it can stand wherever a statement can, including a \texttt{then} or \texttt{else} branch.
 
 
-The debug payload is the quoted expression text, then \texttt{char(30)} and the label if the label is non-empty (\texttt{AssertRunerrSep} in \texttt{errmsg.r}). \texttt{assert\_not} prefixes \texttt{char(29)} so the traceback can print \texttt{assert\_not(}. Error 219 is \texttt{assertion~failed} (\texttt{data.r}). \texttt{errmsg.r} skips the ordinary \texttt{Run-time~error~219} banner and the offending- value line; it prints \texttt{[file:line]~assertion~failed:~...}.
+The debug payload is \texttt{char(28)} for \texttt{assert} or \texttt{char(29)} for \texttt{assert\_\allowbreak{}not}, then the quoted expression text, then \texttt{char(30)} and the label if there is one (\texttt{AssertMarker}, \texttt{AssertNotMarker} and \texttt{AssertRunerrSep} in \texttt{errmsg.\allowbreak{}r}). Error 219 is \texttt{assertion~failed} (\texttt{data.\allowbreak{}r}). For a marked payload \texttt{errmsg.\allowbreak{}r} skips the ordinary \texttt{Run-\allowbreak{}time~error~219} banner and the offending-value line; it prints \texttt{[file:line]~assertion~failed:~.\allowbreak{}.\allowbreak{}.\allowbreak{}}, and the traceback (\texttt{rdebug.\allowbreak{}r}) prints \texttt{assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} or \texttt{assert\_\allowbreak{}not(.\allowbreak{}.\allowbreak{}.\allowbreak{})}. A plain \texttt{runerr(219,\allowbreak{}~x)} without a marker is reported like any other run-time error. When \texttt{\&error} converts an assert failure, \texttt{\&errortext} is the full message and \texttt{\&errorvalue} is its \texttt{expr,\allowbreak{}~label} part.
 
 
-If the label expression fails, the assertion diagnostic still runs: the expansion does \texttt{lbl~:=~((label)~|~"")} (\texttt{assert\_failing\_label.icn}).
+The label is evaluated only when the check fails. A label that fails or is \texttt{\&null} is left out (\texttt{assert\_\allowbreak{}failing\_\allowbreak{}label.\allowbreak{}icn}).
 
 
-Each expansion increments \texttt{preproc\_assert\_uid} so generated temporaries (\texttt{\_\_preproc\_assert\_N\_lbl}) do not collide -- icont has no block-local variables in expression-level \texttt{\{...\}} compounds. The fragment is rescanned so nested macros in the inserted code expand.
+The fragment is rescanned so macros in the arguments expand, including a nested \texttt{assert}: the expansion never names \texttt{assert} itself, so the name is dropped from \texttt{done\_\allowbreak{}set} for the rescan.
 
 
-\texttt{\$undef~assert} then \texttt{\$define~assert(...)} replaces the builtin like any user function-like macro.
+The builtin names are left alone where they are not calls: in a \texttt{procedure} or \texttt{method} heading, and after \texttt{.\allowbreak{}}, so \texttt{method~assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} and \texttt{obj.\allowbreak{}assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} work. Plain \texttt{assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} calls still expand, so a program with its own \texttt{assert} procedure must \texttt{\$undef~assert}. \texttt{\$undef~assert} then \texttt{\$define~assert(.\allowbreak{}.\allowbreak{}.\allowbreak{})} replaces the builtin like any user function-like macro.
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define __debug__
 procedure main()
    local x
@@ -494,61 +564,80 @@ procedure main()
    write("ok")
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 ok
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-A failing debug assert stops the process. The traceback names \texttt{assert} / \texttt{assert\_not} rather than \texttt{runerr}:
+A failing debug assert stops the process. The traceback names \texttt{assert} / \texttt{assert\_\allowbreak{}not} rather than \texttt{runerr}:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define __debug__
 procedure main()
    assert_not(1 = 1)
    write("should not reach here")
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 [assert_ex.icn:3] assertion failed: 1 = 1
 Traceback:
    main()
    assert_not(1 = 1) from line 3 in assert_ex.icn
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-Under \texttt{\_\_test\_\_}, failure writes a diagnostic and \texttt{fail}s, so later statements still run:
+Under \texttt{\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}}, failure writes a diagnostic and \texttt{fail}s out of the procedure that holds the assert. The caller keeps going, so later checks still run when each check is in its own procedure:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define __test__
 procedure main()
-   assert(1 = 2, "keep going")
-   write("after fail")
-   assert(1 = 1)
+   check1()
+   write("after check1")
+   check2()
    write("done")
 end
+procedure check1()
+   assert(1 = 2, "keep going")
+   write("not reached")
+end
+procedure check2()
+   assert(1 = 1)
+end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
-[assert_ex.icn:3] assertion failed (1 = 2) keep going
-after fail
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
+[assert_ex.icn:9] assertion failed (1 = 2) keep going
+after check1
 done
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-With neither symbol, the calls vanish. The asserts below would fail at run time if they were still present, so reaching \texttt{write()} is the proof they were stripped:
+With neither symbol, each call becomes \texttt{(\&null)}. The asserts below would fail at run time if they were still checked, so reaching \texttt{write()} is the proof they were stripped:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 procedure main()
    local x
    x := 1
@@ -557,57 +646,60 @@ procedure main()
    write("strip-ok")
 end
 \end{Verbatim}
+\end{uscribeshaded}
 
 
 Output:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 strip-ok
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-Tests: \texttt{assert\_debugging.icn} (passing cases, then a failing assert five frames down), \texttt{assert\_testing.icn}, \texttt{assert\_strip.icn}, \texttt{assert\_failing\_label.icn}, \texttt{assert\_not\_failing.icn}, matching \texttt{stand/*.std}. Builtin override is in \texttt{macros.icn}.
+Tests: \texttt{assert\_\allowbreak{}debugging.\allowbreak{}icn} (passing cases, then a failing assert five frames down), \texttt{assert\_\allowbreak{}testing.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}strip.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}failing\_\allowbreak{}label.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}not\_\allowbreak{}failing.\allowbreak{}icn}, \texttt{assert\_\allowbreak{}release.\allowbreak{}icn} (assert as a then-part), \texttt{assert\_\allowbreak{}user\_\allowbreak{}defs.\allowbreak{}icn} (an \texttt{assert} method and procedure heading), \texttt{assert\_\allowbreak{}test\_\allowbreak{}debug\_\allowbreak{}defs.\allowbreak{}icn} (explicit and implied \texttt{\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}}), \texttt{assert\_\allowbreak{}cmdline\_\allowbreak{}test.\allowbreak{}icn} and \texttt{assert\_\allowbreak{}cmdline\_\allowbreak{}errconv.\allowbreak{}icn} (\texttt{-\allowbreak{}D\_\allowbreak{}\_\allowbreak{}test\_\allowbreak{}\_\allowbreak{}} and \texttt{-\allowbreak{}D\_\allowbreak{}\_\allowbreak{}debug\_\allowbreak{}\_\allowbreak{}} set in \texttt{tests/\allowbreak{}unicon/\allowbreak{}Makefile}, \texttt{\&error} conversion), \texttt{runerr219\_\allowbreak{}plain.\allowbreak{}icn}, matching \texttt{stand/\allowbreak{}*.\allowbreak{}std}. Builtin override is in \texttt{macros.\allowbreak{}icn}.
 
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
-Concern & Primary routines (\texttt{uni/unicon/preproce.icn}) \\
+Concern & Primary routines (\texttt{uni/\allowbreak{}unicon/\allowbreak{}preproce.\allowbreak{}icn}) \\
 \hline
 \endfirsthead
 \hline
-Concern & Primary routines (\texttt{uni/unicon/preproce.icn}) \\
+Concern & Primary routines (\texttt{uni/\allowbreak{}unicon/\allowbreak{}preproce.\allowbreak{}icn}) \\
 \hline
 \endhead
 \hline
 \endfoot
 \hline
 \endlastfoot
-Triple-quoted strings & \texttt{preproc\_rewrite\_triple\_strings()}, \\
-Function-like macros & \texttt{record~preproc\_fmacro}, \\
-Assertions & \texttt{preproc\_install\_builtin\_macros()}, \\
+Triple-quoted strings & \texttt{preproc\_\allowbreak{}rewrite\_\allowbreak{}triple\_\allowbreak{}strings()}, \\
+Function-like macros & \texttt{record~preproc\_\allowbreak{}fmacro}, \\
+Assertions & \texttt{preproc\_\allowbreak{}install\_\allowbreak{}builtin\_\allowbreak{}macros()}, \\
 \end{longtable}
 
 \section{8. Line numbers, errors, and includes}
 \label{utr24-sec-support}
 
-\texttt{preproc\_sync\_lines()} emits \texttt{\#line~N~"file"} when the filename changes or the gap is large; for small gaps it may emit blank lines. \texttt{preproc\_scan\_text()} can \texttt{suspend} more than once per logical line. Features that insert, delete, or merge lines must keep \texttt{preproc\_line} and \texttt{preproc\_print\_line} consistent with that.
+\texttt{preproc\_\allowbreak{}sync\_\allowbreak{}lines()} emits \texttt{\#line~N~"file"} when the filename changes or the gap is large; for small gaps it may emit blank lines. \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()} can \texttt{suspend} more than once per logical line. Features that insert, delete, or merge lines must keep \texttt{preproc\_\allowbreak{}line} and \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line} consistent with that.
 
 
-\texttt{preproc\_error(msg)} builds \texttt{File~...;~Line~N~\#~\$directive:~...}, increments \texttt{preproc\_err\_count}, and pushes a \texttt{ParseError} onto \texttt{parsingErrors}.
+\texttt{preproc\_\allowbreak{}error(msg)} builds \texttt{File~.\allowbreak{}.\allowbreak{}.\allowbreak{};~Line~N~\#~\$directive:~.\allowbreak{}.\allowbreak{}.\allowbreak{}}, increments \texttt{preproc\_\allowbreak{}err\_\allowbreak{}count}, and pushes a \texttt{ParseError} onto \texttt{parsingErrors}.
 
 
-\texttt{preproc\_read()} increments \texttt{preproc\_line} and returns the next line from \texttt{read()} or from a list "file." On EOF it checks \texttt{preproc\_if\_stack} depth against \texttt{preproc\_nest\_level}, closes the file, pops \texttt{preproc\_file\_stack}, and removes the path from \texttt{preproc\_include\_set}. String continuation, triple-quoted bodies, and macro arguments that need another physical line all call \texttt{preproc\_read()} again.
+\texttt{preproc\_\allowbreak{}read()} increments \texttt{preproc\_\allowbreak{}line} and returns the next line from \texttt{read()} or from a list "file." On EOF it checks \texttt{preproc\_\allowbreak{}if\_\allowbreak{}stack} depth against \texttt{preproc\_\allowbreak{}nest\_\allowbreak{}level}, closes the file, pops \texttt{preproc\_\allowbreak{}file\_\allowbreak{}stack}, and removes the path from \texttt{preproc\_\allowbreak{}include\_\allowbreak{}set}. String continuation and triple-quoted bodies that need another physical line call \texttt{preproc\_\allowbreak{}read()} again. \texttt{\$define} continuations and multiline macro calls use \texttt{preproc\_\allowbreak{}read\_\allowbreak{}same\_\allowbreak{}file()}, which fails at the end of the current file instead of returning to the including file.
 
 
-\texttt{preproc\_quote\_string(s)} escapes arbitrary text for a Unicon string literal. \texttt{preproc\_istring()} / \texttt{preproc\_istring\_radix()} decode escapes in quoted filenames.
+\texttt{preproc\_\allowbreak{}quote\_\allowbreak{}string(s)} escapes arbitrary text for a Unicon string literal. \texttt{preproc\_\allowbreak{}istring()} / \texttt{preproc\_\allowbreak{}istring\_\allowbreak{}radix()} decode escapes in quoted filenames.
 
 \section{9. Extending the preprocessor}
 \label{utr24-sec-extend}
 
-All of the following is in \texttt{uni/unicon/preproce.icn} unless noted. Coordinate any change with \texttt{uni/parser/preproce.icn} if that copy is still shipped; it does not currently match.
+All of the following is in \texttt{uni/\allowbreak{}unicon/\allowbreak{}preproce.\allowbreak{}icn} unless noted. Coordinate any change with \texttt{uni/\allowbreak{}parser/\allowbreak{}preproce.\allowbreak{}icn} if that copy is still shipped; it does not currently match.
 
 \subsection{9.1 Kind and touchpoints}
 \label{utr24-sec-extend-kinds}
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Kind & Touchpoints \\
 \hline
@@ -620,36 +712,37 @@ Kind & Touchpoints \\
 \endfoot
 \hline
 \endlastfoot
-New or changed \texttt{\$} directive & \texttt{preproc\_scan\_directive()}: add a \texttt{case} label; set \\
-Object-like macro behavior & \texttt{preproc\_sym\_table}, substitution in \\
-Function-like macro behavior & \texttt{preproc\_fun\_table}, \\
-Built-in special function macro & \texttt{preproc\_install\_builtin\_macros()}, \\
-Source syntax rewritten to plain Unicon & A phase in \texttt{preproc\_scan\_text()}. Must respect \\
+New or changed \texttt{\$} directive & \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}directive()}: add a \texttt{case} label; set \\
+Object-like macro behavior & \texttt{preproc\_\allowbreak{}sym\_\allowbreak{}table}, substitution in \\
+Function-like macro behavior & \texttt{preproc\_\allowbreak{}fun\_\allowbreak{}table}, \\
+Built-in special function macro & \texttt{preproc\_\allowbreak{}install\_\allowbreak{}builtin\_\allowbreak{}macros()}, \\
+Source syntax rewritten to plain Unicon & A phase in \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()}. Must respect \\
 New predefined symbol & \texttt{predefs()}. Symbols that depend on compiler options \\
 \end{longtable}
 
 \subsection{9.2 Guards and line accounting}
 \label{utr24-sec-extend-guards}
 
-Directives that define, undefine, or include use \texttt{if~/preproc\_if\_state~then} so they do not run when code is stripped. Directives that only keep parser state in skipped regions follow \texttt{ifdef} / \texttt{\$if} / \texttt{else} / \texttt{endif}, not that guard.
+Directives that define, undefine, or include use \texttt{if~/\allowbreak{}preproc\_\allowbreak{}if\_\allowbreak{}state~then} so they do not run when code is stripped. Directives that only keep parser state in skipped regions follow \texttt{ifdef} / \texttt{\$if} / \texttt{else} / \texttt{endif}, not that guard.
 
 
-If the feature reads extra lines or changes output length, check \texttt{preproc\_line}, \texttt{preproc\_print\_line}, and \texttt{preproc\_sync\_lines()}. \texttt{unicon~-E} shows the emitted \texttt{\#line} stream. Multiple \texttt{suspend}s per input line must leave \texttt{preproc\_print\_line} consistent at the end of \texttt{preproc\_scan\_text()}.
+If the feature reads extra lines or changes output length, check \texttt{preproc\_\allowbreak{}line}, \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line}, and \texttt{preproc\_\allowbreak{}sync\_\allowbreak{}lines()}. \texttt{unicon~-\allowbreak{}E} shows the emitted \texttt{\#line} stream. Multiple \texttt{suspend}s per input line must leave \texttt{preproc\_\allowbreak{}print\_\allowbreak{}line} consistent at the end of \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}text()}.
 
 \subsection{9.3 Errors and tests}
 \label{utr24-sec-extend-tests}
 
-Use \texttt{preproc\_error(msg)} after \texttt{preproc\_command} is set so the message includes \texttt{\$directive:}. The compiler exit path is \texttt{preproc\_err\_count} and \texttt{parsingErrors} in \texttt{unicon.icn}.
+Use \texttt{preproc\_\allowbreak{}error(msg)} after \texttt{preproc\_\allowbreak{}command} is set so the message includes \texttt{\$directive:}. The compiler exit path is \texttt{preproc\_\allowbreak{}err\_\allowbreak{}count} and \texttt{parsingErrors} in \texttt{unicon.\allowbreak{}icn}.
 
 
-Add a driver under \texttt{tests/unicon/} and expected output under \texttt{stand/}. Error cases belong in \texttt{tests/unicon/data/}. Update \hyperref[utr24-sec-triple]{sections 5--7} when user-visible semantics change.
+Add a driver under \texttt{tests/\allowbreak{}unicon/\allowbreak{}} and expected output under \texttt{stand/\allowbreak{}}. Error cases belong in \texttt{tests/\allowbreak{}unicon/\allowbreak{}data/\allowbreak{}}. Update \hyperref[utr24-sec-triple]{sections 5--7} when user-visible semantics change.
 
 \subsection{9.4 New \texttt{\$} directive}
 \label{utr24-sec-extend-directive}
 
-After \texttt{preproc\_command~:=~preproc\_word()}, the \texttt{case~preproc\_command~of} dispatch matches the word after \texttt{\$}. A new label:
+After \texttt{preproc\_\allowbreak{}command~:=~preproc\_\allowbreak{}word()}, the \texttt{case~preproc\_\allowbreak{}command~of} dispatch matches the word after \texttt{\$}. A new label:
 
-\begin{Verbatim}[fontsize=\small,frame=single,commandchars=\\\{\}]
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 "mydir": \{
    if /preproc_if_state then \{
       # parse remainder of line; on failure:
@@ -657,13 +750,14 @@ After \texttt{preproc\_command~:=~preproc\_word()}, the \texttt{case~preproc\_co
    \}
 \}
 \end{Verbatim}
+\end{uscribeshaded}
 
 
-Unknown names still hit \texttt{default} and \texttt{preproc\_error("unknown~preprocessor~directive")} when active.
+Unknown names still hit \texttt{default} and \texttt{preproc\_\allowbreak{}error("unknown~preprocessor~directive")} when active.
 
 \section{10. Related documents}
 \label{utr24-sec-related}
-\begin{longtable}{ll}
+\begin{longtable}{>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}>{\raggedright\sloppy\arraybackslash}p{\dimexpr(\textwidth-2\tabcolsep*2)*1/2+2\tabcolsep*(1-1)\relax}}
 \hline
 Document & Content \\
 \hline
@@ -678,11 +772,11 @@ Document & Content \\
 \endlastfoot
 UTR \#15 [1] & How to write and submit a Unicon Technical Report. \\
 UTR \#8 [3] & Language reference preprocessor commands \\
-Implementation book [5] & \texttt{doc/ib/p3-unicon.tex}, "The Unicon Preprocessor": \\
+Implementation book [5] & \texttt{doc/\allowbreak{}ib/\allowbreak{}p3-\allowbreak{}unicon.\allowbreak{}tex}, "The Unicon Preprocessor": \\
 \end{longtable}
 
 
-Other \texttt{doc/ib/} preprocessor mentions (Idol, Ratfor, rtt) are different tools, not \texttt{preproce.icn}.
+Other \texttt{doc/\allowbreak{}ib/\allowbreak{}} preprocessor mentions (Idol, Ratfor, rtt) are different tools, not \texttt{preproce.\allowbreak{}icn}.
 
 \section{References}
 \label{utr24-references}
@@ -701,45 +795,6 @@ Bob Alexander. "Preprocessor for Jcon". Basis for Unicon's preproce.icn.
 
 \bibitem[5]{cite-jeffery-ib-preproc}
 Clinton Jeffery. "The Unicon Compiler". Course notes, doc/ib/p3-unicon.tex, section "The Unicon Preprocessor".
-
-\bibitem[6]{cite-libssh}
-The libssh Project. "libssh -- The SSH Library". https://www.libssh.org/. 2026.
-
-\bibitem[7]{cite-jeffery-utr13}
-Clinton Jeffery. "The Unicon Messaging Facilities". doc/utr/utr13.odt.
-
-\bibitem[8]{cite-openssl}
-The OpenSSL Project. "OpenSSL -- Cryptography and SSL/TLS Toolkit". https://www.openssl.org/. 2026.
-
-\bibitem[9]{cite-algharaibeh-utr26}
-Jafar Al-Gharaibeh. "Native SSH and SFTP Support in Unicon". doc/utr/utr26.rst. 2026.
-
-\bibitem[10]{cite-rfc2104}
-H. Krawczyk and M. Bellare and R. Canetti. "HMAC: Keyed-Hashing for Message Authentication". RFC 2104. 1997.
-
-\bibitem[11]{cite-rfc1112}
-S. Deering. "Host Extensions for IP Multicasting". RFC 1112. 1989.
-
-\bibitem[12]{cite-algharaibeh-utr29}
-Jafar Al-Gharaibeh. "Raw Sockets and Packet Layouts in Unicon". doc/utr/utr29.rst. 2026.
-
-\bibitem[13]{cite-rfc4607}
-H. Holbrook and B. Cain. "Source-Specific Multicast for IP". RFC 4607. 2006.
-
-\bibitem[14]{cite-algharaibeh-utr28}
-Jafar Al-Gharaibeh. "Multicast and Socket Attributes in Unicon". doc/utr/utr28.rst. 2026.
-
-\bibitem[15]{cite-rfc792}
-J. Postel. "Internet Control Message Protocol". RFC 792. 1981.
-
-\bibitem[16]{cite-rfc2236}
-W. Fenner. "Internet Group Management Protocol, Version 2". RFC 2236. 1997.
-
-\bibitem[17]{cite-rfc3376}
-B. Cain and S. Deering and I. Kouvelas and B. Fenner and A. Thyagarajan. "Internet Group Management Protocol, Version 3". RFC 3376. 2002.
-
-\bibitem[18]{cite-rfc1071}
-R. Braden and D. Borman and C. Partridge. "Computing the Internet Checksum". RFC 1071. 1988.
 
 \end{thebibliography}
 \end{document}
