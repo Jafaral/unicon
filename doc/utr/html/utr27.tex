@@ -239,7 +239,7 @@ Without \texttt{iv=}, \texttt{encrypt} generates a fresh random IV per operation
 \texttt{key=} is a private-key path on TLS, crypto, and SSH. \texttt{keypass=} is the shared name for a key-file passphrase. SSH
 
 
-\texttt{verifyPeer=yes|no} and mode \texttt{-\allowbreak{}} mean the same thing on TLS and SSH. An explicit \texttt{verifyPeer=} overrides the mode flag. Trust stores stay distinct: TLS uses \texttt{ca=} (X.509); SSH uses \texttt{hostkeyfile=} (OpenSSH \texttt{known\_\allowbreak{}hosts}).
+\texttt{verifyPeer=yes|no} and mode \texttt{-\allowbreak{}} mean the same thing on TLS and SSH. An explicit \texttt{verifyPeer=} overrides the mode flag. SSH alone also takes \texttt{verifyPeer=accept-\allowbreak{}new}, which trusts and records a host's key the first time it is seen. Trust stores stay distinct: TLS uses \texttt{ca=} (X.509); SSH uses \texttt{hostkeyfile=} (OpenSSH \texttt{known\_\allowbreak{}hosts}).
 
 \subsection{6.4 Status peek (\texttt{[~]} and \texttt{key()})}
 \label{utr27-sec-peek}

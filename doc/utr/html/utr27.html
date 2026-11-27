@@ -934,7 +934,9 @@ Without
 <code>-</code>
  mean the same thing on TLS and SSH. An explicit 
 <code>verifyPeer=</code>
- overrides the mode flag. Trust stores stay distinct: TLS uses 
+ overrides the mode flag. SSH alone also takes 
+<code>verifyPeer=accept-new</code>
+, which trusts and records a host's key the first time it is seen. Trust stores stay distinct: TLS uses 
 <code>ca=</code>
  (X.509); SSH uses 
 <code>hostkeyfile=</code>

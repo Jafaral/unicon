@@ -56,6 +56,8 @@ placeholder="Search..." aria-label="Filter section list">
 </a></li>
 <li class="toc-l2"><a href="#sec-auth">5.1 Authentication order
 </a></li>
+<li class="toc-l2"><a href="#sec-env">5.2 Channel environment
+</a></li>
 <li class="toc-l1"><a href="#sec-examples">6. Examples and use cases
 </a></li>
 <li class="toc-l2"><a href="#sec-ex-modes">6.1 Modes
@@ -656,6 +658,10 @@ Same name as TLS/crypto; distinct from SSH
 <td>
 Remote login password
 </td>
+<td>
+Also answers keyboard-interactive; see 
+<a href="utr26.html#sec-auth">5.1 Authentication order</a>
+</td>
 </tr>
 <tr>
 <td>
@@ -663,8 +669,10 @@ Remote login password
 </td>
 <td>
 <code>yes</code>
- (default) or 
+ (default), 
 <code>no</code>
+ or 
+<code>accept-new</code>
 </td>
 <td>
 Same spelling as TLS; overrides mode 
@@ -711,6 +719,21 @@ Requires mode
 <td>
 <code>no</code>
  is transport-only
+</td>
+</tr>
+<tr>
+<td>
+<code>env=</code>
+</td>
+<td>
+<code>NAME=VALUE</code>
+ environment variable for the channel
+</td>
+<td>
+Repeatable; contradicts 
+<code>channel=no</code>
+; see 
+<a href="utr26.html#sec-env">5.2 Channel environment</a>
 </td>
 </tr>
 <tr>
@@ -768,6 +791,17 @@ The
  are mutually exclusive contexts, so there is no conflict.
 </p>
 <p>
+SSH also takes 
+<code>verifyPeer=accept-new</code>
+, like OpenSSH's 
+<code>StrictHostKeyChecking=accept-new</code>
+: a host with no key on file is trusted and its key is added to the 
+<code>known_hosts</code>
+ file (
+<code>hostkeyfile=</code>
+, else libssh's default), which is created if missing; a host whose key differs from the one on file still fails.
+</p>
+<p>
 A leading integer attribute is a connect timeout in milliseconds and is applied as libssh's 
 <code>SSH_OPTIONS_TIMEOUT</code>
  / 
@@ -794,7 +828,17 @@ neither
 <code>~/.ssh</code>
  and a running agent -- not to password authentication. Agent use through this fallback is supported; an explicit 
 <code>agent=</code>
- attribute and keyboard-interactive auth remain out of scope.
+ attribute remains out of scope.
+</p>
+<p>
+<code>password=</code>
+ uses the server's 
+<code>password</code>
+ method, or keyboard-interactive when the server offers only that (OpenSSH servers using PAM with 
+<code>PasswordAuthentication no</code>
+ do). Either way the password is sent once. For keyboard-interactive, a round with one hidden prompt is answered with the password; rounds with no prompts pass through. A second round of prompts (a wrong password), a round with more than one prompt, or a prompt that echoes, such as a user name or a one-time code question, fails the 
+<code>open()</code>
+. When the server offers neither method, the password is not sent.
 </p>
 <p>
 <code>key=</code>
@@ -806,6 +850,30 @@ neither
 <code>~/</code>
  themselves; libssh treats the path literally.
 </p>
+<h3 id="sec-env">
+5.2 Channel environment
+</h3>
+<p>
+<code>env=NAME=VALUE</code>
+ sets an environment variable on the channel before its command or shell starts, like OpenSSH's 
+<code>SetEnv</code>
+. The attribute splits at its first 
+<code>=</code>
+, so the value may contain further 
+<code>=</code>
+ characters; it may be repeated, and it applies to 
+<code>open(host, &quot;h&quot;/&quot;hc&quot;, ...)</code>
+ and to 
+<code>open(s, &quot;hc&quot;, ...)</code>
+ on an existing session. The server accepts only the names its configuration allows (OpenSSH 
+<code>AcceptEnv</code>
+); a variable it refuses is ignored, as with 
+<code>SetEnv</code>
+.
+</p>
+<pre><code class="language-unicon">c := open(&quot;user@host&quot;, &quot;hc&quot;, &quot;cmd=printenv LC_MODE&quot;,
+          &quot;env=LC_MODE=batch&quot;) | stop(&amp;errortext)
+</code></pre>
 <h2 id="sec-examples">
 6. Examples and use cases
 </h2>
@@ -1065,11 +1133,13 @@ end
 <code>cols=</code>
 , and 
 <code>rows=</code>
- override the PTY. Mode 
+ override the PTY. On a first connect, before the key is on file, 
+<code>verifyPeer=accept-new</code>
+ records the host's key; mode 
 <code>&quot;h-&quot;</code>
  skips 
 <code>known_hosts</code>
- (useful on a first connect before the key is installed). Password auth uses 
+ altogether. Password auth uses 
 <code>password=</code>
  instead of, or in addition to, 
 <code>key=</code>
@@ -2192,9 +2262,9 @@ Guards are
 </h2>
 <p>
 <strong>
-Keyboard-interactive authentication
+An explicit agent attribute.
 </strong>
- and an explicit agent attribute. The 
+ The 
 <code>publickey_auto</code>
  fallback already talks to a running agent.
 </p>
@@ -2238,13 +2308,38 @@ Timeouts.
 <strong>
 Trust-on-first-use.
 </strong>
- Verification is check-only (
+ By default verification is check-only (
 <code>ssh_session_is_known_server</code>
-). A new host fails with 1333 unless the caller uses 
+): a new host fails with 1333 unless the caller uses 
 <code>h-</code>
  or installs the key in 
 <code>known_hosts</code>
- out of band. The runtime does not write the store.
+ out of band. Only 
+<code>verifyPeer=accept-new</code>
+ writes the store, and then only to add a host that has no key on file; it never replaces a key.
+</p>
+<p>
+<strong>
+<code>ssh_config</code>
+.
+</strong>
+ libssh reads 
+<code>~/.ssh/config</code>
+ and the system 
+<code>ssh_config</code>
+ for each new session, before 
+<code>open()</code>
+ sets the connect timeout, 
+<code>hostkeyfile=</code>
+ and host-key checking, so those win: a 
+<code>StrictHostKeyChecking no</code>
+ or a 
+<code>UserKnownHostsFile</code>
+ there cannot turn verification off or point it at another file. Without 
+<code>hostkeyfile=</code>
+, a 
+<code>UserKnownHostsFile</code>
+ there is used.
 </p>
 <p>
 <strong>
@@ -2280,9 +2375,19 @@ Appendix: test coverage
 <code>cmd=</code>
  without mode 
 <code>c</code>
+, 
+<code>env=</code>
+ without a name or 
+<code>=</code>
+ or with 
+<code>channel=no</code>
 , and a connect to a closed local port all fail with 
 <code>&amp;errortext</code>
- set. A live round-trip runs only when 
+ set, and that an 
+<code>env=</code>
+ value ending in 
+<code>=</code>
+ is accepted. A live round-trip runs only when 
 <code>UNICON_SSH_TESTHOST</code>
  is set (host or 
 <code>user@host</code>
@@ -2302,11 +2407,31 @@ Appendix: test coverage
 <code>reads()</code>
  of a 
 <code>printf</code>
- with no newline, and SFTP write/read/stat/remove of a binary payload.
+ with no newline, and SFTP write/read/stat/remove of a binary payload. With 
+<code>UNICON_SSH_ENVOK</code>
+ (a variable name the server accepts, as in 
+<code>AcceptEnv</code>
+) it checks 
+<code>env=</code>
+ on a new session and on a channel opened from one, and that a refused variable is ignored. With 
+<code>UNICON_SSH_TESTPASS</code>
+ it logs in with 
+<code>password=</code>
+ and checks that a wrong password fails; a server that offers only keyboard-interactive tests that path. Closing channels early and then opening another on the same session is checked too; the use-after-free that once followed shows only under valgrind or a sanitizer, so there the test is a smoke test. A 1 MB SFTP 
+<code>writes()</code>
+ checks that large writes are split into packets the server accepts. 
+<code>verifyPeer=accept-new</code>
+ is checked on a scratch 
+<code>known_hosts</code>
+ file: the first contact adds the key, a later strict open trusts it, a changed key fails without touching the file, and a file whose last line has no newline still gets the new entry on a line of its own.
 </p>
 <p>
 <code>tests/posix/Makefile</code>
- skips the test when the feature is absent. Expected default output is 
+ skips the test when the feature is absent, and runs it with 
+<code>STRSIZE=100000</code>
+ so that live opens see a garbage collection; a 
+<code>cmd=</code>
+ followed by a large attribute is then checked to still run as given. Expected default output is 
 <code>tests/posix/stand/ssh.std</code>
 .
 </p>

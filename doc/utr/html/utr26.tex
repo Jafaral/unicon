@@ -195,11 +195,12 @@ Attribute & Meaning & Notes \\
 \texttt{user=} & Remote login name & Overridden by \texttt{user@\allowbreak{}host} \\
 \texttt{key=} & Path to a private key file & Same convention as SSL's \texttt{key=} \\
 \texttt{keypass=} & Passphrase for an encrypted private key & Same name as TLS/crypto; distinct from SSH \texttt{password=} \\
-\texttt{password=} & Remote login password \\
-\texttt{verifyPeer=} & \texttt{yes} (default) or \texttt{no} & Same spelling as TLS; overrides mode \texttt{-\allowbreak{}} \\
+\texttt{password=} & Remote login password & Also answers keyboard-interactive; see \hyperref[utr26-sec-auth]{5.1 Authentication order} \\
+\texttt{verifyPeer=} & \texttt{yes} (default), \texttt{no} or \texttt{accept-\allowbreak{}new} & Same spelling as TLS; overrides mode \texttt{-\allowbreak{}} \\
 \texttt{hostkeyfile=} & Path to an OpenSSH \texttt{known\_\allowbreak{}hosts} file & Passed to libssh as \texttt{SSH\_\allowbreak{}OPTIONS\_\allowbreak{}KNOWNHOSTS} \\
 \texttt{cmd=} & Command for a one-shot exec channel & Requires mode \texttt{hc}; contradicts \texttt{channel=no} \\
 \texttt{channel=} & \texttt{yes} (default) or \texttt{no} & \texttt{no} is transport-only \\
+\texttt{env=} & \texttt{NAME=VALUE} environment variable for the channel & Repeatable; contradicts \texttt{channel=no}; see \hyperref[utr26-sec-env]{5.2 Channel environment} \\
 \texttt{term=} & Remote \texttt{TERM} for a PTY & Default \texttt{\$TERM} or \texttt{xterm} \\
 \texttt{cols=} / \texttt{rows=} & PTY size & Default from the local tty, else 80x24 \\
 \end{longtable}
@@ -211,15 +212,33 @@ Attribute & Meaning & Notes \\
 The \texttt{-\allowbreak{}} mode-character flag disables peer verification on TLS (\texttt{ne-\allowbreak{}}) and SSH (\texttt{h-\allowbreak{}}), the same as \texttt{verifyPeer=no}. An explicit \texttt{verifyPeer=} overrides the mode flag. \texttt{Fs\_\allowbreak{}Encrypt} and \texttt{Fs\_\allowbreak{}SSH} are mutually exclusive contexts, so there is no conflict.
 
 
+SSH also takes \texttt{verifyPeer=accept-\allowbreak{}new}, like OpenSSH's \texttt{StrictHostKeyChecking=accept-\allowbreak{}new}: a host with no key on file is trusted and its key is added to the \texttt{known\_\allowbreak{}hosts} file (\texttt{hostkeyfile=}, else libssh's default), which is created if missing; a host whose key differs from the one on file still fails.
+
+
 A leading integer attribute is a connect timeout in milliseconds and is applied as libssh's \texttt{SSH\_\allowbreak{}OPTIONS\_\allowbreak{}TIMEOUT} / \texttt{TIMEOUT\_\allowbreak{}USEC}. The default port is 22 when \texttt{:port} is omitted.
 
 \subsection{5.1 Authentication order}
 \label{utr26-sec-auth}
 
-If both \texttt{key=} and \texttt{password=} are given, they are tried in the order the attributes appear in the call, not in a hardcoded priority. If \textbf{neither} is given, the implementation falls back to \texttt{ssh\_\allowbreak{}userauth\_\allowbreak{}publickey\_\allowbreak{}auto()} -- default identities under \texttt{\textasciitilde{}/\allowbreak{}.\allowbreak{}ssh} and a running agent -- not to password authentication. Agent use through this fallback is supported; an explicit \texttt{agent=} attribute and keyboard-interactive auth remain out of scope.
+If both \texttt{key=} and \texttt{password=} are given, they are tried in the order the attributes appear in the call, not in a hardcoded priority. If \textbf{neither} is given, the implementation falls back to \texttt{ssh\_\allowbreak{}userauth\_\allowbreak{}publickey\_\allowbreak{}auto()} -- default identities under \texttt{\textasciitilde{}/\allowbreak{}.\allowbreak{}ssh} and a running agent -- not to password authentication. Agent use through this fallback is supported; an explicit \texttt{agent=} attribute remains out of scope.
+
+
+\texttt{password=} uses the server's \texttt{password} method, or keyboard-interactive when the server offers only that (OpenSSH servers using PAM with \texttt{PasswordAuthentication~no} do). Either way the password is sent once. For keyboard-interactive, a round with one hidden prompt is answered with the password; rounds with no prompts pass through. A second round of prompts (a wrong password), a round with more than one prompt, or a prompt that echoes, such as a user name or a one-time code question, fails the \texttt{open()}. When the server offers neither method, the password is not sent.
 
 
 \texttt{key=} does not expand \texttt{\textasciitilde{}}. Callers (and the \texttt{ussh} demo) must expand a leading \texttt{\textasciitilde{}/\allowbreak{}} themselves; libssh treats the path literally.
+
+\subsection{5.2 Channel environment}
+\label{utr26-sec-env}
+
+\texttt{env=NAME=VALUE} sets an environment variable on the channel before its command or shell starts, like OpenSSH's \texttt{SetEnv}. The attribute splits at its first \texttt{=}, so the value may contain further \texttt{=} characters; it may be repeated, and it applies to \texttt{open(host,\allowbreak{}~"h"/\allowbreak{}"hc",\allowbreak{}~.\allowbreak{}.\allowbreak{}.\allowbreak{})} and to \texttt{open(s,\allowbreak{}~"hc",\allowbreak{}~.\allowbreak{}.\allowbreak{}.\allowbreak{})} on an existing session. The server accepts only the names its configuration allows (OpenSSH \texttt{AcceptEnv}); a variable it refuses is ignored, as with \texttt{SetEnv}.
+
+\begin{uscribeshaded}
+\begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
+c := open("user@host", "hc", "cmd=printenv LC_MODE",
+          "env=LC_MODE=batch") | stop(&errortext)
+\end{Verbatim}
+\end{uscribeshaded}
 
 \section{6. Examples and use cases}
 \label{utr26-sec-examples}
@@ -280,7 +299,7 @@ end
 \end{uscribeshaded}
 
 
-\texttt{term=}, \texttt{cols=}, and \texttt{rows=} override the PTY. Mode \texttt{"h-\allowbreak{}"} skips \texttt{known\_\allowbreak{}hosts} (useful on a first connect before the key is installed). Password auth uses \texttt{password=} instead of, or in addition to, \texttt{key=}.
+\texttt{term=}, \texttt{cols=}, and \texttt{rows=} override the PTY. On a first connect, before the key is on file, \texttt{verifyPeer=accept-\allowbreak{}new} records the host's key; mode \texttt{"h-\allowbreak{}"} skips \texttt{known\_\allowbreak{}hosts} altogether. Password auth uses \texttt{password=} instead of, or in addition to, \texttt{key=}.
 
 \subsection{6.3 Remote command}
 \label{utr26-sec-ex-cmd}
@@ -708,7 +727,7 @@ Guards are \texttt{\#if~HAVE\_\allowbreak{}LIBSSH} throughout \texttt{rstructs.\
 \section{13. Status and remaining work}
 \label{utr26-sec-status}
 
-\textbf{Keyboard-interactive authentication} and an explicit agent attribute. The \texttt{publickey\_\allowbreak{}auto} fallback already talks to a running agent.
+\textbf{An explicit agent attribute.} The \texttt{publickey\_\allowbreak{}auto} fallback already talks to a running agent.
 
 
 \textbf{Non-blocking I/O as the primary concurrency model.} \texttt{select()} readiness is implemented; the I/O calls themselves still block. A \texttt{ssh\_\allowbreak{}set\_\allowbreak{}blocking(sess,\allowbreak{}~0)} plus resume state machine is the obvious next step if thread-count pressure appears.
@@ -723,7 +742,10 @@ Guards are \texttt{\#if~HAVE\_\allowbreak{}LIBSSH} throughout \texttt{rstructs.\
 \textbf{Timeouts.} TCP-connect timeout is the leading integer attribute. There is no separate handshake+auth timeout beyond what that covers, and no exec timeout -- a stuck command blocks until \texttt{close()}, matching ordinary blocking sockets.
 
 
-\textbf{Trust-on-first-use.} Verification is check-only (\texttt{ssh\_\allowbreak{}session\_\allowbreak{}is\_\allowbreak{}known\_\allowbreak{}server}). A new host fails with 1333 unless the caller uses \texttt{h-\allowbreak{}} or installs the key in \texttt{known\_\allowbreak{}hosts} out of band. The runtime does not write the store.
+\textbf{Trust-on-first-use.} By default verification is check-only (\texttt{ssh\_\allowbreak{}session\_\allowbreak{}is\_\allowbreak{}known\_\allowbreak{}server}): a new host fails with 1333 unless the caller uses \texttt{h-\allowbreak{}} or installs the key in \texttt{known\_\allowbreak{}hosts} out of band. Only \texttt{verifyPeer=accept-\allowbreak{}new} writes the store, and then only to add a host that has no key on file; it never replaces a key.
+
+
+\textbf{\texttt{ssh\_\allowbreak{}config}.} libssh reads \texttt{\textasciitilde{}/\allowbreak{}.\allowbreak{}ssh/\allowbreak{}config} and the system \texttt{ssh\_\allowbreak{}config} for each new session, before \texttt{open()} sets the connect timeout, \texttt{hostkeyfile=} and host-key checking, so those win: a \texttt{StrictHostKeyChecking~no} or a \texttt{UserKnownHostsFile} there cannot turn verification off or point it at another file. Without \texttt{hostkeyfile=}, a \texttt{UserKnownHostsFile} there is used.
 
 
 \textbf{\texttt{\textasciitilde{}} in \texttt{key=}.} Not expanded. The helper and \texttt{ussh} expand \texttt{\textasciitilde{}/\allowbreak{}} themselves.
@@ -731,10 +753,10 @@ Guards are \texttt{\#if~HAVE\_\allowbreak{}LIBSSH} throughout \texttt{rstructs.\
 \section{Appendix: test coverage}
 \label{utr26-sec-coverage}
 
-\texttt{tests/\allowbreak{}posix/\allowbreak{}ssh.\allowbreak{}icn} is deterministic without a server: it checks that \texttt{\&features} reports \texttt{secure~shell}, and that bad attributes, \texttt{channel=maybe}, \texttt{channel=no} combined with \texttt{hc}/\texttt{cmd=}, \texttt{cmd=} without mode \texttt{c}, and a connect to a closed local port all fail with \texttt{\&errortext} set. A live round-trip runs only when \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTHOST} is set (host or \texttt{user@\allowbreak{}host}), with optional \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTPORT}, \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTKEY}, \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}KNOWNHOSTS}, and \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}SFTPPATH}. The live path covers exec stdout, \texttt{c["exitstatus"]}, \texttt{receive()} event tags, partial-line \texttt{reads()} of a \texttt{printf} with no newline, and SFTP write/read/stat/remove of a binary payload.
+\texttt{tests/\allowbreak{}posix/\allowbreak{}ssh.\allowbreak{}icn} is deterministic without a server: it checks that \texttt{\&features} reports \texttt{secure~shell}, and that bad attributes, \texttt{channel=maybe}, \texttt{channel=no} combined with \texttt{hc}/\texttt{cmd=}, \texttt{cmd=} without mode \texttt{c}, \texttt{env=} without a name or \texttt{=} or with \texttt{channel=no}, and a connect to a closed local port all fail with \texttt{\&errortext} set, and that an \texttt{env=} value ending in \texttt{=} is accepted. A live round-trip runs only when \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTHOST} is set (host or \texttt{user@\allowbreak{}host}), with optional \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTPORT}, \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTKEY}, \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}KNOWNHOSTS}, and \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}SFTPPATH}. The live path covers exec stdout, \texttt{c["exitstatus"]}, \texttt{receive()} event tags, partial-line \texttt{reads()} of a \texttt{printf} with no newline, and SFTP write/read/stat/remove of a binary payload. With \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}ENVOK} (a variable name the server accepts, as in \texttt{AcceptEnv}) it checks \texttt{env=} on a new session and on a channel opened from one, and that a refused variable is ignored. With \texttt{UNICON\_\allowbreak{}SSH\_\allowbreak{}TESTPASS} it logs in with \texttt{password=} and checks that a wrong password fails; a server that offers only keyboard-interactive tests that path. Closing channels early and then opening another on the same session is checked too; the use-after-free that once followed shows only under valgrind or a sanitizer, so there the test is a smoke test. A 1 MB SFTP \texttt{writes()} checks that large writes are split into packets the server accepts. \texttt{verifyPeer=accept-\allowbreak{}new} is checked on a scratch \texttt{known\_\allowbreak{}hosts} file: the first contact adds the key, a later strict open trusts it, a changed key fails without touching the file, and a file whose last line has no newline still gets the new entry on a line of its own.
 
 
-\texttt{tests/\allowbreak{}posix/\allowbreak{}Makefile} skips the test when the feature is absent. Expected default output is \texttt{tests/\allowbreak{}posix/\allowbreak{}stand/\allowbreak{}ssh.\allowbreak{}std}.
+\texttt{tests/\allowbreak{}posix/\allowbreak{}Makefile} skips the test when the feature is absent, and runs it with \texttt{STRSIZE=100000} so that live opens see a garbage collection; a \texttt{cmd=} followed by a large attribute is then checked to still run as given. Expected default output is \texttt{tests/\allowbreak{}posix/\allowbreak{}stand/\allowbreak{}ssh.\allowbreak{}std}.
 
 \section{References}
 \label{utr26-references}
