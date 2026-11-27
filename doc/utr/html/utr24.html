@@ -972,15 +972,13 @@ Zero parameters are legal (
 <p>
 The replacement may continue on following lines if each continued line ends with 
 <code>\</code>
- as the very last character (checked before any trim). 
+ as the very last character. 
 <code>preproc_scan_define_value()</code>
- and 
-<code>preproc_define_value_next_line()</code>
- splice those lines: the 
+ splices those lines before it scans quotes or comments, as the C preprocessor does: the 
 <code>\</code>
- and newline are dropped; other spaces are kept. A 
+ and newline are dropped, and every other character is kept, so a quoted literal may span the join. A 
 <code>\</code>
- with trailing spaces is not a continuation. Leading space is skipped before the first line of the body, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So 
+ with anything after it, including a space, is not a continuation. Leading space is skipped before the first line of the body only, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So 
 <code>$define X 1</code>
  and 
 <code>$define X 1  # c</code>
@@ -994,14 +992,19 @@ The replacement may continue on following lines if each continued line ends with
 <code>$include</code>
  file, after a splice is 
 <code>unterminated $define (line continuation)</code>
+. A quote that is still open after the splice is 
+<code>unterminated string in $define</code>
 .
 </p>
 <pre><code class="language-unicon">$define GREETING &quot;hello &quot; || \
 &quot;there&quot;
+$define SPLIT &quot;hel\
+lo&quot;
 $define SUMCONT(a,b) ((a) + \
 (b))
 procedure main()
    write(GREETING)
+   write(SPLIT)
    write(SUMCONT(2, 3))
 end
 </code></pre>
@@ -1009,6 +1012,7 @@ end
 Output:
 </p>
 <pre><code class="language-text">hello there
+hello
 5
 </code></pre>
 <p>

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian) (preloaded format=pdflatex 2026.11.27)  27 NOV 2026 03:14
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian) (preloaded format=pdflatex 2026.11.27)  27 NOV 2026 05:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -505,131 +505,117 @@ Overfull \hbox (20.04146pt too wide) in paragraph at lines 341--342
 m/n/12 , \T1/cmtt/m/n/12 tests/unicon/stand/triple_
  []
 
-[8]
-Overfull \hbox (9.16643pt too wide) in paragraph at lines 407--408
-\T1/cmtt/m/n/12 scan_define_value() \T1/cmr/m/n/12 and \T1/cmtt/m/n/12 preproc_
-define_value_next_line() \T1/cmr/m/n/12 splice those
- []
-
-
-Overfull \hbox (57.47412pt too wide) in paragraph at lines 407--408
-\T1/cmr/m/n/12 end of an \T1/cmtt/m/n/12 $include \T1/cmr/m/n/12 file, af-ter a
- splice is \T1/cmtt/m/n/12 unterminated $define (line continuation)\T1/cmr/m/n/
-12 . 
- []
-
-[9] [10]
-Overfull \hbox (168.826pt too wide) in paragraph at lines 439--440
+[8] [9] [10]
+Overfull \hbox (168.826pt too wide) in paragraph at lines 443--444
 \T1/cmr/m/n/12 match (\T1/cmtt/m/n/12 wrong number of args in macro call to NAM
 E\T1/cmr/m/n/12 ). Un-closed \T1/cmtt/m/n/12 ( \T1/cmr/m/n/12 is \T1/cmtt/m/n/1
 2 unterminated macro invocation\T1/cmr/m/n/12 .
  []
 
 [11]
-Overfull \hbox (3.54831pt too wide) in paragraph at lines 506--507
+Overfull \hbox (3.54831pt too wide) in paragraph at lines 510--511
 []\T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmtt/m/n/12 $define ass
 ert(...) \T1/cmr/m/n/12 re-places the builtin; \T1/cmtt/m/n/12 macros.
  []
 
-
-Overfull \hbox (14.00311pt too wide) in paragraph at lines 509--510
+[12]
+Overfull \hbox (14.00311pt too wide) in paragraph at lines 513--514
 []\T1/cmr/m/n/12 Tests: \T1/cmtt/m/n/12 tests/unicon/macros.icn\T1/cmr/m/n/12 ;
  \T1/cmtt/m/n/12 macros_multiline_line.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macr
 os_
  []
 
 
-Overfull \hbox (5.02576pt too wide) in paragraph at lines 509--510
+Overfull \hbox (5.02576pt too wide) in paragraph at lines 513--514
 \T1/cmtt/m/n/12 define_multiline_line.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macro
 s_define_continuation.icn\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 macros_
  []
 
 
-Overfull \hbox (2.52838pt too wide) in paragraph at lines 509--510
+Overfull \hbox (2.52838pt too wide) in paragraph at lines 513--514
 \T1/cmtt/m/n/12 unicon/data/macros_bad_*.icn\T1/cmr/m/n/12 , in-clud-ing \T1/cm
 tt/m/n/12 macros_bad_define_eof*.icn\T1/cmr/m/n/12 ,
  []
 
-[12]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 511.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 515.
 
-Overfull \hbox (0.94902pt too wide) in paragraph at lines 514--515
+Overfull \hbox (0.94902pt too wide) in paragraph at lines 518--519
 \T1/cmtt/m/n/12 preproc_fun_table \T1/cmr/m/n/12 as place-holder \T1/cmtt/m/n/1
 2 preproc_fmacro \T1/cmr/m/n/12 records and marks them
  []
 
 
-Overfull \hbox (9.97679pt too wide) in paragraph at lines 514--515
+Overfull \hbox (9.97679pt too wide) in paragraph at lines 518--519
 \T1/cmr/m/n/12 in \T1/cmtt/m/n/12 preproc_builtin_fun_table\T1/cmr/m/n/12 . Ex-
 pan-sion is not \T1/cmtt/m/n/12 preproc_subst_fmacro()\T1/cmr/m/n/12 :
  []
 
 
-Overfull \hbox (23.8002pt too wide) in paragraph at lines 517--518
+Overfull \hbox (23.8002pt too wide) in paragraph at lines 521--522
 []\T1/cmr/m/n/12 Semantics fol-low Uni-con suc-cess and fail-ure, not Boolean t
 ruth: \T1/cmtt/m/n/12 assert(expr)
  []
 
 
-Overfull \hbox (30.02107pt too wide) in paragraph at lines 517--518
+Overfull \hbox (30.02107pt too wide) in paragraph at lines 521--522
 \T1/cmtt/m/n/12 (if not (expr) then ... else &null) \T1/cmr/m/n/12 and \T1/cmtt
 /m/n/12 assert_not \T1/cmr/m/n/12 is \T1/cmtt/m/n/12 (if (expr) then .
  []
 
 
-Overfull \hbox (98.07224pt too wide) in paragraph at lines 533--534
+Overfull \hbox (98.07224pt too wide) in paragraph at lines 537--538
 \T1/cmtt/m/n/12 [file:line] assertion failed (expr)|  
  []
 
 [13]
-Overfull \hbox (26.03966pt too wide) in paragraph at lines 553--554
+Overfull \hbox (26.03966pt too wide) in paragraph at lines 557--558
 \T1/cmtt/m/n/12 assert \T1/cmr/m/n/12 pro-ce-dure must \T1/cmtt/m/n/12 $undef a
 ssert\T1/cmr/m/n/12 . \T1/cmtt/m/n/12 $undef assert \T1/cmr/m/n/12 then \T1/cmt
 t/m/n/12 $define assert(.
  []
 
 [14] [15] [16]
-Overfull \hbox (15.66895pt too wide) in paragraph at lines 661--662
+Overfull \hbox (15.66895pt too wide) in paragraph at lines 665--666
 \T1/cmr/m/n/12 ing), \T1/cmtt/m/n/12 assert_test_debug_defs.icn \T1/cmr/m/n/12 
 (ex-plicit and im-plied \T1/cmtt/m/n/12 __debug__\T1/cmr/m/n/12 ), \T1/cmtt/m/n
 /12 assert_
  []
 
 
-Overfull \hbox (4.8994pt too wide) in paragraph at lines 661--662
+Overfull \hbox (4.8994pt too wide) in paragraph at lines 665--666
 \T1/cmtt/m/n/12 D__debug__ \T1/cmr/m/n/12 set in \T1/cmtt/m/n/12 tests/unicon/M
 akefile\T1/cmr/m/n/12 , \T1/cmtt/m/n/12 &error \T1/cmr/m/n/12 con-ver-sion), \T
 1/cmtt/m/n/12 runerr219_
  []
 
 
-Overfull \hbox (4.44527pt too wide) in paragraph at lines 687--688
+Overfull \hbox (4.44527pt too wide) in paragraph at lines 691--692
 []\T1/cmtt/m/n/12 preproc_error(msg) \T1/cmr/m/n/12 builds \T1/cmtt/m/n/12 File
  ...; Line N # $directive: ...\T1/cmr/m/n/12 , in-
  []
 
 
-Overfull \hbox (8.80406pt too wide) in paragraph at lines 687--688
+Overfull \hbox (8.80406pt too wide) in paragraph at lines 691--692
 \T1/cmr/m/n/12 cre-ments \T1/cmtt/m/n/12 preproc_err_count\T1/cmr/m/n/12 , and 
 pushes a \T1/cmtt/m/n/12 ParseError \T1/cmr/m/n/12 onto \T1/cmtt/m/n/12 parsing
 Errors\T1/cmr/m/n/12 . 
  []
 
 [17] [18]
-Overfull \hbox (10.13985pt too wide) in paragraph at lines 742--743
+Overfull \hbox (10.13985pt too wide) in paragraph at lines 746--747
 \T1/cmr/m/n/12 After \T1/cmtt/m/n/12 preproc_command := preproc_word()\T1/cmr/m
 /n/12 , the \T1/cmtt/m/n/12 case preproc_command of
  []
 
 
-Overfull \hbox (109.59045pt too wide) in paragraph at lines 756--757
+Overfull \hbox (109.59045pt too wide) in paragraph at lines 760--761
 []\T1/cmr/m/n/12 Unknown names still hit \T1/cmtt/m/n/12 default \T1/cmr/m/n/12
  and \T1/cmtt/m/n/12 preproc_error("unknown preprocessor directive")
  []
 
 
-Underfull \hbox (badness 4779) in paragraph at lines 785--786
+Underfull \hbox (badness 4779) in paragraph at lines 789--790
 []\T1/cmr/m/n/12 Clinton Jef-fery. "How to Write a Uni-con Tech-ni-cal Re-port"
 .
  []
@@ -662,7 +648,7 @@ ec/ecrm1200.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknappe
 n/ec/ecbx1200.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jknap
 pen/ec/ecbx1440.600pk> </home/runner/.texlive2025/texmf-var/fonts/pk/ljfour/jkn
 appen/ec/ecbx2074.600pk>
-Output written on utr24.pdf (22 pages, 154639 bytes).
+Output written on utr24.pdf (22 pages, 154731 bytes).
 PDF statistics:
  648 PDF objects out of 1000 (max. 8388607)
  230 compressed objects within 3 object streams

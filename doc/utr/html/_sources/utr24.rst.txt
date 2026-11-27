@@ -442,36 +442,43 @@ between ``(`` and ``)`` is zero arguments (``ZERO( )``), not
 one empty argument.
 
 The replacement may continue on following lines if each
-continued line ends with ``\`` as the very last character
-(checked before any trim). ``preproc_scan_define_value()`` and
-``preproc_define_value_next_line()`` splice those lines:
-the ``\`` and newline are dropped; other spaces are kept.
-A ``\`` with trailing spaces is not a continuation. Leading
-space is skipped before the first line of the body, and
-trailing space and any comment are removed from the final
-value, as in C, where whitespace around the replacement list
-is not part of it. So ``$define X 1`` and ``$define X 1  # c``
-are the same definition. The same ``\`` rule applies to
-object-like ``$define`` values
+continued line ends with ``\`` as the very last character.
+``preproc_scan_define_value()`` splices those lines before it
+scans quotes or comments, as the C preprocessor does: the
+``\`` and newline are dropped, and every other character is
+kept, so a quoted literal may span the join. A ``\`` with
+anything after it, including a space, is not a continuation.
+Leading space is skipped before the first line of the body
+only, and trailing space and any comment are removed from the
+final value, as in C, where whitespace around the replacement
+list is not part of it. So ``$define X 1`` and
+``$define X 1  # c`` are the same definition. The same ``\``
+rule applies to object-like ``$define`` values
 (``macros_define_continuation.icn``). Continuation lines come
 from the same file: end of file, including the end of an
 ``$include`` file, after a splice is
-``unterminated $define (line continuation)``.
+``unterminated $define (line continuation)``. A quote that is
+still open after the splice is ``unterminated string in
+$define``.
 
 .. code-block:: unicon
 
    $define GREETING "hello " || \
    "there"
+   $define SPLIT "hel\
+   lo"
    $define SUMCONT(a,b) ((a) + \
    (b))
    procedure main()
       write(GREETING)
+      write(SPLIT)
       write(SUMCONT(2, 3))
    end
 
 Output::
 
    hello there
+   hello
    5
 
 A call ``NAME(arg1, ...)`` may span physical lines without
@@ -777,7 +784,6 @@ Builtin override is in ``macros.icn``.
      - ``record preproc_fmacro``,
        ``preproc_scan_define_fmacro()``,
        ``preproc_scan_define_value()``,
-       ``preproc_define_value_next_line()``,
        ``preproc_scan_macro_args()``,
        ``preproc_macro_arg_next_line()``,
        ``preproc_subst_fmacro()``,

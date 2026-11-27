@@ -404,16 +404,19 @@ On \texttt{\$define}, \texttt{(} must follow the name immediately. \texttt{\$def
 Zero parameters are legal (\texttt{ZERO()}). Whitespace-only between \texttt{(} and \texttt{)} is zero arguments (\texttt{ZERO(~)}), not one empty argument.
 
 
-The replacement may continue on following lines if each continued line ends with \texttt{\textbackslash{}} as the very last character (checked before any trim). \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}define\_\allowbreak{}value()} and \texttt{preproc\_\allowbreak{}define\_\allowbreak{}value\_\allowbreak{}next\_\allowbreak{}line()} splice those lines: the \texttt{\textbackslash{}} and newline are dropped; other spaces are kept. A \texttt{\textbackslash{}} with trailing spaces is not a continuation. Leading space is skipped before the first line of the body, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So \texttt{\$define~X~1} and \texttt{\$define~X~1~~\#~c} are the same definition. The same \texttt{\textbackslash{}} rule applies to object-like \texttt{\$define} values (\texttt{macros\_\allowbreak{}define\_\allowbreak{}continuation.\allowbreak{}icn}). Continuation lines come from the same file: end of file, including the end of an \texttt{\$include} file, after a splice is \texttt{unterminated~\$define~(line~continuation)}.
+The replacement may continue on following lines if each continued line ends with \texttt{\textbackslash{}} as the very last character. \texttt{preproc\_\allowbreak{}scan\_\allowbreak{}define\_\allowbreak{}value()} splices those lines before it scans quotes or comments, as the C preprocessor does: the \texttt{\textbackslash{}} and newline are dropped, and every other character is kept, so a quoted literal may span the join. A \texttt{\textbackslash{}} with anything after it, including a space, is not a continuation. Leading space is skipped before the first line of the body only, and trailing space and any comment are removed from the final value, as in C, where whitespace around the replacement list is not part of it. So \texttt{\$define~X~1} and \texttt{\$define~X~1~~\#~c} are the same definition. The same \texttt{\textbackslash{}} rule applies to object-like \texttt{\$define} values (\texttt{macros\_\allowbreak{}define\_\allowbreak{}continuation.\allowbreak{}icn}). Continuation lines come from the same file: end of file, including the end of an \texttt{\$include} file, after a splice is \texttt{unterminated~\$define~(line~continuation)}. A quote that is still open after the splice is \texttt{unterminated~string~in~\$define}.
 
 \begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 $define GREETING "hello " || \\
 "there"
+$define SPLIT "hel\\
+lo"
 $define SUMCONT(a,b) ((a) + \\
 (b))
 procedure main()
    write(GREETING)
+   write(SPLIT)
    write(SUMCONT(2, 3))
 end
 \end{Verbatim}
@@ -425,6 +428,7 @@ Output:
 \begin{uscribeshaded}
 \begin{Verbatim}[fontsize=\small,frame=none,resetmargins=true,commandchars=\\\{\}]
 hello there
+hello
 5
 \end{Verbatim}
 \end{uscribeshaded}
