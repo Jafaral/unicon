@@ -317,6 +317,15 @@ example, if you want to enable https/ssl, do:</p>
 <p>If openssl development library is not present on the system, the
 configure script will stop with an error message:</p>
 <pre><code>configure: error: &quot;ssl requires libssl-dev or equivalent&quot;</code></pre>
+<p>Profile-guided optimization of the interpreter is off by default.
+With gcc,</p>
+<pre><code>./configure --enable-pgo</code></pre>
+<p>makes <code>make</code> build an instrumented <code>iconx</code>, run
+the test suite (<code>make Test</code>) to train it, and then rebuild
+<code>iconx</code> with the collected profile. The build takes longer,
+since <code>iconx</code> is compiled three times and the tests are run
+once. The profile is kept in <code>pgo-profile</code> in the build
+directory and <code>make clean</code> removes it.</p>
 <h3 id="linux">Linux</h3>
 <p>Use the package manager in your Linux distribution to get the build
 utilities and C compiler. For example, on a Debian system</p>
