@@ -946,8 +946,8 @@ void init_threads()
 #endif /* NamedSemaphores */
 
    maxmutexes = 1024;
-   mutexes=malloc(maxmutexes * sizeof(pthread_mutex_t *));
-   if (mutexes==NULL) syserr("init_threads(): out of memory for mutexes!");
+   MutexPublish(malloc(maxmutexes * sizeof(pthread_mutex_t *)));
+   if (MutexTab()==NULL) syserr("init_threads(): out of memory for mutexes!");
 
    ncondvars = 0;
    maxcondvars = 10*1024;

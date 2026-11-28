@@ -1634,31 +1634,41 @@
 
 /*
  *  Lock mutex mutexes[mtx].
+ *
+ *  The table pointer is loaded and published atomically.  get_mutex()
+ *  grows it by installing a new array and keeping the old one: a thread
+ *  that has already counted out for a collection may still load the
+ *  table it saw (thread_control takes MTX_COND_TC after NARthreads
+ *  drops).  Moving or freeing that array races with the load.
  */
-
+#define MutexTab() \
+      ((pthread_mutex_t **)__atomic_load_n(&(mutexes), __ATOMIC_ACQUIRE))
+#define MutexPublish(p) \
+      __atomic_store_n(&(mutexes), (pthread_mutex_t **)(p), __ATOMIC_RELEASE)
 
 #define MUTEX_INITID( mtx, attr )                                       \
       do {                                                              \
         int __rv;                                                       \
-        mutexes[mtx] = malloc(sizeof(pthread_mutex_t));                 \
-        if ((__rv=pthread_mutex_init(mutexes[mtx], attr)) != 0) \
+        pthread_mutex_t **__tab = MutexTab();                          \
+        __tab[mtx] = malloc(sizeof(pthread_mutex_t));                   \
+        if ((__rv=pthread_mutex_init(__tab[mtx], attr)) != 0)           \
           handle_thread_error(__rv, FUNC_MUTEX_INIT, NULL);             \
       } while (0)
 
-#define MUTEXID(mtx) mutexes[mtx]
+#define MUTEXID(mtx) (MutexTab()[mtx])
 
 //BASIC: don't define __rv or check is_concurrent, enclosing code will do it
 #define MUTEX_LOCKID_BASIC(mtx)                                         \
-      if ((__rv=pthread_mutex_lock(mutexes[mtx])) != 0)                 \
+      if ((__rv=pthread_mutex_lock(MUTEXID(mtx))) != 0)                 \
           handle_thread_error(__rv, FUNC_MUTEX_LOCK, NULL);
 
 #define MUTEX_UNLOCKID_BASIC(mtx)                                       \
-          if ((__rv=pthread_mutex_unlock(mutexes[mtx])) != 0)           \
+          if ((__rv=pthread_mutex_unlock(MUTEXID(mtx))) != 0)           \
             handle_thread_error(__rv, FUNC_MUTEX_UNLOCK, NULL);
 
 
 #define MUTEX_TRYLOCKID_BASIC(mtx, isbusy)                              \
-      if ((isbusy=pthread_mutex_trylock(mutexes[mtx])) != 0) {          \
+      if ((isbusy=pthread_mutex_trylock(MUTEXID(mtx))) != 0) {          \
         if (isbusy != EBUSY){                                           \
           handle_thread_error(isbusy, FUNC_MUTEX_TRYLOCK, NULL);        \
           isbusy = 0;                                                   \
@@ -1840,7 +1850,7 @@
         }                                       \
       } while (0)
 
-#define MUTEX_GETBLK(bp) mutexes[bp->mutexid]
+#define MUTEX_GETBLK(bp) MUTEXID((bp)->mutexid)
 
 #define CV_INITBLK(bp)                          \
       do {                                      \

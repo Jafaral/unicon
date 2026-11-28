@@ -2544,17 +2544,42 @@ end
    if (y<NUM_STATIC_MUTEXES || y>=nmutexes) { irunerr(180, x); errorfail; }}
 
 
+/*
+ * Tables get_mutex() has replaced.  A thread may still hold a pointer
+ * to one of them, so they are not freed.
+ */
+struct retired_mutex_tab {
+   struct retired_mutex_tab *next;
+   pthread_mutex_t **tab;
+   };
+static struct retired_mutex_tab *retired_mutex_tabs;
+
 word get_mutex( pthread_mutexattr_t *mattr){
 word n;
    MUTEX_LOCKID_CONTROLLED(MTX_MUTEXES);
    if(nmutexes==maxmutexes){
-      SUSPEND_THREADS();
-      if(nmutexes==maxmutexes){
-         maxmutexes = maxmutexes * 2;
-         mutexes=realloc(mutexes, maxmutexes * sizeof(pthread_mutex_t *));
-         if (mutexes==NULL) syserr("get_mutex(): out of memory for mutexes!");
-         }
-      RESUME_THREADS();
+      word nmax = maxmutexes * 2;
+      pthread_mutex_t **old = MutexTab();
+      pthread_mutex_t **fresh;
+      struct retired_mutex_tab *kept;
+
+      /*
+       * Publish a larger table and keep the old one.  Suspending first
+       * does not cover a thread that has counted out and is still
+       * evaluating mutexes[id]; realloc would free the table under it.
+       */
+      fresh = malloc(nmax * sizeof(pthread_mutex_t *));
+      if (fresh == NULL)
+         syserr("get_mutex(): out of memory for mutexes!");
+      memcpy(fresh, old, maxmutexes * sizeof(pthread_mutex_t *));
+      kept = malloc(sizeof(struct retired_mutex_tab));
+      if (kept == NULL)
+         syserr("get_mutex(): out of memory for mutexes!");
+      kept->tab = old;
+      kept->next = retired_mutex_tabs;
+      retired_mutex_tabs = kept;
+      maxmutexes = nmax;
+      MutexPublish(fresh);
       }
    MUTEX_INITID(nmutexes, mattr);
    n = nmutexes++;
