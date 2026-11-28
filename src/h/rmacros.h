@@ -1635,16 +1635,23 @@
 /*
  *  Lock mutex mutexes[mtx].
  *
- *  The table pointer is loaded and published atomically.  get_mutex()
- *  grows it by installing a new array and keeping the old one: a thread
+ *  The table pointer is loaded and published atomically when the
+ *  compiler has __atomic builtins.  Otherwise it is an ordinary word:
+ *  configure still accepts those compilers.  get_mutex() grows the
+ *  table by installing a new array and keeping the old one.  A thread
  *  that has already counted out for a collection may still load the
  *  table it saw (thread_control takes MTX_COND_TC after NARthreads
  *  drops).  Moving or freeing that array races with the load.
  */
+#if defined(HAVE_ATOMIC_BUILTINS)
 #define MutexTab() \
       ((pthread_mutex_t **)__atomic_load_n(&(mutexes), __ATOMIC_ACQUIRE))
 #define MutexPublish(p) \
       __atomic_store_n(&(mutexes), (pthread_mutex_t **)(p), __ATOMIC_RELEASE)
+#else                                   /* HAVE_ATOMIC_BUILTINS */
+#define MutexTab() (mutexes)
+#define MutexPublish(p) ((void)((mutexes) = (pthread_mutex_t **)(p)))
+#endif                                  /* HAVE_ATOMIC_BUILTINS */
 
 #define MUTEX_INITID( mtx, attr )                                       \
       do {                                                              \
